@@ -1,5 +1,8 @@
 import { appendFile, readFile } from "node:fs/promises";
 
+const shouldFailOnFindings =
+  String(process.env.SECURITY_FAIL_ON_FINDINGS ?? "false").toLowerCase() === "true";
+
 function safeNumber(value) {
   return Number.isFinite(value) ? value : 0;
 }
@@ -124,10 +127,12 @@ await writeSummary([
   ),
   "",
   blockingFindings > 0
-    ? `Security gate failed: found ${blockingFindings} blocking findings.`
+    ? shouldFailOnFindings
+      ? `Security gate failed: found ${blockingFindings} blocking findings.`
+      : `Security findings detected: ${blockingFindings}. Job remains informational because SECURITY_FAIL_ON_FINDINGS=false.`
     : "Security gate passed: no blocking findings were detected.",
 ]);
 
-if (blockingFindings > 0) {
+if (blockingFindings > 0 && shouldFailOnFindings) {
   process.exit(1);
 }

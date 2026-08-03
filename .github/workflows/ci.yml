@@ -182,4 +182,6 @@ jobs:
           category: trivy-filesystem
 
       - name: Evaluate security reports
+        env:
+          SECURITY_FAIL_ON_FINDINGS: ${{ vars.SECURITY_FAIL_ON_FINDINGS }}
         run: node ./scripts/ci/evaluate-security-reports.mjs
