@@ -39,6 +39,7 @@ jobs:
     environment: production
     env:
       DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+      DEPLOY_HOST_KEY_ALIAS: ${{ vars.DEPLOY_HOST_KEY_ALIAS }}
       DEPLOY_PORT: ${{ vars.DEPLOY_PORT }}
       DEPLOY_USER: ${{ vars.DEPLOY_USER }}
       PRODUCTION_DOMAIN: ${{ vars.PRODUCTION_DOMAIN }}
@@ -60,6 +61,7 @@ jobs:
 
           echo "RELEASE_SHA=$(git rev-parse --short=12 HEAD)" >> "$GITHUB_ENV"
           echo "DEPLOY_PORT=${DEPLOY_PORT:-22}" >> "$GITHUB_ENV"
+          echo "DEPLOY_HOST_KEY_ALIAS=${DEPLOY_HOST_KEY_ALIAS:-$DEPLOY_HOST}" >> "$GITHUB_ENV"
           echo "ADMIN_BASE_PATH=${ADMIN_BASE_PATH:-/admin/}" >> "$GITHUB_ENV"
           echo "VITE_DYNAMIC_BACKDROP=${VITE_DYNAMIC_BACKDROP:-true}" >> "$GITHUB_ENV"
           echo "BOOTSTRAP_SERVER=${{ github.event_name == 'workflow_dispatch' && inputs.bootstrap_server || 'false' }}" >> "$GITHUB_ENV"
@@ -70,11 +72,34 @@ jobs:
           DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           DEPLOY_SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}
         run: |
+          if [ -z "${DEPLOY_SSH_PRIVATE_KEY}" ]; then
+            echo "DEPLOY_SSH_PRIVATE_KEY secret is not configured." >&2
+            exit 1
+          fi
+
+          if [ -z "${DEPLOY_SSH_KNOWN_HOSTS}" ]; then
+            echo "DEPLOY_SSH_KNOWN_HOSTS secret is not configured." >&2
+            exit 1
+          fi
+
           install -d -m 700 ~/.ssh
           printf '%s\n' "${DEPLOY_SSH_PRIVATE_KEY}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           printf '%s\n' "${DEPLOY_SSH_KNOWN_HOSTS}" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
+
+          cat > ~/.ssh/config <<EOF
+          Host deploy-target
+            HostName ${DEPLOY_HOST}
+            User ${DEPLOY_USER}
+            Port ${DEPLOY_PORT}
+            IdentityFile ~/.ssh/id_ed25519
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+            UserKnownHostsFile ~/.ssh/known_hosts
+            HostKeyAlias ${DEPLOY_HOST_KEY_ALIAS}
+          EOF
+          chmod 600 ~/.ssh/config
 
       - name: Build API image
         run: docker build -f backend/Dockerfile -t "portfolio-api:${RELEASE_SHA}" .
@@ -127,18 +152,18 @@ jobs:
       - name: Upload deployment artifacts to the server
         shell: bash
         run: |
-          scp -P "${DEPLOY_PORT}" \
+          scp \
             "artifacts/deploy/portfolio-deploy-bundle-${RELEASE_SHA}.tar.gz" \
             "artifacts/deploy/portfolio-api-${RELEASE_SHA}.tar.gz" \
             "artifacts/deploy/portfolio-web-nginx-${RELEASE_SHA}.tar.gz" \
             "artifacts/deploy/portfolio-production.env" \
             "artifacts/deploy/portfolio-deploy-meta.env" \
-            "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/"
+            "deploy-target:/tmp/"
 
       - name: Run remote deployment
         shell: bash
         run: |
-          ssh -p "${DEPLOY_PORT}" "${DEPLOY_USER}@${DEPLOY_HOST}" \
+          ssh deploy-target \
             "set -a && . /tmp/portfolio-deploy-meta.env && set +a && /bin/sh -s" \
             < scripts/deploy/remote-deploy.sh
 
