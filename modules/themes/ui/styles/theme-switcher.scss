@@ -1,0 +1,23 @@
+@use "../../../../packages/design-tokens/src/variables" as *;
+
+.theme-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: $color-carbon-900;
+  font: 600 0.9rem/1.1 $font-family-body;
+}
+
+.theme-switcher__label {
+  opacity: 0.78;
+}
+
+.theme-switcher__select {
+  border: 1px solid rgba(107, 87, 61, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  padding: 0.65rem 0.95rem;
+  color: inherit;
+  font: inherit;
+}
+

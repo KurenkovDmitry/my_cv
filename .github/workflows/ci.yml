@@ -1,0 +1,185 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - "codex/**"
+  pull_request:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Typecheck workspaces
+        run: npm run typecheck
+
+      - name: Run workspace tests
+        run: npm test
+
+      - name: Build public frontend
+        run: npm run build:web
+
+      - name: Build admin frontend
+        run: npm run build:admin
+
+      - name: Write frontend summary
+        if: success()
+        run: |
+          {
+            echo "## Frontend checks"
+            echo ""
+            echo "- TypeScript typecheck passed."
+            echo "- Workspace unit tests passed."
+            echo "- Public and admin production builds passed."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "./backend[dev]"
+
+      - name: Run backend tests
+        run: |
+          mkdir -p artifacts/tests
+          python -m pytest backend/tests backend/app/modules --junitxml=artifacts/tests/backend-pytest.xml
+
+      - name: Upload backend test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-report
+          path: artifacts/tests/backend-pytest.xml
+          if-no-files-found: error
+
+      - name: Write backend summary
+        if: success()
+        run: |
+          {
+            echo "## Backend checks"
+            echo ""
+            echo "- Python 3.13 environment created successfully."
+            echo "- Backend pytest suite passed."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Install dependencies for security scans
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "./backend[dev]"
+          npm ci
+
+      - name: Run npm audit
+        shell: bash
+        run: |
+          mkdir -p artifacts/security
+          set +e
+          npm audit --omit=dev --json > artifacts/security/npm-audit.json
+          npm_audit_exit_code=$?
+          set -e
+          echo "npm_audit_exit_code=${npm_audit_exit_code}" >> "$GITHUB_ENV"
+
+      - name: Run pip-audit
+        shell: bash
+        run: |
+          set +e
+          python -m pip_audit --format=json --output=artifacts/security/pip-audit.json
+          pip_audit_exit_code=$?
+          set -e
+          echo "pip_audit_exit_code=${pip_audit_exit_code}" >> "$GITHUB_ENV"
+
+      - name: Run Trivy filesystem scan (JSON)
+        run: |
+          docker run --rm \
+            -v "${PWD}:/workspace" \
+            -w /workspace \
+            aquasec/trivy:0.65.0 \
+            fs \
+            --scanners vuln,misconfig \
+            --severity HIGH,CRITICAL \
+            --format json \
+            --output artifacts/security/trivy-report.json \
+            .
+
+      - name: Run Trivy filesystem scan (SARIF)
+        run: |
+          docker run --rm \
+            -v "${PWD}:/workspace" \
+            -w /workspace \
+            aquasec/trivy:0.65.0 \
+            fs \
+            --scanners vuln,misconfig \
+            --severity HIGH,CRITICAL \
+            --format sarif \
+            --output artifacts/security/trivy-report.sarif \
+            .
+
+      - name: Upload security artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: artifacts/security
+          if-no-files-found: error
+
+      - name: Upload Trivy SARIF
+        if: >-
+          always() &&
+          (
+            github.event_name != 'pull_request' ||
+            github.event.pull_request.head.repo.fork == false
+          )
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: artifacts/security/trivy-report.sarif
+          category: trivy-filesystem
+
+      - name: Evaluate security reports
+        run: node ./scripts/ci/evaluate-security-reports.mjs

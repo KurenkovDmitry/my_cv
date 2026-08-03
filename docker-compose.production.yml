@@ -1,0 +1,98 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file:
+      - ${APP_ENV_FILE:-./.env}
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_SUPERUSER_NAME}
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--maxmemory", "192mb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  api:
+    image: portfolio-api:${IMAGE_TAG:-current}
+    restart: unless-stopped
+    env_file:
+      - ${APP_ENV_FILE:-./.env}
+    environment:
+      ENVIRONMENT: production
+      ENABLE_DOCS: "false"
+    volumes:
+      - portfolio-backups:${BACKUP_STORAGE_PATH}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8000/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  nginx:
+    image: portfolio-web-nginx:${IMAGE_TAG:-current}
+    restart: unless-stopped
+    env_file:
+      - ${APP_ENV_FILE:-./.env}
+    environment:
+      DOMAIN_NAME: ${DOMAIN_NAME}
+      ENABLE_HTTPS: ${ENABLE_HTTPS:-true}
+      ADMIN_BASE_PATH: ${ADMIN_BASE_PATH:-/admin}
+      API_UPSTREAM: http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - certbot-www:/var/www/certbot
+      - letsencrypt:/etc/letsencrypt
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  certbot:
+    image: certbot/certbot:latest
+    profiles: ["ops"]
+    env_file:
+      - ${APP_ENV_FILE:-./.env}
+    volumes:
+      - certbot-www:/var/www/certbot
+      - letsencrypt:/etc/letsencrypt
+
+volumes:
+  postgres-data:
+  redis-data:
+  portfolio-backups:
+  certbot-www:
+  letsencrypt:

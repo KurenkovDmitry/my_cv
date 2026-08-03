@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+.DS_Store
+.env
+.env.*
+!.env.example
+.idea/
+*.log
+*.pyc
+__pycache__/
+.pytest_cache/
+.venv/
+.mypy_cache/
+backend/.venv/
+rules/
+

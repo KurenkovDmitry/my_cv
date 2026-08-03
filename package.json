@@ -1,0 +1,19 @@
+{
+  "name": "portfolio-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Монорепозиторий персонального сайта-портфолио с публичной и административной частью.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace @portfolio/web run dev",
+    "dev:admin": "npm --workspace @portfolio/admin run dev",
+    "build:web": "npm --workspace @portfolio/web run build",
+    "build:admin": "npm --workspace @portfolio/admin run build",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  }
+}
+

@@ -1,0 +1,13 @@
+[build-system]
+requires = ["scikit-build-core>=0.10", "pybind11>=2.13"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "content-diff-native"
+version = "0.1.0"
+description = "Python-callable native diff engine for portfolio backup and import bundle comparison."
+requires-python = ">=3.13,<3.14"
+dependencies = []
+
+[tool.scikit-build]
+wheel.packages = ["python/content_diff_native"]

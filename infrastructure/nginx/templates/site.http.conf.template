@@ -1,0 +1,38 @@
+server {
+    listen 80;
+    server_name ${DOMAIN_NAME};
+
+    client_max_body_size 8m;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+    add_header X-Frame-Options SAMEORIGIN always;
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+        try_files $uri =404;
+    }
+
+    location /api/ {
+        proxy_pass ${API_UPSTREAM};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Request-ID $request_id;
+    }
+
+    location = ${ADMIN_BASE_PATH} {
+        return 301 ${ADMIN_BASE_PATH}/;
+    }
+
+    location ^~ ${ADMIN_BASE_PATH}/ {
+        root /usr/share/nginx/html;
+        try_files $uri $uri/ ${ADMIN_BASE_PATH}/index.html;
+    }
+
+    location / {
+        root /usr/share/nginx/html/public;
+        try_files $uri $uri/ /index.html;
+    }
+}

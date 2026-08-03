@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.local/schemas/portfolio.v1.schema.json",
+  "title": "Portfolio v1",
+  "type": "object",
+  "required": ["version", "profile", "projects", "themes", "localization", "accessibility", "seo"],
+  "properties": {
+    "version": {
+      "const": "portfolio.v1"
+    },
+    "draft": {
+      "type": "boolean"
+    },
+    "needsManualReview": {
+      "type": "boolean"
+    },
+    "profile": {
+      "type": "object",
+      "required": ["displayName", "headline", "summary"],
+      "properties": {
+        "displayName": { "$ref": "#/$defs/localizedText" },
+        "headline": { "$ref": "#/$defs/localizedText" },
+        "summary": { "$ref": "#/$defs/localizedText" },
+        "avatarAsset": { "type": "string" }
+      }
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "slug", "title", "summary"],
+        "properties": {
+          "id": { "type": "string" },
+          "slug": { "type": "string" },
+          "featured": { "type": "boolean" },
+          "title": { "$ref": "#/$defs/localizedText" },
+          "summary": { "$ref": "#/$defs/localizedText" }
+        }
+      }
+    },
+    "themes": {
+      "type": "object",
+      "required": ["active", "available"],
+      "properties": {
+        "active": { "type": "string" },
+        "available": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "label"],
+            "properties": {
+              "id": { "type": "string" },
+              "label": { "$ref": "#/$defs/localizedText" }
+            }
+          }
+        }
+      }
+    },
+    "localization": {
+      "type": "object",
+      "required": ["defaultLocale", "supportedLocales"],
+      "properties": {
+        "defaultLocale": { "type": "string", "enum": ["ru", "en"] },
+        "supportedLocales": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["ru", "en"] }
+        }
+      }
+    },
+    "accessibility": {
+      "type": "object",
+      "properties": {
+        "speechSynthesisEnabled": { "type": "boolean" },
+        "highContrastModeEnabled": { "type": "boolean" },
+        "reducedMotionPresetEnabled": { "type": "boolean" }
+      }
+    },
+    "seo": {
+      "type": "object",
+      "required": ["siteName"],
+      "properties": {
+        "siteName": { "$ref": "#/$defs/localizedText" },
+        "openGraphImage": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "localizedText": {
+      "type": "object",
+      "required": ["ru", "en"],
+      "properties": {
+        "ru": { "type": "string" },
+        "en": { "type": "string" }
+      }
+    }
+  }
+}
+

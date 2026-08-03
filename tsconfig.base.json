@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@portfolio/shared-config": ["packages/shared-config/src/index.ts"],
+      "@portfolio/shared-contracts": ["packages/shared-contracts/src/index.ts"],
+      "@portfolio/shared-errors": ["packages/shared-errors/src/index.ts"],
+      "@portfolio/shared-types": ["packages/shared-types/src/index.ts"],
+      "@portfolio/shared-ui": ["packages/shared-ui/src/index.ts"],
+      "@portfolio/design-tokens": ["packages/design-tokens/src/index.ts"],
+      "@portfolio/modules/profile": ["modules/profile/index.ts"],
+      "@portfolio/modules/projects": ["modules/projects/index.ts"],
+      "@portfolio/modules/localization": ["modules/localization/index.ts"],
+      "@portfolio/modules/themes": ["modules/themes/index.ts"],
+      "@portfolio/modules/analytics": ["modules/analytics/index.ts"],
+      "@portfolio/modules/consent": ["modules/consent/index.ts"]
+    }
+  }
+}

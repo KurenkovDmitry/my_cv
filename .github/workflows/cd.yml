@@ -1,0 +1,163 @@
+name: CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      bootstrap_server:
+        description: "Allow first-time server bootstrap and create the server identity marker if it is absent."
+        required: true
+        default: false
+        type: boolean
+      git_ref:
+        description: "Git ref to deploy manually."
+        required: false
+        default: "main"
+        type: string
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main'
+      )
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+      DEPLOY_PORT: ${{ vars.DEPLOY_PORT }}
+      DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+      PRODUCTION_DOMAIN: ${{ vars.PRODUCTION_DOMAIN }}
+      ADMIN_BASE_PATH: ${{ vars.ADMIN_BASE_PATH }}
+      VITE_DYNAMIC_BACKDROP: ${{ vars.VITE_DYNAMIC_BACKDROP }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || inputs.git_ref }}
+
+      - name: Resolve release metadata
+        shell: bash
+        run: |
+          if [ -z "${DEPLOY_HOST}" ] || [ -z "${DEPLOY_USER}" ] || [ -z "${PRODUCTION_DOMAIN}" ]; then
+            echo "DEPLOY_HOST, DEPLOY_USER and PRODUCTION_DOMAIN must be configured as production environment variables." >&2
+            exit 1
+          fi
+
+          echo "RELEASE_SHA=$(git rev-parse --short=12 HEAD)" >> "$GITHUB_ENV"
+          echo "DEPLOY_PORT=${DEPLOY_PORT:-22}" >> "$GITHUB_ENV"
+          echo "ADMIN_BASE_PATH=${ADMIN_BASE_PATH:-/admin/}" >> "$GITHUB_ENV"
+          echo "VITE_DYNAMIC_BACKDROP=${VITE_DYNAMIC_BACKDROP:-true}" >> "$GITHUB_ENV"
+          echo "BOOTSTRAP_SERVER=${{ github.event_name == 'workflow_dispatch' && inputs.bootstrap_server || 'false' }}" >> "$GITHUB_ENV"
+
+      - name: Configure SSH
+        shell: bash
+        env:
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          DEPLOY_SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "${DEPLOY_SSH_PRIVATE_KEY}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "${DEPLOY_SSH_KNOWN_HOSTS}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Build API image
+        run: docker build -f backend/Dockerfile -t "portfolio-api:${RELEASE_SHA}" .
+
+      - name: Build Nginx image
+        run: |
+          docker build -f infrastructure/nginx/Dockerfile \
+            --build-arg "VITE_PUBLIC_API_BASE_URL=https://${PRODUCTION_DOMAIN}/api/public" \
+            --build-arg "VITE_ADMIN_API_BASE_URL=https://${PRODUCTION_DOMAIN}/api/admin" \
+            --build-arg "VITE_ENABLE_DYNAMIC_BACKDROP=${VITE_DYNAMIC_BACKDROP}" \
+            --build-arg "VITE_ADMIN_BASE_PATH=${ADMIN_BASE_PATH}" \
+            -t "portfolio-web-nginx:${RELEASE_SHA}" \
+            .
+
+      - name: Package deployment bundle and images
+        shell: bash
+        run: |
+          mkdir -p artifacts/deploy
+
+          tar -czf "artifacts/deploy/portfolio-deploy-bundle-${RELEASE_SHA}.tar.gz" \
+            docker-compose.production.yml \
+            infrastructure/postgres/init \
+            scripts/deploy \
+            scripts/postgres
+
+          docker save "portfolio-api:${RELEASE_SHA}" | gzip > "artifacts/deploy/portfolio-api-${RELEASE_SHA}.tar.gz"
+          docker save "portfolio-web-nginx:${RELEASE_SHA}" | gzip > "artifacts/deploy/portfolio-web-nginx-${RELEASE_SHA}.tar.gz"
+
+      - name: Write production env files
+        shell: bash
+        env:
+          PRODUCTION_ENV_FILE: ${{ secrets.PRODUCTION_ENV_FILE }}
+          DEPLOY_SERVER_ID: ${{ secrets.DEPLOY_SERVER_ID }}
+          LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL }}
+        run: |
+          printf '%s\n' "${PRODUCTION_ENV_FILE}" > artifacts/deploy/portfolio-production.env
+
+          {
+            printf 'RELEASE_SHA=%q\n' "${RELEASE_SHA}"
+            printf 'DEPLOY_SERVER_ID=%q\n' "${DEPLOY_SERVER_ID}"
+            printf 'TARGET_DOMAIN_NAME=%q\n' "${PRODUCTION_DOMAIN}"
+            printf 'TARGET_LETSENCRYPT_EMAIL=%q\n' "${LETSENCRYPT_EMAIL}"
+            printf 'BOOTSTRAP_SERVER=%q\n' "${BOOTSTRAP_SERVER}"
+            printf 'BUNDLE_ARCHIVE=%q\n' "/tmp/portfolio-deploy-bundle-${RELEASE_SHA}.tar.gz"
+            printf 'API_IMAGE_ARCHIVE=%q\n' "/tmp/portfolio-api-${RELEASE_SHA}.tar.gz"
+            printf 'NGINX_IMAGE_ARCHIVE=%q\n' "/tmp/portfolio-web-nginx-${RELEASE_SHA}.tar.gz"
+            printf 'ENV_ARCHIVE=%q\n' "/tmp/portfolio-production.env"
+          } > artifacts/deploy/portfolio-deploy-meta.env
+
+      - name: Upload deployment artifacts to the server
+        shell: bash
+        run: |
+          scp -P "${DEPLOY_PORT}" \
+            "artifacts/deploy/portfolio-deploy-bundle-${RELEASE_SHA}.tar.gz" \
+            "artifacts/deploy/portfolio-api-${RELEASE_SHA}.tar.gz" \
+            "artifacts/deploy/portfolio-web-nginx-${RELEASE_SHA}.tar.gz" \
+            "artifacts/deploy/portfolio-production.env" \
+            "artifacts/deploy/portfolio-deploy-meta.env" \
+            "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/"
+
+      - name: Run remote deployment
+        shell: bash
+        run: |
+          ssh -p "${DEPLOY_PORT}" "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "set -a && . /tmp/portfolio-deploy-meta.env && set +a && /bin/sh -s" \
+            < scripts/deploy/remote-deploy.sh
+
+      - name: Upload deployment package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-deploy-${{ env.RELEASE_SHA }}
+          path: artifacts/deploy
+          if-no-files-found: error
+
+      - name: Write deployment summary
+        if: success()
+        run: |
+          {
+            echo "## Production deployment"
+            echo ""
+            echo "- Domain: https://${PRODUCTION_DOMAIN}"
+            echo "- Release SHA: ${RELEASE_SHA}"
+            echo "- Bootstrap mode: ${BOOTSTRAP_SERVER}"
+            echo "- HTTPS certificate requested and nginx reloaded."
+          } >> "$GITHUB_STEP_SUMMARY"

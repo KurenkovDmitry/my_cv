@@ -1,0 +1,107 @@
+version: portfolio.v1
+draft: true
+needsManualReview: true
+metadata:
+  owner:
+    shortName: "Д. А. Куренков"
+    displayName:
+      ru: "Д. А. Куренков"
+      en: "D. A. Kurenkov"
+  generatedAt: "2026-08-03"
+  sourceNotes:
+    - "Каркас заполнен на основе предоставленных артефактов rules/photo_2025-04-09_22-18-09.jpg и резюме."
+    - "Поля, которые не удалось достоверно извлечь автоматически, помечены как требующие ручной валидации."
+profile:
+  slug: primary
+  displayName:
+    ru: "Д. А. Куренков"
+    en: "D. A. Kurenkov"
+  headline:
+    ru: "Инженер, сфокусированный на highload-архитектуре, инфраструктуре и качественном пользовательском опыте."
+    en: "Engineer focused on highload architecture, infrastructure, and polished user experience."
+  summary:
+    ru: "Стартовый профиль собран из предоставленных материалов и требует ручного уточнения деталей резюме перед публикацией."
+    en: "This starter profile was assembled from the provided materials and still requires manual CV validation before publication."
+  location:
+    ru: "Россия"
+    en: "Russia"
+  avatarAsset: "rules/photo_2025-04-09_22-18-09.jpg"
+education:
+  - id: school-204
+    title:
+      ru: "Школа №204"
+      en: "School No. 204"
+    status: "needs_review"
+  - id: bmstu
+    title:
+      ru: "МГТУ имени Н. Э. Баумана"
+      en: "Bauman Moscow State Technical University"
+    status: "needs_review"
+projects:
+  - id: personal-portfolio
+    slug: personal-portfolio
+    featured: true
+    status: "active"
+    title:
+      ru: "Персональный сайт-портфолио"
+      en: "Personal portfolio platform"
+    summary:
+      ru: "Модульный SPA-проект с публичной частью, админкой, импортом контента и безопасным backend-контуром."
+      en: "A modular SPA platform with a public site, admin panel, content import/export, and a secure backend layer."
+    technologies:
+      - "TypeScript"
+      - "React"
+      - "SCSS"
+      - "FastAPI"
+      - "PostgreSQL"
+      - "Redis"
+    links:
+      - kind: "repository"
+        label:
+          ru: "Монорепозиторий"
+          en: "Monorepo"
+        href: "#"
+experience:
+  - id: cv-import-pending
+    company:
+      ru: "Ожидает импорта из резюме"
+      en: "Pending CV import"
+    role:
+      ru: "Детали опыта будут уточнены после валидации импорта"
+      en: "Experience details will be refined after import validation"
+    status: "needs_review"
+skills:
+  focusAreas:
+    - "Highload architecture"
+    - "Infrastructure design"
+    - "Nginx"
+    - "Routing"
+    - "Frontend architecture"
+themes:
+  active: "paper-sand"
+  available:
+    - id: "paper-sand"
+      label:
+        ru: "Тёплый песок"
+        en: "Paper sand"
+    - id: "contrast-carbon"
+      label:
+        ru: "Контрастный графит"
+        en: "Contrast carbon"
+localization:
+  defaultLocale: "en"
+  supportedLocales:
+    - "en"
+    - "ru"
+  autoDetectByRegion:
+    RU: "ru"
+accessibility:
+  speechSynthesisEnabled: true
+  highContrastModeEnabled: true
+  reducedMotionPresetEnabled: true
+seo:
+  siteName:
+    ru: "Портфолио Д. А. Куренкова"
+    en: "D. A. Kurenkov Portfolio"
+  openGraphImage: "rules/photo_2025-04-09_22-18-09.jpg"
+
