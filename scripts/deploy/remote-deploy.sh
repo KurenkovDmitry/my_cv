@@ -78,14 +78,14 @@ ensure_server_identity() {
 
 export COMPOSE_PROJECT_NAME=portfolio
 
-run_root mkdir -p "${DEPLOY_ROOT}/app/releases" "${DEPLOY_ROOT}/config" "${DEPLOY_ROOT}/tmp"
+run_root mkdir -p "${DEPLOY_ROOT}/app/releases" "${DEPLOY_ROOT}/config" "${DEPLOY_ROOT}/tmp" /etc/portfolio
 run_root rm -rf "${RELEASE_DIR}"
 run_root mkdir -p "${RELEASE_DIR}"
 run_root tar -xzf "${BUNDLE_ARCHIVE}" -C "${RELEASE_DIR}"
 run_root chmod +x "${RELEASE_DIR}/scripts/deploy/"*.sh "${RELEASE_DIR}/scripts/postgres/"*.sh
 
-sh "${RELEASE_DIR}/scripts/deploy/bootstrap-server.sh" "${DEPLOY_ROOT}"
 ensure_server_identity
+sh "${RELEASE_DIR}/scripts/deploy/bootstrap-server.sh" "${DEPLOY_ROOT}"
 
 run_root sh -c "tr -d '\r' < '${ENV_ARCHIVE}' > '${ENV_FILE}'"
 run_root chmod 600 "${ENV_FILE}"
