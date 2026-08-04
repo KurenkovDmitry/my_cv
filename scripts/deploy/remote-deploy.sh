@@ -31,6 +31,44 @@ run_root() {
   fi
 }
 
+cleanup_release_directories() {
+  if [ ! -d "${DEPLOY_ROOT}/app/releases" ]; then
+    return
+  fi
+
+  find "${DEPLOY_ROOT}/app/releases" -mindepth 1 -maxdepth 1 -type d ! -name "${RELEASE_SHA}" -exec rm -rf {} +
+}
+
+cleanup_repository_image_tags() {
+  repository="$1"
+  keep_primary_tag="$2"
+  keep_secondary_tag="$3"
+
+  image_refs="$(run_root docker image ls "${repository}" --format '{{.Repository}}:{{.Tag}}')"
+  if [ -z "${image_refs}" ]; then
+    return
+  fi
+
+  echo "${image_refs}" | while IFS= read -r image_ref; do
+    [ -z "${image_ref}" ] && continue
+
+    case "${image_ref}" in
+      "${repository}:${keep_primary_tag}"|"${repository}:${keep_secondary_tag}"|"${repository}:<none>")
+        continue
+        ;;
+    esac
+
+    run_root docker image rm "${image_ref}" >/dev/null 2>&1 || true
+  done
+}
+
+cleanup_runtime_artifacts() {
+  cleanup_release_directories
+  cleanup_repository_image_tags "portfolio-api" "current" "${RELEASE_SHA}"
+  cleanup_repository_image_tags "portfolio-web-nginx" "current" "${RELEASE_SHA}"
+  run_root docker image prune -f >/dev/null 2>&1 || true
+}
+
 docker_compose() {
   if [ -n "${SUDO}" ]; then
     ${SUDO} docker compose --env-file "${RELEASE_DIR}/.env" -f "${RELEASE_DIR}/docker-compose.production.yml" "$@"
@@ -110,7 +148,7 @@ run_root sh -c "gunzip -c '${NGINX_IMAGE_ARCHIVE}' | docker load"
 run_root docker tag "portfolio-api:${RELEASE_SHA}" portfolio-api:current
 run_root docker tag "portfolio-web-nginx:${RELEASE_SHA}" portfolio-web-nginx:current
 
-docker_compose up -d postgres redis
+docker_compose up -d --remove-orphans postgres redis
 
 attempt=1
 while [ "${attempt}" -le 30 ]; do
@@ -129,7 +167,7 @@ fi
 docker_compose exec -T postgres sh /docker-entrypoint-initdb.d/00-bootstrap-app-roles.sh
 docker_compose run --rm api sh /app/scripts/deploy/run-migrations.sh
 
-ENABLE_HTTPS=false docker_compose up -d api nginx
+ENABLE_HTTPS=false docker_compose up -d --remove-orphans api nginx
 wait_for_http "http://127.0.0.1:8000/health/live"
 
 ENABLE_HTTPS=false docker_compose run --rm certbot certonly \
@@ -143,10 +181,11 @@ ENABLE_HTTPS=false docker_compose run --rm certbot certonly \
   --cert-name "${TARGET_DOMAIN_NAME}" \
   -d "${TARGET_DOMAIN_NAME}"
 
-ENABLE_HTTPS=true docker_compose up -d api nginx
+ENABLE_HTTPS=true docker_compose up -d --remove-orphans api nginx
 wait_for_http "https://${TARGET_DOMAIN_NAME}/" --resolve "${TARGET_DOMAIN_NAME}:443:127.0.0.1"
 
 run_root ln -sfn "${RELEASE_DIR}" "${CURRENT_RELEASE_LINK}"
 sh "${RELEASE_DIR}/scripts/deploy/install-cert-renew-timer.sh" "${DEPLOY_ROOT}"
+cleanup_runtime_artifacts
 
 run_root rm -f "${BUNDLE_ARCHIVE}" "${API_IMAGE_ARCHIVE}" "${NGINX_IMAGE_ARCHIVE}" "${ENV_ARCHIVE}"
