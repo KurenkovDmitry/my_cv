@@ -61,7 +61,7 @@ jobs:
 
           echo "RELEASE_SHA=$(git rev-parse --short=12 HEAD)" >> "$GITHUB_ENV"
           echo "DEPLOY_PORT=${DEPLOY_PORT:-22}" >> "$GITHUB_ENV"
-          echo "DEPLOY_HOST_KEY_ALIAS=${DEPLOY_HOST_KEY_ALIAS:-$DEPLOY_HOST}" >> "$GITHUB_ENV"
+          echo "DEPLOY_HOST_KEY_ALIAS=${DEPLOY_HOST_KEY_ALIAS:-$PRODUCTION_DOMAIN}" >> "$GITHUB_ENV"
           echo "ADMIN_BASE_PATH=${ADMIN_BASE_PATH:-/admin/}" >> "$GITHUB_ENV"
           echo "VITE_DYNAMIC_BACKDROP=${VITE_DYNAMIC_BACKDROP:-true}" >> "$GITHUB_ENV"
           echo "BOOTSTRAP_SERVER=${{ github.event_name == 'workflow_dispatch' && inputs.bootstrap_server || 'false' }}" >> "$GITHUB_ENV"
