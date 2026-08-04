@@ -36,7 +36,7 @@ cleanup_release_directories() {
     return
   fi
 
-  find "${DEPLOY_ROOT}/app/releases" -mindepth 1 -maxdepth 1 -type d ! -name "${RELEASE_SHA}" -exec rm -rf {} +
+  run_root find "${DEPLOY_ROOT}/app/releases" -mindepth 1 -maxdepth 1 -type d ! -name "${RELEASE_SHA}" -exec rm -rf {} +
 }
 
 cleanup_repository_image_tags() {
@@ -67,6 +67,18 @@ cleanup_runtime_artifacts() {
   cleanup_repository_image_tags "portfolio-api" "current" "${RELEASE_SHA}"
   cleanup_repository_image_tags "portfolio-web-nginx" "current" "${RELEASE_SHA}"
   run_root docker image prune -f >/dev/null 2>&1 || true
+}
+
+sync_environment_files() {
+  tr -d '\r' < "${ENV_ARCHIVE}" > "${RELEASE_DIR}/.env"
+  chmod 600 "${RELEASE_DIR}/.env"
+
+  run_root cp "${RELEASE_DIR}/.env" "${ENV_FILE}"
+  run_root chmod 600 "${ENV_FILE}"
+
+  if [ -n "${SUDO}" ]; then
+    run_root chown "$(id -u)":"$(id -g)" "${ENV_FILE}"
+  fi
 }
 
 docker_compose() {
@@ -125,9 +137,7 @@ run_root chmod +x "${RELEASE_DIR}/scripts/deploy/"*.sh "${RELEASE_DIR}/scripts/p
 ensure_server_identity
 sh "${RELEASE_DIR}/scripts/deploy/bootstrap-server.sh" "${DEPLOY_ROOT}"
 
-run_root sh -c "tr -d '\r' < '${ENV_ARCHIVE}' > '${ENV_FILE}'"
-run_root chmod 600 "${ENV_FILE}"
-run_root ln -sfn "${ENV_FILE}" "${RELEASE_DIR}/.env"
+sync_environment_files
 
 set -a
 . "${RELEASE_DIR}/.env"
