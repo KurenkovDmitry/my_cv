@@ -82,10 +82,22 @@ sync_environment_files() {
 }
 
 docker_compose() {
+  compose_project_name="${COMPOSE_PROJECT_NAME:-portfolio}"
+  compose_image_tag="${IMAGE_TAG:-current}"
+  compose_enable_https="${ENABLE_HTTPS:-}"
+
   if [ -n "${SUDO}" ]; then
-    ${SUDO} docker compose --env-file "${RELEASE_DIR}/.env" -f "${RELEASE_DIR}/docker-compose.production.yml" "$@"
+    ${SUDO} env \
+      COMPOSE_PROJECT_NAME="${compose_project_name}" \
+      IMAGE_TAG="${compose_image_tag}" \
+      ENABLE_HTTPS="${compose_enable_https}" \
+      docker compose --env-file "${RELEASE_DIR}/.env" -f "${RELEASE_DIR}/docker-compose.production.yml" "$@"
   else
-    docker compose --env-file "${RELEASE_DIR}/.env" -f "${RELEASE_DIR}/docker-compose.production.yml" "$@"
+    env \
+      COMPOSE_PROJECT_NAME="${compose_project_name}" \
+      IMAGE_TAG="${compose_image_tag}" \
+      ENABLE_HTTPS="${compose_enable_https}" \
+      docker compose --env-file "${RELEASE_DIR}/.env" -f "${RELEASE_DIR}/docker-compose.production.yml" "$@"
   fi
 }
 
