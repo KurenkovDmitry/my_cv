@@ -72,6 +72,7 @@ cleanup_runtime_artifacts() {
 
 sync_environment_files() {
   tr -d '\r' < "${ENV_ARCHIVE}" > "${RELEASE_DIR}/.env"
+  printf '\nIMAGE_TAG=%s\n' "${RELEASE_SHA}" >> "${RELEASE_DIR}/.env"
   chmod 600 "${RELEASE_DIR}/.env"
 
   run_root cp "${RELEASE_DIR}/.env" "${ENV_FILE}"
@@ -84,7 +85,7 @@ sync_environment_files() {
 
 docker_compose() {
   compose_project_name="${COMPOSE_PROJECT_NAME:-portfolio}"
-  compose_image_tag="${IMAGE_TAG:-current}"
+  compose_image_tag="${IMAGE_TAG:-$RELEASE_SHA}"
   compose_enable_https="${ENABLE_HTTPS:-}"
 
   if [ -n "${SUDO}" ]; then
