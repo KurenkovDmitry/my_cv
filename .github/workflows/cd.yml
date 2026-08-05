@@ -13,6 +13,11 @@ on:
         required: true
         default: false
         type: boolean
+      run_database_maintenance:
+        description: "Allow explicit PostgreSQL/Redis maintenance: startup checks, grants refresh and schema migrations."
+        required: true
+        default: false
+        type: boolean
       git_ref:
         description: "Git ref to deploy manually."
         required: false
@@ -72,6 +77,7 @@ jobs:
           echo "VITE_DYNAMIC_BACKDROP=${VITE_DYNAMIC_BACKDROP:-true}" >> "$GITHUB_ENV"
           echo "BOOTSTRAP_SERVER=${{ github.event_name == 'workflow_dispatch' && inputs.bootstrap_server || 'false' }}" >> "$GITHUB_ENV"
           echo "RECREATE_STATEFUL_SERVICES=${{ github.event_name == 'workflow_dispatch' && inputs.recreate_stateful_services || 'false' }}" >> "$GITHUB_ENV"
+          echo "RUN_DATABASE_MAINTENANCE=${{ github.event_name == 'workflow_dispatch' && inputs.run_database_maintenance || 'false' }}" >> "$GITHUB_ENV"
 
       - name: Configure SSH
         shell: bash
@@ -156,6 +162,7 @@ jobs:
             printf 'TARGET_LETSENCRYPT_EMAIL=%q\n' "${LETSENCRYPT_EMAIL}"
             printf 'BOOTSTRAP_SERVER=%q\n' "${BOOTSTRAP_SERVER}"
             printf 'RECREATE_STATEFUL_SERVICES=%q\n' "${RECREATE_STATEFUL_SERVICES}"
+            printf 'RUN_DATABASE_MAINTENANCE=%q\n' "${RUN_DATABASE_MAINTENANCE}"
             printf 'BUNDLE_ARCHIVE=%q\n' "/tmp/portfolio-deploy-bundle-${RELEASE_SHA}.tar.gz"
             printf 'API_IMAGE_ARCHIVE=%q\n' "/tmp/portfolio-api-${RELEASE_SHA}.tar.gz"
             printf 'NGINX_IMAGE_ARCHIVE=%q\n' "/tmp/portfolio-web-nginx-${RELEASE_SHA}.tar.gz"
@@ -176,9 +183,16 @@ jobs:
       - name: Run remote deployment
         shell: bash
         run: |
+          scp scripts/deploy/remote-deploy.sh "deploy-target:/tmp/portfolio-remote-deploy.sh"
           ssh deploy-target \
-            "set -a && . /tmp/portfolio-deploy-meta.env && set +a && /bin/sh -s" \
-            < scripts/deploy/remote-deploy.sh
+            "tr -d '\r' < /tmp/portfolio-remote-deploy.sh > /tmp/portfolio-remote-deploy.sh.lf && mv /tmp/portfolio-remote-deploy.sh.lf /tmp/portfolio-remote-deploy.sh && chmod 700 /tmp/portfolio-remote-deploy.sh && set -a && . /tmp/portfolio-deploy-meta.env && set +a && /bin/sh /tmp/portfolio-remote-deploy.sh"
+
+      - name: Show current containers
+        if: success()
+        shell: bash
+        run: |
+          ssh deploy-target \
+            "docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'"
 
       - name: Upload deployment package
         if: always() && hashFiles('artifacts/deploy/**') != ''
@@ -197,5 +211,6 @@ jobs:
             echo "- Domain: https://${PRODUCTION_DOMAIN}"
             echo "- Release SHA: ${RELEASE_SHA}"
             echo "- Bootstrap mode: ${BOOTSTRAP_SERVER}"
+            echo "- Database maintenance: ${RUN_DATABASE_MAINTENANCE}"
             echo "- HTTPS certificate requested and nginx reloaded."
           } >> "$GITHUB_STEP_SUMMARY"

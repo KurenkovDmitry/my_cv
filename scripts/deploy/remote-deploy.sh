@@ -8,6 +8,7 @@ TARGET_DOMAIN_NAME="${TARGET_DOMAIN_NAME:?TARGET_DOMAIN_NAME is required}"
 TARGET_LETSENCRYPT_EMAIL="${TARGET_LETSENCRYPT_EMAIL:-}"
 BOOTSTRAP_SERVER="${BOOTSTRAP_SERVER:-false}"
 RECREATE_STATEFUL_SERVICES="${RECREATE_STATEFUL_SERVICES:-false}"
+RUN_DATABASE_MAINTENANCE="${RUN_DATABASE_MAINTENANCE:-false}"
 BUNDLE_ARCHIVE="${BUNDLE_ARCHIVE:-/tmp/portfolio-deploy-bundle-${RELEASE_SHA}.tar.gz}"
 API_IMAGE_ARCHIVE="${API_IMAGE_ARCHIVE:-/tmp/portfolio-api-${RELEASE_SHA}.tar.gz}"
 NGINX_IMAGE_ARCHIVE="${NGINX_IMAGE_ARCHIVE:-/tmp/portfolio-web-nginx-${RELEASE_SHA}.tar.gz}"
@@ -122,11 +123,34 @@ docker_compose() {
   fi
 }
 
+docker_compose_exec_no_stdin() {
+  docker_compose exec -T "$@" </dev/null
+}
+
+docker_compose_run_no_stdin() {
+  docker_compose run --rm "$@" </dev/null
+}
+
+should_run_database_maintenance() {
+  if [ "${BOOTSTRAP_SERVER}" = "true" ] || [ "${RECREATE_STATEFUL_SERVICES}" = "true" ]; then
+    return 0
+  fi
+
+  [ "${RUN_DATABASE_MAINTENANCE}" = "true" ]
+}
+
 replace_services() {
   compose_enable_https="$1"
-  shift
+  dependency_mode="$2"
+  shift 2
 
   ENABLE_HTTPS="${compose_enable_https}" docker_compose rm -f -s "$@" || true
+
+  if [ "${dependency_mode}" = "no_deps" ]; then
+    ENABLE_HTTPS="${compose_enable_https}" docker_compose up -d --force-recreate --remove-orphans --no-deps "$@"
+    return
+  fi
+
   ENABLE_HTTPS="${compose_enable_https}" docker_compose up -d --force-recreate --remove-orphans "$@"
 }
 
@@ -168,6 +192,50 @@ wait_for_http() {
 
   echo "Timed out while waiting for ${target_url}." >&2
   return 1
+}
+
+describe_service_container() {
+  service_name="$1"
+  container_id="$(docker_compose ps -q "${service_name}" | head -n 1)"
+
+  if [ -z "${container_id}" ]; then
+    echo "Service ${service_name} container not found after deploy." >&2
+    return 1
+  fi
+
+  run_root docker inspect \
+    --format "service=${service_name} id={{.Id}} name={{.Name}} image={{.Config.Image}} status={{.State.Status}} started_at={{.State.StartedAt}} health={{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}" \
+    "${container_id}"
+}
+
+verify_deployed_release() {
+  expected_api_image="portfolio-api:${RELEASE_SHA}"
+  expected_nginx_image="portfolio-web-nginx:${RELEASE_SHA}"
+
+  api_container_id="$(docker_compose ps -q api | head -n 1)"
+  nginx_container_id="$(docker_compose ps -q nginx | head -n 1)"
+
+  if [ -z "${api_container_id}" ] || [ -z "${nginx_container_id}" ]; then
+    echo "api or nginx container is missing after deploy." >&2
+    return 1
+  fi
+
+  api_config_image="$(run_root docker inspect --format '{{.Config.Image}}' "${api_container_id}")"
+  nginx_config_image="$(run_root docker inspect --format '{{.Config.Image}}' "${nginx_container_id}")"
+
+  if [ "${api_config_image}" != "${expected_api_image}" ]; then
+    echo "api container runs unexpected image: ${api_config_image} (expected ${expected_api_image})." >&2
+    return 1
+  fi
+
+  if [ "${nginx_config_image}" != "${expected_nginx_image}" ]; then
+    echo "nginx container runs unexpected image: ${nginx_config_image} (expected ${expected_nginx_image})." >&2
+    return 1
+  fi
+
+  echo "--- deployed container snapshot ---"
+  describe_service_container api
+  describe_service_container nginx
 }
 
 ensure_server_identity() {
@@ -226,41 +294,49 @@ run_root sh -c "gunzip -c '${NGINX_IMAGE_ARCHIVE}' | docker load"
 run_root docker tag "portfolio-api:${RELEASE_SHA}" portfolio-api:current
 run_root docker tag "portfolio-web-nginx:${RELEASE_SHA}" portfolio-web-nginx:current
 
-log_step "Starting stateful services"
-if [ "${RECREATE_STATEFUL_SERVICES}" = "true" ]; then
-  docker_compose up -d --force-recreate postgres redis
-else
-  docker_compose up -d --no-recreate postgres redis
-fi
+dependency_mode="no_deps"
+if should_run_database_maintenance; then
+  dependency_mode="with_deps"
 
-log_step "Waiting for PostgreSQL"
-attempt=1
-while [ "${attempt}" -le 30 ]; do
-  if docker_compose exec -T postgres pg_isready -U "${POSTGRES_SUPERUSER_NAME}" -d "${POSTGRES_DB_NAME}" >/dev/null 2>&1; then
-    break
+  log_step "Starting stateful services"
+  if [ "${RECREATE_STATEFUL_SERVICES}" = "true" ]; then
+    docker_compose up -d --force-recreate postgres redis
+  else
+    docker_compose up -d --no-recreate postgres redis
   fi
-  attempt=$((attempt + 1))
-  sleep 3
-done
 
-if [ "${attempt}" -gt 30 ]; then
-  echo "PostgreSQL did not become ready in time." >&2
-  exit 1
+  log_step "Waiting for PostgreSQL"
+  attempt=1
+  while [ "${attempt}" -le 30 ]; do
+    if docker_compose_exec_no_stdin postgres pg_isready -U "${POSTGRES_SUPERUSER_NAME}" -d "${POSTGRES_DB_NAME}" >/dev/null 2>&1; then
+      break
+    fi
+    attempt=$((attempt + 1))
+    sleep 3
+  done
+
+  if [ "${attempt}" -gt 30 ]; then
+    echo "PostgreSQL did not become ready in time." >&2
+    exit 1
+  fi
+
+  log_step "Applying database grants"
+  docker_compose_exec_no_stdin postgres sh /docker-entrypoint-initdb.d/00-bootstrap-app-roles.sh
+
+  log_step "Running database migrations"
+  docker_compose_run_no_stdin api sh /app/scripts/deploy/run-migrations.sh
+else
+  log_step "Skipping database maintenance"
+  echo "Stateful services are left untouched. Deploying only api and nginx against the existing PostgreSQL/Redis instances."
 fi
-
-log_step "Applying database grants"
-docker_compose exec -T postgres sh /docker-entrypoint-initdb.d/00-bootstrap-app-roles.sh
-
-log_step "Running database migrations"
-docker_compose run --rm api sh /app/scripts/deploy/run-migrations.sh
 
 log_step "Deploying application over HTTP"
-replace_services false api nginx
+replace_services false "${dependency_mode}" api nginx
 wait_for_http "http://127.0.0.1:8000/health/live"
 wait_for_http "http://127.0.0.1/"
 
 log_step "Issuing or renewing TLS certificate"
-ENABLE_HTTPS=false docker_compose run --rm certbot certonly \
+ENABLE_HTTPS=false docker_compose_run_no_stdin certbot certonly \
   --webroot \
   -w /var/www/certbot \
   --agree-tos \
@@ -272,8 +348,9 @@ ENABLE_HTTPS=false docker_compose run --rm certbot certonly \
   -d "${TARGET_DOMAIN_NAME}"
 
 log_step "Deploying application over HTTPS"
-replace_services true api nginx
+replace_services true "${dependency_mode}" api nginx
 wait_for_http "https://${TARGET_DOMAIN_NAME}/" --resolve "${TARGET_DOMAIN_NAME}:443:127.0.0.1"
+verify_deployed_release
 
 log_step "Finalizing release"
 update_release_link "${CURRENT_RELEASE_LINK}" "${RELEASE_DIR}"
