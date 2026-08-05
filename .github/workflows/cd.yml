@@ -181,12 +181,12 @@ jobs:
             < scripts/deploy/remote-deploy.sh
 
       - name: Upload deployment package
-        if: always()
+        if: always() && hashFiles('artifacts/deploy/**') != ''
         uses: actions/upload-artifact@v4
         with:
           name: production-deploy-${{ env.RELEASE_SHA }}
           path: artifacts/deploy
-          if-no-files-found: error
+          if-no-files-found: ignore
 
       - name: Write deployment summary
         if: success()

@@ -4,6 +4,7 @@ WORKDIR /workspace
 
 COPY package.json package-lock.json pnpm-workspace.yaml tsconfig.base.json ./
 COPY apps ./apps
+COPY content ./content
 COPY modules ./modules
 COPY packages ./packages
 
