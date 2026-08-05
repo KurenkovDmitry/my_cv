@@ -8,9 +8,8 @@ import {
   portfolioPreviewContent,
   runtimeHealthPreview,
 } from "@portfolio/shared-config";
+import type { AdminLoginRequest, AdminSessionResponse } from "@portfolio/shared-contracts";
 import type {
-  AdminLoginRequest,
-  AdminSessionResponse,
   AdminAuditLogEntry,
   AdminContentStateSnapshot,
   AnalyticsDashboardSnapshot,
