@@ -122,6 +122,14 @@ docker_compose() {
   fi
 }
 
+replace_services() {
+  compose_enable_https="$1"
+  shift
+
+  ENABLE_HTTPS="${compose_enable_https}" docker_compose rm -f -s "$@" || true
+  ENABLE_HTTPS="${compose_enable_https}" docker_compose up -d --force-recreate --remove-orphans "$@"
+}
+
 debug_on_error() {
   exit_code="$1"
 
@@ -247,7 +255,7 @@ log_step "Running database migrations"
 docker_compose run --rm api sh /app/scripts/deploy/run-migrations.sh
 
 log_step "Deploying application over HTTP"
-ENABLE_HTTPS=false docker_compose up -d --force-recreate --remove-orphans api nginx
+replace_services false api nginx
 wait_for_http "http://127.0.0.1:8000/health/live"
 wait_for_http "http://127.0.0.1/"
 
@@ -264,7 +272,7 @@ ENABLE_HTTPS=false docker_compose run --rm certbot certonly \
   -d "${TARGET_DOMAIN_NAME}"
 
 log_step "Deploying application over HTTPS"
-ENABLE_HTTPS=true docker_compose up -d --force-recreate --remove-orphans api nginx
+replace_services true api nginx
 wait_for_http "https://${TARGET_DOMAIN_NAME}/" --resolve "${TARGET_DOMAIN_NAME}:443:127.0.0.1"
 
 log_step "Finalizing release"
