@@ -104,6 +104,9 @@ def _map_diff_response(diff_record: ContentDiffRecord) -> ContentDiffResponse:
 def _resolve_actor_login(request: Request) -> str:
     """Возвращает логин актёра до подключения полноценной auth-схемы."""
 
+    if hasattr(request.state, "admin_login") and request.state.admin_login:
+        return request.state.admin_login
+
     return request.headers.get("X-Admin-Actor", "admin-ui")
 
 

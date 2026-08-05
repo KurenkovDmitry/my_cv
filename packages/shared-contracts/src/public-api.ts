@@ -41,6 +41,17 @@ export interface DraftSnapshotUpsertRequest {
   payload: PortfolioContent;
 }
 
+export interface AdminLoginRequest {
+  login: string;
+  password: string;
+}
+
+export interface AdminSessionResponse {
+  login: string;
+  csrfToken: string;
+  expiresAt: string;
+}
+
 export interface AdminPublishResponse {
   snapshot: PublicPortfolioResponse;
   backup: BackupArtifactSummary | null;

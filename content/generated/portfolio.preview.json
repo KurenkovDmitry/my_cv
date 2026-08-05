@@ -1,0 +1,363 @@
+{
+  "version": "portfolio.v1",
+  "draft": true,
+  "needsManualReview": true,
+  "profile": {
+    "slug": "primary",
+    "displayName": {
+      "ru": "Дмитрий Андреевич Куренков",
+      "en": "Dmitry Andreevich Kurenkov"
+    },
+    "headline": {
+      "ru": "Системный аналитик и platform-инженер, который проектирует highload-сервисы, данные и рабочие интерфейсы.",
+      "en": "System analyst and platform-minded engineer focused on highload services, data architecture, and production-grade interfaces."
+    },
+    "summary": {
+      "ru": "Строю архитектуру вокруг нагрузки, интеграций и эксплуатационной устойчивости: от требований и моделей данных до backend-контуров, CI/CD и админ-панелей.",
+      "en": "I build architecture around load, integrations, and operational resilience, spanning requirements, data models, backend services, CI/CD, and admin tooling."
+    },
+    "location": {
+      "ru": "Россия,Москва",
+      "en": "Moscow, Russia"
+    },
+    "avatarAsset": "/media/photo_2025-04-09_22-18-09.jpg"
+  },
+  "education": [
+    {
+      "id": "hse-netology-master",
+      "title": {
+        "ru": "НИУ ВШЭ, магистратура ФКН и Нетология",
+        "en": "HSE University, Faculty of Computer Science master's track with Netology"
+      },
+      "status": "draft"
+    },
+    {
+      "id": "vk-bmstu-web",
+      "title": {
+        "ru": "Образовательный центр VK в МГТУ им. Н. Э. Баумана",
+        "en": "VK Education Center at Bauman Moscow State Technical University"
+      },
+      "status": "published"
+    },
+    {
+      "id": "bmstu-bachelor",
+      "title": {
+        "ru": "МГТУ им. Н. Э. Баумана, бакалавриат ИУ, красный диплом",
+        "en": "Bauman Moscow State Technical University, bachelor's degree in informatics and control systems with honors"
+      },
+      "status": "published"
+    },
+    {
+      "id": "school-1580",
+      "title": {
+        "ru": "Бауманская инженерная школа №1580, профиль информатика",
+        "en": "Bauman Engineering School No. 1580, informatics profile"
+      },
+      "status": "published"
+    }
+  ],
+  "experience": [
+    {
+      "id": "t-bank-credit-products",
+      "company": {
+        "ru": "Т-Банк",
+        "en": "T-Bank"
+      },
+      "role": {
+        "ru": "Стажёр-системный аналитик. ТБанк:системный анализ в команде кредитных продуктов: импортозамещение и сопровождение функционалав условиях изменения методов хранения и инфраструктуры, подготовка требований, изучение существующей реализации(SQL, Java Spring), тестирование и SQL-разработка. Роль: стажёр-системный аналитик.",
+        "en": "System analyst intern in the credit products domain with SQL, Java Spring, requirements analysis, and testing."
+      },
+      "status": "published"
+    },
+    {
+      "id": "lateco-project-experience",
+      "company": {
+        "ru": "Латеко и внутренние IT-проекты",
+        "en": "Lateco and internal IT initiatives"
+      },
+      "role": {
+        "ru": "System analyst с дополнительной ролью backend-архитектора, full-stack разработчика и тестировщика на внутренних продуктах компании.",
+        "en": "System analyst with additional responsibilities across backend architecture, full-stack delivery, and QA for internal products."
+      },
+      "status": "published"
+    },
+    {
+      "id": "lateco-practice",
+      "company": {
+        "ru": "Латеко, производственная практика",
+        "en": "Lateco internship practice"
+      },
+      "role": {
+        "ru": "Участие в разработке целевой архитектуры и детального плана цифровой трансформации для единой IT-компании холдинга.",
+        "en": "Worked on target architecture and a detailed transformation roadmap for a unified IT company across a holding structure."
+      },
+      "status": "published"
+    }
+  ],
+  "projects": [
+    {
+      "id": "fillusion",
+      "slug": "fillusion",
+      "featured": true,
+      "status": "active",
+      "title": {
+        "ru": "Fillusion",
+        "en": "Fillusion"
+      },
+      "summary": {
+        "ru": "Платформа автозаполнения и редактирования баз данных с AI и Faker: микросервисная архитектура, gRPC, Kafka, backend-функциональность, Docker Compose, CI/CD и Nginx.",
+        "en": "AI-assisted database autofill and editing platform combining microservices, gRPC, Kafka, backend delivery, Docker Compose, CI/CD, and Nginx."
+      },
+      "technologies": [
+        "Go",
+        "Python",
+        "Java Spring",
+        "gRPC",
+        "Kafka",
+        "Docker Compose",
+        "CI/CD",
+        "Nginx"
+      ],
+      "links": []
+    },
+    {
+      "id": "flexi-kanban",
+      "slug": "flexi-kanban",
+      "featured": true,
+      "status": "active",
+      "title": {
+        "ru": "FlexiKanban",
+        "en": "FlexiKanban"
+      },
+      "summary": {
+        "ru": "Веб-сервис для управления проектами: Kanban-доски, задачи, чаты и уведомления с backend-архитектурой, админ-панелью, интеграциями и несколькими моделями данных.",
+        "en": "Project management platform with Kanban boards, tasks, chats, and notifications built around backend architecture, admin tooling, integrations, and multi-database modeling."
+      },
+      "technologies": [
+        "Go",
+        "Python",
+        "Java Spring",
+        "Kanban",
+        "Admin UI",
+        "API design",
+        "Security"
+      ],
+      "links": []
+    },
+    {
+      "id": "split-app",
+      "slug": "split-app",
+      "featured": true,
+      "status": "active",
+      "title": {
+        "ru": "Split-app",
+        "en": "Split-app"
+      },
+      "summary": {
+        "ru": "Telegram-приложение для разделения и оплаты счетов с доработкой PostgreSQL-поднагрузку, развитием backend-логики на Python и призовыми результатами на The Open League.",
+        "en": "Telegram-based bill splitting app with PostgreSQL redesign for higher load, Python backend evolution, and award-winning results in The Open League."
+      },
+      "technologies": [
+        "Python",
+        "PostgreSQL",
+        "Telegram",
+        "Performance tuning"
+      ],
+      "links": [
+        {
+          "kind": "demo",
+          "label": {
+            "ru": "Telegram-бот",
+            "en": "Telegram bot"
+          },
+          "href": "https://t.me/SplitAppTg_bot"
+        }
+      ]
+    },
+    {
+      "id": "twirly-quirly",
+      "slug": "twirly-quirly",
+      "featured": false,
+      "status": "active",
+      "title": {
+        "ru": "Twirly-Quirly",
+        "en": "Twirly-Quirly"
+      },
+      "summary": {
+        "ru": "Маркетплейс с рейтинговой системой продавцов, где зона ответственности охватывала бизнес-требования, пользовательские сценарии и QA-проверку функциональности.",
+        "en": "Marketplace with a seller rating system where the scope covered business requirements, user scenarios, and QA validation."
+      },
+      "technologies": [
+        "System analysis",
+        "QA",
+        "User scenarios",
+        "Product requirements"
+      ],
+      "links": []
+    },
+    {
+      "id": "highload-ozon",
+      "slug": "highload-ozon",
+      "featured": false,
+      "status": "active",
+      "title": {
+        "ru": "Highload Ozon",
+        "en": "Highload Ozon"
+      },
+      "summary": {
+        "ru": "Учебное проектирование высоконагруженного интернет-магазина: MAU/DAU, RPS, сетевой трафик, балансировка, модели БД, шардирование, кэширование и отказоустойчивость.",
+        "en": "Highload e-commerce architecture study covering MAU/DAU, RPS, traffic budgeting, balancing, database design, sharding, caching, and resilience."
+      },
+      "technologies": [
+        "Highload",
+        "Sharding",
+        "Caching",
+        "Architecture",
+        "Database design"
+      ],
+      "links": [
+        {
+          "kind": "repository",
+          "label": {
+            "ru": "GitHub",
+            "en": "GitHub"
+          },
+          "href": "https://github.com/KurenkovDmitry/highload-ozon"
+        }
+      ]
+    },
+    {
+      "id": "kanban-board-register",
+      "slug": "kanban-board-register",
+      "featured": false,
+      "status": "active",
+      "title": {
+        "ru": "Канбан-доска",
+        "en": "Kanban board"
+      },
+      "summary": {
+        "ru": "Зарегистрированная программа для ЭВМ с backend на Java/Spring, frontend на JavaScript, совместной работой и встроенными методами анализа MoSCoW и Kano.",
+        "en": "Registered software product with Java/Spring backend, JavaScript frontend, collaboration workflows, and embedded MoSCoW and Kano analysis methods."
+      },
+      "technologies": [
+        "Java",
+        "Spring",
+        "JavaScript",
+        "MoSCoW",
+        "Kano"
+      ],
+      "links": []
+    },
+    {
+      "id": "oxic-marketplace",
+      "slug": "oxic-marketplace",
+      "featured": false,
+      "status": "active",
+      "title": {
+        "ru": "OXIC",
+        "en": "OXIC"
+      },
+      "summary": {
+        "ru": "Маркетплейс с frontend-фокусом на TypeScript, участием в backend на Go, UI-дизайном в Figma и базовой серверной конфигурацией для деплоя через Nginx.",
+        "en": "Marketplace project with a TypeScript-heavy frontend, Go backend contribution, Figma UI design, and foundational Nginx deployment setup."
+      },
+      "technologies": [
+        "TypeScript",
+        "Go",
+        "Figma",
+        "Nginx"
+      ],
+      "links": [
+        {
+          "kind": "repository",
+          "label": {
+            "ru": "Frontend",
+            "en": "Frontend"
+          },
+          "href": "https://github.com/frontend-park-mail-ru/2024_2_kotyari"
+        },
+        {
+          "kind": "repository",
+          "label": {
+            "ru": "Backend",
+            "en": "Backend"
+          },
+          "href": "https://github.com/go-park-mail-ru/2024_2_kotyari"
+        }
+      ]
+    }
+  ],
+  "skills": {
+    "focusAreas": [
+      "System analysis",
+      "Highload architecture",
+      "Microservices",
+      "Backend platform engineering",
+      "Admin panels",
+      "Data modeling",
+      "CI/CD"
+    ]
+  },
+  "themes": {
+    "active": "engineering-blueprint",
+    "available": [
+      {
+        "id": "engineering-blueprint",
+        "label": {
+          "ru": "Инженерный blueprint",
+          "en": "Engineering blueprint"
+        }
+      },
+      {
+        "id": "papyrus-scroll",
+        "label": {
+          "ru": "Папирусный свиток",
+          "en": "Papyrus scroll"
+        }
+      }
+    ]
+  },
+  "localization": {
+    "defaultLocale": "en",
+    "supportedLocales": [
+      "en",
+      "ru"
+    ],
+    "autoDetectByRegion": {
+      "RU": "ru"
+    }
+  },
+  "accessibility": {
+    "speechSynthesisEnabled": true,
+    "highContrastModeEnabled": true,
+    "reducedMotionPresetEnabled": true
+  },
+  "legal": {
+    "analyticsConsent": {
+      "version": "2026-08-05",
+      "modalTitle": {
+        "ru": "Согласие на обезличенную аналитику",
+        "en": "Consent for anonymous analytics"
+      },
+      "modalBodyMarkdown": {
+        "ru": "Сайт собирает только обезличенные агрегированные события по просмотрам, кликам и сеансам без привязки к личности и постоянному идентификатору устройства.",
+        "en": "The site stores only anonymous aggregated events about views, clicks, and sessions without tying them to identity or a permanent device identifier."
+      },
+      "acceptButtonLabel": {
+        "ru": "Продолжить и согласиться",
+        "en": "Continue and agree"
+      },
+      "rejectButtonLabel": {
+        "ru": "Отказаться и закрыть сайт",
+        "en": "Decline and close site"
+      }
+    }
+  },
+  "seo": {
+    "siteName": {
+      "ru": "Портфолио Дмитрия Куренкова",
+      "en": "Dmitry Kurenkov Portfolio"
+    },
+    "openGraphImage": "/media/photo_2025-04-09_22-18-09.jpg"
+  }
+}

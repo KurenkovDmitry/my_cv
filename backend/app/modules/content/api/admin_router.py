@@ -46,6 +46,9 @@ def _map_backup_response_item(backup_item: BackupArtifactRecord) -> BackupArtifa
 def _resolve_actor_login(request: Request) -> str:
     """Возвращает человекочитаемый логин актора до подключения полноценной auth-схемы."""
 
+    if hasattr(request.state, "admin_login") and request.state.admin_login:
+        return request.state.admin_login
+
     return request.headers.get("X-Admin-Actor", "admin-ui")
 
 

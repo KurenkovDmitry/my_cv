@@ -10,6 +10,7 @@ from app.database.session import get_read_database_session, get_write_database_s
 from app.modules.content.infrastructure.sqlalchemy_repository import SqlAlchemyContentRepository
 from app.modules.system.application.admin_service import SystemAdminService
 from app.modules.system.application.compare_service import SystemCompareService
+from app.modules.system.application.resume_import_converter import ResumeImportConverter
 from app.modules.system.application.service import SystemService
 from app.modules.system.domain.diff_engine import ContentDiffEngine
 from app.modules.system.domain.storage import BackupBundleStorage, ImportCandidateStorage
@@ -42,6 +43,13 @@ def get_content_diff_engine() -> ContentDiffEngine:
     """Возвращает singleton фасада native/Python compare engine."""
 
     return NativeContentDiffEngine()
+
+
+@lru_cache(maxsize=1)
+def get_resume_import_converter() -> ResumeImportConverter:
+    """Возвращает singleton-адаптер конвертации resume-like документов в `portfolio.v1`."""
+
+    return ResumeImportConverter(settings=get_settings())
 
 
 def get_system_service(
@@ -83,6 +91,7 @@ def get_system_admin_service(
     write_database_session: AsyncSession = Depends(get_write_database_session),
     backup_bundle_storage: BackupBundleStorage = Depends(get_backup_bundle_storage),
     import_candidate_storage: ImportCandidateStorage = Depends(get_import_candidate_storage),
+    resume_import_converter: ResumeImportConverter = Depends(get_resume_import_converter),
 ) -> SystemAdminService:
     """Собирает system-admin service для backup/download/delete и import upload сценариев."""
 
@@ -92,4 +101,5 @@ def get_system_admin_service(
         system_repository=SqlAlchemySystemRepository(database_session=write_database_session),
         backup_storage=backup_bundle_storage,
         import_candidate_storage=import_candidate_storage,
+        resume_import_converter=resume_import_converter,
     )

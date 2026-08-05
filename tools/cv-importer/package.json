@@ -1,0 +1,12 @@
+{
+  "name": "@portfolio/cv-importer",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Layered resume importer/exporter for portfolio.v1 with Python orchestration and native C++ PDF extraction.",
+  "scripts": {
+    "build:native:configure": "cmake -S ./native -B ./native/build",
+    "build:native": "cmake --build ./native/build --config Release",
+    "convert:source": "python -m portfolio_cv_importer.api.cli.convert_source_to_portfolio",
+    "export:document": "python -m portfolio_cv_importer.api.cli.export_portfolio_document"
+  }
+}

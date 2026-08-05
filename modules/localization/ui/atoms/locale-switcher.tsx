@@ -14,23 +14,23 @@ export function LocaleSwitcher({
   availableLocales,
   onLocaleChange,
 }: LocaleSwitcherProps) {
-  return (
-    <div className="locale-switcher" role="group" aria-label="Language switcher">
-      {availableLocales.map((localeOption) => {
-        const isActive = localeOption.code === currentLocale;
+  const switcherLabel = currentLocale === "ru" ? "Язык" : "Language";
 
-        return (
-          <button
-            key={localeOption.code}
-            className={`locale-switcher__button${isActive ? " locale-switcher__button--active" : ""}`}
-            type="button"
-            onClick={() => onLocaleChange(localeOption.code)}
-            aria-pressed={isActive}
-          >
+  return (
+    <label className="locale-switcher">
+      <span className="locale-switcher__label">{switcherLabel}</span>
+      <select
+        className="locale-switcher__select"
+        value={currentLocale}
+        onChange={(event) => onLocaleChange(event.target.value as LocaleCode)}
+        aria-label={switcherLabel}
+      >
+        {availableLocales.map((localeOption) => (
+          <option key={localeOption.code} value={localeOption.code}>
             {localeOption.label}
-          </button>
-        );
-      })}
-    </div>
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

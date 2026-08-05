@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.modules.content.domain.entities import PortfolioSnapshotRecord
 from app.modules.content.domain.repository import ContentAdminRepository
 from app.modules.system.application.bundle_payloads import extract_portfolio_payload
+from app.modules.system.application.resume_import_converter import ResumeImportConverter
 from app.modules.system.domain.entities import BackupArtifactRecord, ImportCandidateRecord
 from app.modules.system.domain.repository import SystemAdminRepository
 from app.modules.system.domain.storage import BackupBundleStorage, ImportCandidateStorage
@@ -27,12 +28,14 @@ class SystemAdminService:
         system_repository: SystemAdminRepository,
         backup_storage: BackupBundleStorage,
         import_candidate_storage: ImportCandidateStorage,
+        resume_import_converter: ResumeImportConverter,
     ) -> None:
         self._database_session = database_session
         self._content_repository = content_repository
         self._system_repository = system_repository
         self._backup_storage = backup_storage
         self._import_candidate_storage = import_candidate_storage
+        self._resume_import_converter = resume_import_converter
 
     async def create_backup_artifact(
         self,
@@ -141,18 +144,28 @@ class SystemAdminService:
         stored_candidate_document = None
 
         try:
-            parsed_document = json.loads(document_bytes.decode("utf-8"))
-            if not isinstance(parsed_document, dict):
-                raise ValueError("Import candidate must be a JSON object.")
-
-            candidate_payload = extract_portfolio_payload(dict(parsed_document))
-            review_summary = _build_review_summary(candidate_payload)
-            warning_messages = _build_warning_messages(candidate_payload)
-            parse_status = "warning" if warning_messages else "parsed"
-
-            stored_candidate_document = await self._import_candidate_storage.write_candidate_document(
+            candidate_payload, source_type = await self._resume_import_converter.convert_to_portfolio_payload(
                 source_file_name=source_file_name,
                 document_bytes=document_bytes,
+            )
+            review_summary = _build_review_summary(
+                candidate_payload,
+                source_type=source_type,
+                source_file_name=source_file_name,
+            )
+            warning_messages = _build_warning_messages(candidate_payload)
+            parse_status = "warning" if warning_messages else "parsed"
+            normalized_candidate_document_bytes = json.dumps(
+                candidate_payload,
+                ensure_ascii=False,
+                sort_keys=True,
+                indent=2,
+            ).encode("utf-8")
+            normalized_candidate_file_name = _build_normalized_candidate_file_name(source_file_name)
+
+            stored_candidate_document = await self._import_candidate_storage.write_candidate_document(
+                source_file_name=normalized_candidate_file_name,
+                document_bytes=normalized_candidate_document_bytes,
             )
             created_import_candidate = await self._system_repository.create_import_candidate(
                 storage_disk=stored_candidate_document.storage_disk,
@@ -167,8 +180,9 @@ class SystemAdminService:
                 created_import_candidate.import_candidate_id,
                 last_import_status=parse_status,
                 source_metadata_patch={
-                    "lastSourceType": "import_bundle",
+                    "lastSourceType": source_type,
                     "lastSourceFilename": source_file_name,
+                    "normalizedCandidateFileName": normalized_candidate_file_name,
                     "warnings": warning_messages,
                 },
             )
@@ -187,6 +201,7 @@ class SystemAdminService:
                 metadata={
                     "checksumSha256": created_import_candidate.checksum_sha256,
                     "contentSchemaVersion": created_import_candidate.content_schema_version,
+                    "sourceType": source_type,
                 },
             )
             await self._database_session.commit()
@@ -234,6 +249,8 @@ class SystemAdminService:
         )
         import_status = "applied_full" if replace_mode == "full_replace" else "applied_partial"
         warning_messages = _build_warning_messages(candidate_payload)
+        source_type = import_candidate_record.review_summary.get("sourceType")
+        source_file_name = import_candidate_record.review_summary.get("sourceFileName")
 
         try:
             created_backup = await self._create_backup_from_snapshot_record(
@@ -255,8 +272,12 @@ class SystemAdminService:
                 last_import_status=import_status,
                 last_imported_at=occurred_at,
                 source_metadata_patch={
-                    "lastSourceType": "import_bundle",
-                    "lastSourceFilename": Path(import_candidate_record.storage_path).name,
+                    "lastSourceType": source_type if isinstance(source_type, str) and source_type else "import_bundle",
+                    "lastSourceFilename": (
+                        source_file_name
+                        if isinstance(source_file_name, str) and source_file_name
+                        else Path(import_candidate_record.storage_path).name
+                    ),
                     "lastAppliedImportCandidateId": import_candidate_id,
                     "manualOverrides": [] if replace_mode == "full_replace" else applied_sections,
                     "warnings": warning_messages,
@@ -384,7 +405,12 @@ def _build_warning_messages(candidate_payload: dict[str, object]) -> list[str]:
     return warning_messages
 
 
-def _build_review_summary(candidate_payload: dict[str, object]) -> dict[str, object]:
+def _build_review_summary(
+    candidate_payload: dict[str, object],
+    *,
+    source_type: str,
+    source_file_name: str,
+) -> dict[str, object]:
     """Строит компактный review summary для staged import candidate."""
 
     warning_messages = _build_warning_messages(candidate_payload)
@@ -398,7 +424,16 @@ def _build_review_summary(candidate_payload: dict[str, object]) -> dict[str, obj
         "replaceableSections": replaceable_sections,
         "warningsCount": len(warning_messages),
         "canReplaceFully": bool(replaceable_sections),
+        "sourceType": source_type,
+        "sourceFileName": source_file_name,
     }
+
+
+def _build_normalized_candidate_file_name(source_file_name: str) -> str:
+    """Строит имя нормализованного import candidate JSON с сохранением source stem."""
+
+    source_stem = Path(source_file_name).stem or "import-candidate"
+    return f"{source_stem}.portfolio.v1.json"
 
 
 def _pick_string_list(value: object) -> list[str]:

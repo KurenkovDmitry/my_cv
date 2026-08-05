@@ -1,4 +1,6 @@
 export type {
+  AdminLoginRequest,
+  AdminSessionResponse,
   AdminContentStateResponse,
   AdminPublishResponse,
   AnalyticsSummaryResponse,

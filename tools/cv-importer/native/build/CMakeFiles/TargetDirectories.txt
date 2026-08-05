@@ -1,0 +1,4 @@
+C:/Users/DimaK/Desktop/Arbiten/cv/my_cv/tools/cv-importer/native/build/CMakeFiles/portfolio_cv_importer_native.dir
+C:/Users/DimaK/Desktop/Arbiten/cv/my_cv/tools/cv-importer/native/build/CMakeFiles/portfolio_cv_pdf_extract.dir
+C:/Users/DimaK/Desktop/Arbiten/cv/my_cv/tools/cv-importer/native/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/DimaK/Desktop/Arbiten/cv/my_cv/tools/cv-importer/native/build/CMakeFiles/ZERO_CHECK.dir

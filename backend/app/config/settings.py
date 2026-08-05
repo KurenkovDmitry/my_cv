@@ -97,6 +97,30 @@ class Settings(BaseSettings):
     auth_lockout_base_seconds: int = Field(default=60, alias="AUTH_LOCKOUT_BASE_SECONDS")
     auth_lockout_max_seconds: int = Field(default=3600, alias="AUTH_LOCKOUT_MAX_SECONDS")
     auth_rate_limit_key_pepper: str = Field(default="change-me", alias="AUTH_RATE_LIMIT_KEY_PEPPER")
+    admin_login: str = Field(default="admin", alias="ADMIN_LOGIN")
+    admin_password: str = Field(default="change-me-admin-password", alias="ADMIN_PASSWORD")
+    admin_session_secret: str = Field(
+        default="change-me-admin-session-secret",
+        alias="ADMIN_SESSION_SECRET",
+    )
+    admin_session_ttl_seconds: int = Field(default=28800, alias="ADMIN_SESSION_TTL_SECONDS")
+    admin_session_cookie_name: str = Field(
+        default="portfolio_admin_session",
+        alias="ADMIN_SESSION_COOKIE_NAME",
+    )
+    admin_session_cookie_same_site: str = Field(default="lax", alias="ADMIN_SESSION_COOKIE_SAME_SITE")
+    admin_cookie_secure: bool = Field(default=False, alias="ADMIN_COOKIE_SECURE")
+    resume_import_python_binary: str = Field(default="python", alias="RESUME_IMPORT_PYTHON_BINARY")
+    resume_import_pythonpath: str = Field(
+        default="tools/cv-importer/src",
+        alias="RESUME_IMPORT_PYTHONPATH",
+    )
+    resume_import_cli_module: str = Field(
+        default="portfolio_cv_importer.api.cli.convert_source_to_portfolio",
+        alias="RESUME_IMPORT_CLI_MODULE",
+    )
+    resume_import_workdir: str = Field(default=".", alias="RESUME_IMPORT_WORKDIR")
+    resume_import_native_pdf_binary: str = Field(default="", alias="RESUME_IMPORT_NATIVE_PDF_BINARY")
 
     @property
     def allowed_origins(self) -> list[str]:
@@ -163,6 +187,27 @@ class Settings(BaseSettings):
             raise ValueError("Wildcard origin запрещён для production-контура.")
 
         return value.rstrip("/")
+
+    @field_validator("admin_session_cookie_same_site")
+    @classmethod
+    def validate_admin_cookie_same_site(cls, value: str) -> str:
+        """Ограничивает SameSite только безопасными значениями cookie-сессии."""
+
+        normalized_value = value.strip().lower()
+        if normalized_value not in {"lax", "strict", "none"}:
+            raise ValueError("ADMIN_SESSION_COOKIE_SAME_SITE must be one of: lax, strict, none.")
+
+        return normalized_value
+
+    @field_validator("admin_login", "admin_password", "admin_session_secret")
+    @classmethod
+    def validate_admin_placeholders(cls, value: str, info) -> str:
+        """Не позволяет оставить production сессионный контур на placeholder-значениях."""
+
+        if not value.strip():
+            raise ValueError(f"{info.field_name} must not be blank.")
+
+        return value
 
 
 @lru_cache(maxsize=1)

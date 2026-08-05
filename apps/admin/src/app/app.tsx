@@ -1,4 +1,4 @@
-import { ChangeEvent, startTransition, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, startTransition, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import {
   adminAuditLogPreview,
   adminContentStatePreview,
@@ -9,6 +9,8 @@ import {
   runtimeHealthPreview,
 } from "@portfolio/shared-config";
 import type {
+  AdminLoginRequest,
+  AdminSessionResponse,
   AdminAuditLogEntry,
   AdminContentStateSnapshot,
   AnalyticsDashboardSnapshot,
@@ -34,6 +36,13 @@ import {
   saveDraftSnapshot,
   uploadImportCandidate,
 } from "./admin-dashboard-http-client";
+import {
+  ADMIN_AUTH_EXPIRED_EVENT,
+  AdminUnauthorizedError,
+  fetchCurrentAdminSession,
+  loginToAdminPanel,
+  logoutFromAdminPanel,
+} from "./admin-auth-http-client";
 
 type DashboardSourceKind = "live_api" | "preview_fallback";
 
@@ -96,6 +105,14 @@ function mergeCandidateSelections(
  * backup registry, service-state, health и audit log.
  */
 export function App() {
+  const [adminSession, setAdminSession] = useState<AdminSessionResponse | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [isAuthResolved, setIsAuthResolved] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [loginRequest, setLoginRequest] = useState<AdminLoginRequest>({
+    login: "admin",
+    password: "",
+  });
   const [draftContent, setDraftContent] = useState<PortfolioContent>(() =>
     structuredClone(portfolioPreviewContent),
   );
@@ -179,19 +196,80 @@ export function App() {
 
     void (async () => {
       try {
+        const currentAdminSession = await fetchCurrentAdminSession(abortController.signal);
+        if (abortController.signal.aborted) {
+          return;
+        }
+
+        setAdminSession(currentAdminSession);
         await loadDashboardData(abortController.signal);
       } catch (error) {
         if (abortController.signal.aborted) {
           return;
         }
 
+        if (error instanceof AdminUnauthorizedError) {
+          setAdminSession(null);
+          setAuthError(null);
+          setIsAuthResolved(true);
+          return;
+        }
+
         setDashboardSource("preview_fallback");
         setDashboardLoadError(error instanceof Error ? error.message : "Unknown admin dashboard loading error.");
+      } finally {
+        if (!abortController.signal.aborted) {
+          setIsAuthResolved(true);
+        }
       }
     })();
 
     return () => abortController.abort();
   }, []);
+
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      setAdminSession(null);
+      setAuthError("Сессия администратора истекла. Войдите повторно.");
+      setIsAuthResolved(true);
+    };
+
+    window.addEventListener(ADMIN_AUTH_EXPIRED_EVENT, handleAuthExpired);
+    return () => window.removeEventListener(ADMIN_AUTH_EXPIRED_EVENT, handleAuthExpired);
+  }, []);
+
+  const handleAdminLogin = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    try {
+      setIsAuthenticating(true);
+      setAuthError(null);
+      const nextAdminSession = await loginToAdminPanel(loginRequest);
+      setAdminSession(nextAdminSession);
+      await loadDashboardData();
+    } catch (error) {
+      if (error instanceof AdminUnauthorizedError) {
+        setAuthError("Логин или пароль администратора неверны.");
+      } else {
+        setAuthError(error instanceof Error ? error.message : "Не удалось выполнить вход в админку.");
+      }
+    } finally {
+      setIsAuthenticating(false);
+      setIsAuthResolved(true);
+    }
+  };
+
+  const handleAdminLogout = async () => {
+    try {
+      await logoutFromAdminPanel();
+    } finally {
+      setAdminSession(null);
+      setLoginRequest((currentRequest) => ({
+        ...currentRequest,
+        password: "",
+      }));
+    }
+  };
 
   const updateProfileField = (
     fieldName: "displayName" | "headline" | "summary",
@@ -525,6 +603,72 @@ export function App() {
     }
   };
 
+  if (!isAuthResolved) {
+    return (
+      <div className="admin-auth-shell">
+        <section className="admin-auth-card">
+          <p className="admin-auth-card__eyebrow">Admin access</p>
+          <h1 className="admin-auth-card__title">Проверяю административную сессию</h1>
+          <p className="admin-auth-card__description">
+            Панель ждёт подтверждения входа, прежде чем открывать контент, импорт и аудит.
+          </p>
+        </section>
+      </div>
+    );
+  }
+
+  if (!adminSession) {
+    return (
+      <div className="admin-auth-shell">
+        <section className="admin-auth-card">
+          <p className="admin-auth-card__eyebrow">Admin access</p>
+          <h1 className="admin-auth-card__title">Вход в административную панель</h1>
+          <p className="admin-auth-card__description">
+            Доступ к публикации, импортам, бэкапам и аналитике открыт только после входа по данным из `.env`.
+          </p>
+          <form className="admin-auth-form" onSubmit={(event) => void handleAdminLogin(event)}>
+            <label className="admin-field">
+              <span>Логин</span>
+              <input
+                type="text"
+                autoComplete="username"
+                value={loginRequest.login}
+                onChange={(event) =>
+                  setLoginRequest((currentRequest) => ({
+                    ...currentRequest,
+                    login: event.target.value,
+                  }))
+                }
+              />
+            </label>
+            <label className="admin-field">
+              <span>Пароль</span>
+              <input
+                type="password"
+                autoComplete="current-password"
+                value={loginRequest.password}
+                onChange={(event) =>
+                  setLoginRequest((currentRequest) => ({
+                    ...currentRequest,
+                    password: event.target.value,
+                  }))
+                }
+              />
+            </label>
+            {authError ? <div className="admin-runtime-alert">{authError}</div> : null}
+            <button
+              type="submit"
+              className="admin-button admin-button--primary"
+              disabled={isAuthenticating || !loginRequest.login || !loginRequest.password}
+            >
+              {isAuthenticating ? "Выполняю вход..." : "Войти в админку"}
+            </button>
+          </form>
+        </section>
+      </div>
+    );
+  }
+
   const contentStateWarnings = pickStringArray(contentState.sourceMetadata.warnings);
   const contentStateOverrides = pickStringArray(contentState.sourceMetadata.manualOverrides);
 
@@ -541,6 +685,10 @@ export function App() {
           </p>
         </div>
         <div className="admin-hero__actions">
+          <div className="admin-session-pill">
+            <span>{adminSession.login}</span>
+            <strong>до {formatDateTime(adminSession.expiresAt)}</strong>
+          </div>
           <button
             type="button"
             className="admin-button admin-button--primary"
@@ -564,6 +712,9 @@ export function App() {
             Загрузить draft
             <input type="file" accept="application/json" hidden onChange={handleDraftImport} />
           </label>
+          <button type="button" className="admin-button admin-button--ghost" onClick={() => void handleAdminLogout()}>
+            Выйти
+          </button>
         </div>
       </header>
 
@@ -913,7 +1064,7 @@ export function App() {
               {isUploadingImportCandidate ? "Загружаю candidate..." : "Загрузить candidate"}
               <input
                 type="file"
-                accept="application/json"
+                accept="application/json,.json,application/pdf,.pdf,text/markdown,.md,text/plain,.txt,text/html,.html,.htm"
                 hidden
                 disabled={isUploadingImportCandidate || Boolean(busyImportActionKey)}
                 onChange={handleImportCandidateUpload}

@@ -1,0 +1,10 @@
+^C:\USERS\DIMAK\DESKTOP\ARBITEN\CV\MY_CV\TOOLS\CV-IMPORTER\NATIVE\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/DimaK/Desktop/Arbiten/cv/my_cv/tools/cv-importer/native -BC:/Users/DimaK/Desktop/Arbiten/cv/my_cv/tools/cv-importer/native/build --check-stamp-file C:/Users/DimaK/Desktop/Arbiten/cv/my_cv/tools/cv-importer/native/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

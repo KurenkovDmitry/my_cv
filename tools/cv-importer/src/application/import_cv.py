@@ -1,28 +1,26 @@
-"""Application-layer entrypoint для импорта резюме."""
+"""Совместимый entrypoint старого import_cv сценария."""
 
-from dataclasses import dataclass
 from pathlib import Path
 
+from portfolio_cv_importer.application.commands import ConvertSourceToPortfolioCommand
+from portfolio_cv_importer.application.service import CvImportExportService
 
-@dataclass(slots=True, frozen=True)
+
 class ImportCvCommand:
-    """Команда импорта резюме в draft-формат."""
+    """Команда импорта резюме в raw `portfolio.v1`."""
 
-    source_path: Path
-    target_directory: Path
+    def __init__(self, source_path: Path, target_directory: Path) -> None:
+        self.source_path = source_path
+        self.target_directory = target_directory
 
 
 def import_cv(command: ImportCvCommand) -> None:
-    """Заглушка будущего сценария импорта.
+    """Совместимый фасад поверх нового Python import/export пайплайна."""
 
-    Реальная реализация должна:
-    1. определить адаптер по типу файла;
-    2. извлечь текст;
-    3. распознать секции;
-    4. сформировать draft и report;
-    5. не публиковать данные автоматически.
-    """
-
-    _ = command
-    raise NotImplementedError("CV importer will be implemented after Python runtime setup.")
-
+    target_path = command.target_directory / f"{command.source_path.stem}.portfolio.v1.json"
+    CvImportExportService().convert_source_to_portfolio(
+        ConvertSourceToPortfolioCommand(
+            source_path=command.source_path,
+            target_path=target_path,
+        ),
+    )

@@ -6,6 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config.settings import get_settings
 from app.middleware.request_context import RequestContextMiddleware
 from app.modules.analytics.api.router import router as analytics_router
+from app.modules.authentication.api.admin_guard_middleware import AdminGuardMiddleware
+from app.modules.authentication.api.router import router as authentication_router
 from app.modules.content.api.admin_router import router as admin_content_router
 from app.modules.content.api.router import router as content_router
 from app.modules.localization.api.router import router as localization_router
@@ -34,6 +36,7 @@ def create_app() -> FastAPI:
         allow_headers=settings.allowed_headers,
     )
     application.add_middleware(RequestContextMiddleware)
+    application.add_middleware(AdminGuardMiddleware)
 
     @application.get("/health/live", tags=["system"])
     async def live_healthcheck() -> dict[str, str]:
@@ -46,6 +49,7 @@ def create_app() -> FastAPI:
     application.include_router(localization_router, prefix="/api/public")
     application.include_router(content_router, prefix="/api/public")
     application.include_router(analytics_router, prefix="/api/public")
+    application.include_router(authentication_router, prefix="/api/admin")
     application.include_router(admin_content_router, prefix="/api/admin")
     application.include_router(analytics_router, prefix="/api/admin")
     application.include_router(system_router, prefix="/api/admin")

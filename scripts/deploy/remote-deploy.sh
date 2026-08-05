@@ -33,6 +33,17 @@ run_root() {
   fi
 }
 
+update_release_link() {
+  link_path="$1"
+  target_path="$2"
+
+  if run_root test -d "${link_path}" && ! run_root test -L "${link_path}"; then
+    run_root rm -rf "${link_path}"
+  fi
+
+  run_root ln -sfn "${target_path}" "${link_path}"
+}
+
 cleanup_release_directories() {
   if [ ! -d "${DEPLOY_ROOT}/app/releases" ]; then
     return
@@ -147,7 +158,7 @@ run_root mkdir -p "${DEPLOY_ROOT}/app/releases" "${DEPLOY_ROOT}/config" "${DEPLO
 run_root rm -rf "${RELEASE_DIR}"
 run_root mkdir -p "${RELEASE_DIR}"
 run_root tar -xzf "${BUNDLE_ARCHIVE}" -C "${RELEASE_DIR}"
-run_root ln -sfn "${RELEASE_DIR}" "${ATTEMPT_RELEASE_LINK}"
+update_release_link "${ATTEMPT_RELEASE_LINK}" "${RELEASE_DIR}"
 run_root chmod +x "${RELEASE_DIR}/scripts/deploy/"*.sh "${RELEASE_DIR}/scripts/postgres/"*.sh
 
 ensure_server_identity
@@ -214,7 +225,7 @@ ENABLE_HTTPS=false docker_compose run --rm certbot certonly \
 ENABLE_HTTPS=true docker_compose up -d --force-recreate --remove-orphans api nginx
 wait_for_http "https://${TARGET_DOMAIN_NAME}/" --resolve "${TARGET_DOMAIN_NAME}:443:127.0.0.1"
 
-run_root ln -sfn "${RELEASE_DIR}" "${CURRENT_RELEASE_LINK}"
+update_release_link "${CURRENT_RELEASE_LINK}" "${RELEASE_DIR}"
 sh "${RELEASE_DIR}/scripts/deploy/install-cert-renew-timer.sh" "${DEPLOY_ROOT}"
 cleanup_runtime_artifacts
 

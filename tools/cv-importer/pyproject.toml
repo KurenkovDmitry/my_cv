@@ -1,20 +1,20 @@
 [project]
 name = "portfolio-cv-importer"
 version = "0.1.0"
-description = "CV importer that prepares portfolio.import.draft.yaml."
+description = "CV importer and exporter that converts resume-like documents into portfolio.v1."
 requires-python = ">=3.13,<3.14"
-dependencies = [
-  "pydantic>=2.9,<3.0",
-  "pydantic-settings>=2.6,<3.0",
-  "python-docx>=1.1,<2.0",
-  "pypdf>=5.0,<6.0",
-  "beautifulsoup4>=4.12,<5.0",
-  "markdown>=3.7,<4.0"
-]
+dependencies = []
 
-[project.optional-dependencies]
-ocr = [
-  "pillow>=10.4,<11.0",
-  "pytesseract>=0.3.13,<1.0"
-]
+[project.scripts]
+portfolio-cv-convert = "portfolio_cv_importer.api.cli.convert_source_to_portfolio:main"
+portfolio-cv-export = "portfolio_cv_importer.api.cli.export_portfolio_document:main"
 
+[build-system]
+requires = ["setuptools>=70.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

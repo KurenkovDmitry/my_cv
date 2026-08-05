@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\DimaK\Desktop\Arbiten\cv\my_cv\tools\cv-importer\native\build\CMakeFiles\649b2d2d4d5f044b23a601bb334ef057\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{8198522E-493A-36E3-97B4-8A0782EFD16D}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
