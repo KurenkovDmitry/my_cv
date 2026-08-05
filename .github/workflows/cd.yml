@@ -8,6 +8,11 @@ on:
         required: true
         default: false
         type: boolean
+      recreate_stateful_services:
+        description: "Allow explicit recreation of postgres and redis containers."
+        required: true
+        default: false
+        type: boolean
       git_ref:
         description: "Git ref to deploy manually."
         required: false
@@ -66,6 +71,7 @@ jobs:
           echo "ADMIN_BASE_PATH=${ADMIN_BASE_PATH:-/admin/}" >> "$GITHUB_ENV"
           echo "VITE_DYNAMIC_BACKDROP=${VITE_DYNAMIC_BACKDROP:-true}" >> "$GITHUB_ENV"
           echo "BOOTSTRAP_SERVER=${{ github.event_name == 'workflow_dispatch' && inputs.bootstrap_server || 'false' }}" >> "$GITHUB_ENV"
+          echo "RECREATE_STATEFUL_SERVICES=${{ github.event_name == 'workflow_dispatch' && inputs.recreate_stateful_services || 'false' }}" >> "$GITHUB_ENV"
 
       - name: Configure SSH
         shell: bash
@@ -107,11 +113,12 @@ jobs:
           chmod 600 ~/.ssh/config
 
       - name: Build API image
-        run: docker build -f backend/Dockerfile -t "portfolio-api:${RELEASE_SHA}" .
+        run: docker build -f backend/Dockerfile --build-arg "RELEASE_SHA=${RELEASE_SHA}" -t "portfolio-api:${RELEASE_SHA}" .
 
       - name: Build Nginx image
         run: |
           docker build -f infrastructure/nginx/Dockerfile \
+            --build-arg "RELEASE_SHA=${RELEASE_SHA}" \
             --build-arg "VITE_PUBLIC_API_BASE_URL=https://${PRODUCTION_DOMAIN}/api/public" \
             --build-arg "VITE_ADMIN_API_BASE_URL=https://${PRODUCTION_DOMAIN}/api/admin" \
             --build-arg "VITE_ENABLE_DYNAMIC_BACKDROP=${VITE_DYNAMIC_BACKDROP}" \
@@ -148,6 +155,7 @@ jobs:
             printf 'TARGET_DOMAIN_NAME=%q\n' "${PRODUCTION_DOMAIN}"
             printf 'TARGET_LETSENCRYPT_EMAIL=%q\n' "${LETSENCRYPT_EMAIL}"
             printf 'BOOTSTRAP_SERVER=%q\n' "${BOOTSTRAP_SERVER}"
+            printf 'RECREATE_STATEFUL_SERVICES=%q\n' "${RECREATE_STATEFUL_SERVICES}"
             printf 'BUNDLE_ARCHIVE=%q\n' "/tmp/portfolio-deploy-bundle-${RELEASE_SHA}.tar.gz"
             printf 'API_IMAGE_ARCHIVE=%q\n' "/tmp/portfolio-api-${RELEASE_SHA}.tar.gz"
             printf 'NGINX_IMAGE_ARCHIVE=%q\n' "/tmp/portfolio-web-nginx-${RELEASE_SHA}.tar.gz"

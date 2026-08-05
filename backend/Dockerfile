@@ -1,5 +1,11 @@
 FROM python:3.13-slim
 
+ARG RELEASE_SHA=dev
+
+LABEL org.opencontainers.image.title="portfolio-api" \
+      org.opencontainers.image.revision="${RELEASE_SHA}" \
+      org.opencontainers.image.description="Portfolio FastAPI application image."
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1

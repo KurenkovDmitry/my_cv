@@ -7,6 +7,7 @@ DEPLOY_SERVER_ID="${DEPLOY_SERVER_ID:?DEPLOY_SERVER_ID is required}"
 TARGET_DOMAIN_NAME="${TARGET_DOMAIN_NAME:?TARGET_DOMAIN_NAME is required}"
 TARGET_LETSENCRYPT_EMAIL="${TARGET_LETSENCRYPT_EMAIL:-}"
 BOOTSTRAP_SERVER="${BOOTSTRAP_SERVER:-false}"
+RECREATE_STATEFUL_SERVICES="${RECREATE_STATEFUL_SERVICES:-false}"
 BUNDLE_ARCHIVE="${BUNDLE_ARCHIVE:-/tmp/portfolio-deploy-bundle-${RELEASE_SHA}.tar.gz}"
 API_IMAGE_ARCHIVE="${API_IMAGE_ARCHIVE:-/tmp/portfolio-api-${RELEASE_SHA}.tar.gz}"
 NGINX_IMAGE_ARCHIVE="${NGINX_IMAGE_ARCHIVE:-/tmp/portfolio-web-nginx-${RELEASE_SHA}.tar.gz}"
@@ -173,7 +174,11 @@ run_root sh -c "gunzip -c '${NGINX_IMAGE_ARCHIVE}' | docker load"
 run_root docker tag "portfolio-api:${RELEASE_SHA}" portfolio-api:current
 run_root docker tag "portfolio-web-nginx:${RELEASE_SHA}" portfolio-web-nginx:current
 
-docker_compose up -d --remove-orphans postgres redis
+if [ "${RECREATE_STATEFUL_SERVICES}" = "true" ]; then
+  docker_compose up -d --force-recreate postgres redis
+else
+  docker_compose up -d --no-recreate postgres redis
+fi
 
 attempt=1
 while [ "${attempt}" -le 30 ]; do
@@ -192,7 +197,7 @@ fi
 docker_compose exec -T postgres sh /docker-entrypoint-initdb.d/00-bootstrap-app-roles.sh
 docker_compose run --rm api sh /app/scripts/deploy/run-migrations.sh
 
-ENABLE_HTTPS=false docker_compose up -d --remove-orphans api nginx
+ENABLE_HTTPS=false docker_compose up -d --force-recreate --remove-orphans api nginx
 wait_for_http "http://127.0.0.1:8000/health/live"
 
 ENABLE_HTTPS=false docker_compose run --rm certbot certonly \
@@ -206,7 +211,7 @@ ENABLE_HTTPS=false docker_compose run --rm certbot certonly \
   --cert-name "${TARGET_DOMAIN_NAME}" \
   -d "${TARGET_DOMAIN_NAME}"
 
-ENABLE_HTTPS=true docker_compose up -d --remove-orphans api nginx
+ENABLE_HTTPS=true docker_compose up -d --force-recreate --remove-orphans api nginx
 wait_for_http "https://${TARGET_DOMAIN_NAME}/" --resolve "${TARGET_DOMAIN_NAME}:443:127.0.0.1"
 
 run_root ln -sfn "${RELEASE_DIR}" "${CURRENT_RELEASE_LINK}"

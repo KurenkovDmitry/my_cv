@@ -13,6 +13,7 @@ ARG VITE_PUBLIC_API_BASE_URL
 ARG VITE_ADMIN_API_BASE_URL
 ARG VITE_ENABLE_DYNAMIC_BACKDROP=true
 ARG VITE_ADMIN_BASE_PATH=/admin/
+ARG RELEASE_SHA=dev
 
 ENV VITE_PUBLIC_API_BASE_URL=${VITE_PUBLIC_API_BASE_URL}
 ENV VITE_ADMIN_API_BASE_URL=${VITE_ADMIN_API_BASE_URL}
@@ -25,6 +26,12 @@ ENV VITE_APP_BASE_PATH=${VITE_ADMIN_BASE_PATH}
 RUN npm run build
 
 FROM nginx:1.27-alpine
+
+ARG RELEASE_SHA=dev
+
+LABEL org.opencontainers.image.title="portfolio-web-nginx" \
+      org.opencontainers.image.revision="${RELEASE_SHA}" \
+      org.opencontainers.image.description="Portfolio nginx bundle with release-specific frontend assets."
 
 COPY infrastructure/nginx/docker-entrypoint.d/40-render-site.sh /docker-entrypoint.d/40-render-site.sh
 COPY infrastructure/nginx/templates/site.http.conf.template /opt/portfolio-nginx/templates/site.http.conf.template
