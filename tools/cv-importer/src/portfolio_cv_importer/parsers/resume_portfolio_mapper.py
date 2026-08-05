@@ -11,8 +11,8 @@ def build_portfolio_payload_from_resume_sections(resume_sections: ResumeSections
     """Собирает итоговый `portfolio.v1` из нормализованных секций резюме."""
 
     portfolio_payload = create_base_portfolio_payload(
-        display_name_ru="Дмитрий Андреевич Куренков",
-        display_name_en="Dmitry Andreevich Kurenkov",
+        display_name_ru="Дмитрий Александрович Куренков",
+        display_name_en="Dmitry Aleksandrovich Kurenkov",
         headline_ru="Системный аналитик и platform-инженер, который проектирует highload-сервисы, данные и рабочие интерфейсы.",
         headline_en="System analyst and platform-minded engineer focused on highload services, data architecture, and production-grade interfaces.",
         location_ru=resume_sections.location_ru,

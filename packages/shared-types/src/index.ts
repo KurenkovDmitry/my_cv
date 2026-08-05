@@ -26,11 +26,14 @@ export type {
   LocalizedText,
   LocalizationConfig,
   PortfolioContent,
+  ProfileContact,
   ProfileContent,
   ProjectContent,
   ProjectLink,
   RuntimeHealthSnapshot,
   SeoConfig,
+  SkillGroup,
+  SkillProof,
   ThemeCollection,
   ThemeDefinition
 } from "./portfolio-content";

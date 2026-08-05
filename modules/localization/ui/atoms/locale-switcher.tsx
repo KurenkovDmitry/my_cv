@@ -1,9 +1,9 @@
-import type { LocaleCode } from "../../types/locale";
+import type { RegionalLocaleCode } from "../../types/locale";
 
 interface LocaleSwitcherProps {
-  currentLocale: LocaleCode;
-  availableLocales: Array<{ code: LocaleCode; label: string }>;
-  onLocaleChange: (localeCode: LocaleCode) => void;
+  currentLocale: RegionalLocaleCode;
+  availableLocales: Array<{ code: RegionalLocaleCode; label: string }>;
+  onLocaleChange: (localeCode: RegionalLocaleCode) => void;
 }
 
 /**
@@ -22,7 +22,7 @@ export function LocaleSwitcher({
       <select
         className="locale-switcher__select"
         value={currentLocale}
-        onChange={(event) => onLocaleChange(event.target.value as LocaleCode)}
+        onChange={(event) => onLocaleChange(event.target.value as RegionalLocaleCode)}
         aria-label={switcherLabel}
       >
         {availableLocales.map((localeOption) => (

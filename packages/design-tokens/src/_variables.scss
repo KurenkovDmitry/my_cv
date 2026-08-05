@@ -7,9 +7,9 @@ $color-coral-500: #cf6f53;
 $color-sage-500: #728b78;
 $color-sky-400: #95b8d1;
 
-$font-family-display: "Literata", "Georgia", serif;
-$font-family-body: "Manrope", "Segoe UI", sans-serif;
-$font-family-code: "IBM Plex Mono", "Consolas", monospace;
+$font-family-display: "Segoe UI Variable Display", "Aptos Display", "Trebuchet MS", sans-serif;
+$font-family-body: "Segoe UI Variable Text", "Aptos", "Segoe UI", sans-serif;
+$font-family-code: "Cascadia Mono", "IBM Plex Mono", "Consolas", monospace;
 
 $page-content-max-width: 1440px;
 $header-content-max-width: 1440px;
@@ -24,4 +24,3 @@ $breakpoint-tv: 2560px;
 
 $shadow-soft: 0 18px 48px rgba(37, 37, 37, 0.12);
 $shadow-raised: 0 22px 80px rgba(21, 21, 21, 0.18);
-

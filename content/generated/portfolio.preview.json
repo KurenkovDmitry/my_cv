@@ -5,8 +5,8 @@
   "profile": {
     "slug": "primary",
     "displayName": {
-      "ru": "Дмитрий Андреевич Куренков",
-      "en": "Dmitry Andreevich Kurenkov"
+      "ru": "Дмитрий Александрович Куренков",
+      "en": "Dmitry Aleksandrovich Kurenkov"
     },
     "headline": {
       "ru": "Системный аналитик и platform-инженер, который проектирует highload-сервисы, данные и рабочие интерфейсы.",
@@ -17,10 +17,46 @@
       "en": "I build architecture around load, integrations, and operational resilience, spanning requirements, data models, backend services, CI/CD, and admin tooling."
     },
     "location": {
-      "ru": "Россия,Москва",
+      "ru": "Москва, Россия",
       "en": "Moscow, Russia"
     },
-    "avatarAsset": "/media/photo_2025-04-09_22-18-09.jpg"
+    "avatarAsset": "/media/photo_2025-04-09_22-18-09.jpg",
+    "availability": {
+      "ru": "Открыт к задачам системного анализа и проектирования высоконагруженных систем",
+      "en": "Open to system analysis and high-load architecture opportunities"
+    },
+    "contacts": [
+      {
+        "kind": "email",
+        "label": "Email",
+        "value": "dimakurenkov33557080@gmail.com",
+        "href": "mailto:dimakurenkov33557080@gmail.com"
+      },
+      {
+        "kind": "phone",
+        "label": "Phone",
+        "value": "+7 (968) 021-94-27",
+        "href": "tel:+79680219427"
+      },
+      {
+        "kind": "github",
+        "label": "GitHub",
+        "value": "KurenkovDmitry",
+        "href": "https://github.com/KurenkovDmitry"
+      },
+      {
+        "kind": "telegram",
+        "label": "Telegram",
+        "value": "@KURDMIALE",
+        "href": "https://t.me/KURDMIALE"
+      },
+      {
+        "kind": "social",
+        "label": "VK",
+        "value": "@dimakurenkov",
+        "href": "https://vk.com/dimakurenkov"
+      }
+    ]
   },
   "education": [
     {
@@ -28,6 +64,14 @@
       "title": {
         "ru": "НИУ ВШЭ, магистратура ФКН и Нетология",
         "en": "HSE University, Faculty of Computer Science master's track with Netology"
+      },
+      "programme": {
+        "ru": "Магистратура, факультет компьютерных наук",
+        "en": "Master's degree, Faculty of Computer Science"
+      },
+      "period": {
+        "ru": "Сентябрь 2026 — июль 2028",
+        "en": "September 2026 — July 2028"
       },
       "status": "draft"
     },
@@ -37,6 +81,14 @@
         "ru": "Образовательный центр VK в МГТУ им. Н. Э. Баумана",
         "en": "VK Education Center at Bauman Moscow State Technical University"
       },
+      "programme": {
+        "ru": "Веб-разработка",
+        "en": "Web development"
+      },
+      "period": {
+        "ru": "Январь 2024 — январь 2026",
+        "en": "January 2024 — January 2026"
+      },
       "status": "published"
     },
     {
@@ -45,6 +97,18 @@
         "ru": "МГТУ им. Н. Э. Баумана, бакалавриат ИУ, красный диплом",
         "en": "Bauman Moscow State Technical University, bachelor's degree in informatics and control systems with honors"
       },
+      "programme": {
+        "ru": "Факультет ИУ — информатика и системы управления",
+        "en": "Informatics and Control Systems faculty"
+      },
+      "period": {
+        "ru": "Сентябрь 2022 — июль 2026",
+        "en": "September 2022 — July 2026"
+      },
+      "detail": {
+        "ru": "Красный диплом",
+        "en": "Graduated with honours"
+      },
       "status": "published"
     },
     {
@@ -52,6 +116,14 @@
       "title": {
         "ru": "Бауманская инженерная школа №1580, профиль информатика",
         "en": "Bauman Engineering School No. 1580, informatics profile"
+      },
+      "programme": {
+        "ru": "Профильный класс — информатика",
+        "en": "Specialised informatics programme"
+      },
+      "period": {
+        "ru": "Сентябрь 2018 — июнь 2022",
+        "en": "September 2018 — June 2022"
       },
       "status": "published"
     }
@@ -64,9 +136,27 @@
         "en": "T-Bank"
       },
       "role": {
-        "ru": "Стажёр-системный аналитик. ТБанк:системный анализ в команде кредитных продуктов: импортозамещение и сопровождение функционалав условиях изменения методов хранения и инфраструктуры, подготовка требований, изучение существующей реализации(SQL, Java Spring), тестирование и SQL-разработка. Роль: стажёр-системный аналитик.",
-        "en": "System analyst intern in the credit products domain with SQL, Java Spring, requirements analysis, and testing."
+        "ru": "Стажёр-системный аналитик",
+        "en": "System Analyst Intern"
       },
+      "period": {
+        "ru": "Январь 2026 — май 2026",
+        "en": "January 2026 — May 2026"
+      },
+      "description": {
+        "ru": "Системный анализ в команде кредитных продуктов: импортозамещение и сопровождение функциональности при изменении способов хранения данных и инфраструктуры.",
+        "en": "System analysis for a credit products team, supporting import substitution and product continuity while data storage and infrastructure were changing."
+      },
+      "highlights": [
+        {
+          "ru": "Подготовка и уточнение требований, изучение существующей реализации на SQL и Java Spring.",
+          "en": "Prepared and refined requirements; investigated the existing SQL and Java Spring implementation."
+        },
+        {
+          "ru": "Тестирование изменений и SQL-разработка.",
+          "en": "Tested changes and delivered SQL development work."
+        }
+      ],
       "status": "published"
     },
     {
@@ -76,9 +166,23 @@
         "en": "Lateco and internal IT initiatives"
       },
       "role": {
-        "ru": "System analyst с дополнительной ролью backend-архитектора, full-stack разработчика и тестировщика на внутренних продуктах компании.",
-        "en": "System analyst with additional responsibilities across backend architecture, full-stack delivery, and QA for internal products."
+        "ru": "Системный аналитик / Backend-архитектор / Full-Stack разработчик",
+        "en": "System Analyst / Backend Architect / Full-Stack Developer"
       },
+      "period": {
+        "ru": "Август 2023 — июль 2026",
+        "en": "August 2023 — July 2026"
+      },
+      "description": {
+        "ru": "Проектный опыт в компании «Латеко» и при её поддержке: внутренние IT-продукты Fillusion, FlexiKanban и Twirly-Quirly.",
+        "en": "Project work at and with the support of Lateco across the internal products Fillusion, FlexiKanban and Twirly-Quirly."
+      },
+      "highlights": [
+        {
+          "ru": "Системный анализ, проектирование backend-архитектуры, разработка и тестирование.",
+          "en": "System analysis, backend architecture, software delivery and quality assurance."
+        }
+      ],
       "status": "published"
     },
     {
@@ -88,9 +192,23 @@
         "en": "Lateco internship practice"
       },
       "role": {
-        "ru": "Участие в разработке целевой архитектуры и детального плана цифровой трансформации для единой IT-компании холдинга.",
-        "en": "Worked on target architecture and a detailed transformation roadmap for a unified IT company across a holding structure."
+        "ru": "Практикант, архитектурно-аналитический проект",
+        "en": "Architecture and analysis intern"
       },
+      "period": {
+        "ru": "Июль 2020 — ноябрь 2020",
+        "en": "July 2020 — November 2020"
+      },
+      "description": {
+        "ru": "Производственная практика в инженерной школе при МГТУ им. Н. Э. Баумана на проекте цифровой трансформации холдинга.",
+        "en": "Industrial placement through the Bauman engineering school on a holding-company digital transformation programme."
+      },
+      "highlights": [
+        {
+          "ru": "Разработка целевой архитектуры и детального плана объединения подразделений в единую IT-компанию.",
+          "en": "Helped define the target architecture and detailed plan for consolidating divisions into a single IT company."
+        }
+      ],
       "status": "published"
     }
   ],
@@ -108,6 +226,36 @@
         "ru": "Платформа автозаполнения и редактирования баз данных с AI и Faker: микросервисная архитектура, gRPC, Kafka, backend-функциональность, Docker Compose, CI/CD и Nginx.",
         "en": "AI-assisted database autofill and editing platform combining microservices, gRPC, Kafka, backend delivery, Docker Compose, CI/CD, and Nginx."
       },
+      "category": "commercial",
+      "period": {
+        "ru": "Июль 2025 — январь 2026",
+        "en": "July 2025 — January 2026"
+      },
+      "role": {
+        "ru": "Team Lead / System Analyst / Backend Architect & Developer",
+        "en": "Team Lead / System Analyst / Backend Architect & Developer"
+      },
+      "teamSize": 4,
+      "responsibilities": [
+        {
+          "ru": "Проектирование микросервисной архитектуры и взаимодействия через gRPC и Kafka.",
+          "en": "Designed the microservice architecture and gRPC/Kafka service interactions."
+        },
+        {
+          "ru": "Backend-разработка на Go, Python и Java Spring; инфраструктура Docker Compose, CI/CD и Nginx.",
+          "en": "Delivered Go, Python and Java Spring backend work plus Docker Compose, CI/CD and Nginx infrastructure."
+        },
+        {
+          "ru": "Функциональные и технические требования, документация, координация команды и развитие продукта.",
+          "en": "Owned functional and technical requirements, documentation, team coordination and product development."
+        }
+      ],
+      "achievements": [
+        {
+          "ru": "PoC реализован в июле 2025; MVP завершён в декабре 2025.",
+          "en": "PoC delivered in July 2025; MVP completed in December 2025."
+        }
+      ],
       "technologies": [
         "Go",
         "Python",
@@ -133,6 +281,26 @@
         "ru": "Веб-сервис для управления проектами: Kanban-доски, задачи, чаты и уведомления с backend-архитектурой, админ-панелью, интеграциями и несколькими моделями данных.",
         "en": "Project management platform with Kanban boards, tasks, chats, and notifications built around backend architecture, admin tooling, integrations, and multi-database modeling."
       },
+      "category": "commercial",
+      "period": {
+        "ru": "Август 2025 — июль 2026",
+        "en": "August 2025 — July 2026"
+      },
+      "role": {
+        "ru": "Team Lead / System Analyst / Backend Developer / Admin Frontend Developer",
+        "en": "Team Lead / System Analyst / Backend Developer / Admin Frontend Developer"
+      },
+      "teamSize": 2,
+      "responsibilities": [
+        {
+          "ru": "Сбор и формализация требований, проектирование API, интеграций и моделей данных для нескольких СУБД.",
+          "en": "Gathered and formalised requirements; designed APIs, integrations and data models spanning several database systems."
+        },
+        {
+          "ru": "Разработка backend и административной панели, участие в deployment и обеспечении безопасности.",
+          "en": "Developed the backend and admin interface and contributed to deployment and application security."
+        }
+      ],
       "technologies": [
         "Go",
         "Python",
@@ -157,6 +325,32 @@
         "ru": "Telegram-приложение для разделения и оплаты счетов с доработкой PostgreSQL-поднагрузку, развитием backend-логики на Python и призовыми результатами на The Open League.",
         "en": "Telegram-based bill splitting app with PostgreSQL redesign for higher load, Python backend evolution, and award-winning results in The Open League."
       },
+      "category": "hackathon",
+      "period": {
+        "ru": "Август 2024 — сентябрь 2024",
+        "en": "August 2024 — September 2024"
+      },
+      "role": {
+        "ru": "System Analyst / Backend Developer",
+        "en": "System Analyst / Backend Developer"
+      },
+      "teamSize": 5,
+      "responsibilities": [
+        {
+          "ru": "Реинжиниринг PostgreSQL для работы под нагрузкой, оптимизация взаимодействия с БД и развитие серверной логики на Python.",
+          "en": "Re-engineered PostgreSQL for load, optimised database interaction and extended the Python server-side logic."
+        }
+      ],
+      "achievements": [
+        {
+          "ru": "3 место на московском хакатоне The Open League by Telegram 2024.",
+          "en": "3rd place at the 2024 Moscow The Open League by Telegram hackathon."
+        },
+        {
+          "ru": "Топ-100 из 1000 проектов международного хакатона The Open League 2024.",
+          "en": "Top 100 of 1,000 projects in the 2024 international The Open League hackathon."
+        }
+      ],
       "technologies": [
         "Python",
         "PostgreSQL",
@@ -187,6 +381,21 @@
         "ru": "Маркетплейс с рейтинговой системой продавцов, где зона ответственности охватывала бизнес-требования, пользовательские сценарии и QA-проверку функциональности.",
         "en": "Marketplace with a seller rating system where the scope covered business requirements, user scenarios, and QA validation."
       },
+      "category": "commercial",
+      "period": {
+        "ru": "Август 2023 — февраль 2024",
+        "en": "August 2023 — February 2024"
+      },
+      "role": {
+        "ru": "Junior System Analyst / QA Engineer",
+        "en": "Junior System Analyst / QA Engineer"
+      },
+      "responsibilities": [
+        {
+          "ru": "Развитие бизнес- и функциональных требований, описание пользовательских сценариев, тестирование, фиксация и перепроверка дефектов.",
+          "en": "Developed business and functional requirements, documented user scenarios, tested features and managed defect verification."
+        }
+      ],
       "technologies": [
         "System analysis",
         "QA",
@@ -208,6 +417,25 @@
         "ru": "Учебное проектирование высоконагруженного интернет-магазина: MAU/DAU, RPS, сетевой трафик, балансировка, модели БД, шардирование, кэширование и отказоустойчивость.",
         "en": "Highload e-commerce architecture study covering MAU/DAU, RPS, traffic budgeting, balancing, database design, sharding, caching, and resilience."
       },
+      "category": "academic",
+      "period": {
+        "ru": "Февраль 2025 — май 2025",
+        "en": "February 2025 — May 2025"
+      },
+      "role": {
+        "ru": "System Analyst / Architect",
+        "en": "System Analyst / Architect"
+      },
+      "responsibilities": [
+        {
+          "ru": "Анализ требований и расчёт MAU/DAU, RPS и сетевого трафика.",
+          "en": "Analysed requirements and estimated MAU/DAU, RPS and network traffic."
+        },
+        {
+          "ru": "Глобальная и локальная балансировка, логическая и физическая модель БД, шардирование, кэширование и схема отказоустойчивости.",
+          "en": "Designed global and local balancing, logical and physical data models, sharding, caching and failure resilience."
+        }
+      ],
       "technologies": [
         "Highload",
         "Sharding",
@@ -239,6 +467,21 @@
         "ru": "Зарегистрированная программа для ЭВМ с backend на Java/Spring, frontend на JavaScript, совместной работой и встроенными методами анализа MoSCoW и Kano.",
         "en": "Registered software product with Java/Spring backend, JavaScript frontend, collaboration workflows, and embedded MoSCoW and Kano analysis methods."
       },
+      "category": "academic",
+      "period": {
+        "ru": "Июль 2024 — декабрь 2024",
+        "en": "July 2024 — December 2024"
+      },
+      "role": {
+        "ru": "Автор и правообладатель",
+        "en": "Author and rights holder"
+      },
+      "achievements": [
+        {
+          "ru": "Свидетельство о государственной регистрации программы для ЭВМ № 2025611078.",
+          "en": "State registration certificate for computer software No. 2025611078."
+        }
+      ],
       "technologies": [
         "Java",
         "Spring",
@@ -261,6 +504,26 @@
         "ru": "Маркетплейс с frontend-фокусом на TypeScript, участием в backend на Go, UI-дизайном в Figma и базовой серверной конфигурацией для деплоя через Nginx.",
         "en": "Marketplace project with a TypeScript-heavy frontend, Go backend contribution, Figma UI design, and foundational Nginx deployment setup."
       },
+      "category": "academic",
+      "period": {
+        "ru": "Сентябрь 2024 — декабрь 2024",
+        "en": "September 2024 — December 2024"
+      },
+      "role": {
+        "ru": "Full-Stack Developer — frontend focus",
+        "en": "Full-Stack Developer — frontend focus"
+      },
+      "teamSize": 4,
+      "responsibilities": [
+        {
+          "ru": "Адаптивный frontend на TypeScript, UI-дизайн в Figma, участие в backend на Go и интеграция пользовательских сценариев.",
+          "en": "Built an adaptive TypeScript frontend, designed UI in Figma, contributed to the Go backend and integrated user journeys."
+        },
+        {
+          "ru": "Базовая серверная конфигурация деплоя на Nginx.",
+          "en": "Prepared the foundational Nginx deployment configuration."
+        }
+      ],
       "technologies": [
         "TypeScript",
         "Go",
@@ -296,7 +559,97 @@
       "Admin panels",
       "Data modeling",
       "CI/CD"
-    ]
+    ],
+    "groups": [
+      {
+        "id": "languages",
+        "title": {
+          "ru": "Языки и frontend",
+          "en": "Languages & frontend"
+        },
+        "items": ["JavaScript", "TypeScript", "Python", "Go", "Java", "SQL", "React"]
+      },
+      {
+        "id": "architecture",
+        "title": {
+          "ru": "Архитектура и интеграции",
+          "en": "Architecture & integration"
+        },
+        "items": ["REST", "gRPC / Protobuf", "grpcui", "Kafka", "Microservices", "Highload", "C4 model", "PlantUML", "UML", "BPMN", "IDEF0", "Use Case"]
+      },
+      {
+        "id": "data",
+        "title": {
+          "ru": "Данные",
+          "en": "Data"
+        },
+        "items": ["PostgreSQL", "Oracle DB", "DBeaver", "DataGrip", "pgAdmin 4", "Adminer", "drawDB", "MongoDB", "Redis", "Cassandra", "ClickHouse", "mongo-express", "Cassandra Web"]
+      },
+      {
+        "id": "delivery",
+        "title": {
+          "ru": "Delivery и качество",
+          "en": "Delivery & quality"
+        },
+        "items": ["Git", "GitLab", "GitHub Actions", "Docker", "Nginx", "Postman", "Swagger", "Selenium", "Figma", "Markdown"]
+      },
+      {
+        "id": "product",
+        "title": {
+          "ru": "Продукт и управление",
+          "en": "Product & delivery methods"
+        },
+        "items": ["Scrum", "Kanban", "YouGile", "Jira", "Gantt", "MoSCoW", "Kano", "Lean Canvas", "Business Model Canvas", "Roadmap"]
+      },
+      {
+        "id": "personal",
+        "title": {
+          "ru": "Работа в команде",
+          "en": "Ways of working"
+        },
+        "items": [
+          {
+            "ru": "Быстро обучаюсь",
+            "en": "Fast learner"
+          },
+          {
+            "ru": "Целеустремлённость",
+            "en": "Goal ownership"
+          },
+          {
+            "ru": "Опыт командной работы",
+            "en": "Team collaboration"
+          },
+          {
+            "ru": "Опыт управления командой",
+            "en": "Team leadership"
+          }
+        ]
+      }
+    ],
+    "proofs": [
+      {
+        "id": "kanban-registration",
+        "skill": "Kanban",
+        "kind": "registration",
+        "title": {
+          "ru": "Государственная регистрация программы для ЭВМ № 2025611078",
+          "en": "State registration of computer software No. 2025611078"
+        },
+        "issuer": {
+          "ru": "Российская Федерация",
+          "en": "Russian Federation"
+        },
+        "note": {
+          "ru": "Дмитрий Куренков указан автором и правообладателем Канбан-доски с методами MoSCoW и Kano.",
+          "en": "Dmitry Kurenkov is named as author and rights holder of the Kanban product with MoSCoW and Kano methods."
+        }
+      }
+    ],
+    "proofNote": {
+      "ru": "Сертификаты и рекомендации могут быть предоставлены по запросу.",
+      "en": "Certificates and references are available on request."
+    }
   },
   "themes": {
     "active": "engineering-blueprint",

@@ -18,11 +18,23 @@ export interface ProfileContent {
   summary: LocalizedText;
   location: LocalizedText;
   avatarAsset: string;
+  availability?: LocalizedText;
+  contacts?: ProfileContact[];
+}
+
+export interface ProfileContact {
+  kind: "email" | "phone" | "github" | "telegram" | "social";
+  label: string;
+  value: string;
+  href: string;
 }
 
 export interface EducationItem {
   id: string;
   title: LocalizedText;
+  programme?: LocalizedText;
+  period?: LocalizedText;
+  detail?: LocalizedText;
   status: "draft" | "published" | "needs_review";
 }
 
@@ -39,6 +51,12 @@ export interface ProjectContent {
   status: "active" | "archived" | "draft";
   title: LocalizedText;
   summary: LocalizedText;
+  category?: "commercial" | "academic" | "hackathon";
+  period?: LocalizedText;
+  role?: LocalizedText;
+  teamSize?: number;
+  responsibilities?: LocalizedText[];
+  achievements?: LocalizedText[];
   technologies: string[];
   links: ProjectLink[];
 }
@@ -47,7 +65,27 @@ export interface ExperienceItem {
   id: string;
   company: LocalizedText;
   role: LocalizedText;
+  period?: LocalizedText;
+  description?: LocalizedText;
+  highlights?: LocalizedText[];
   status: "published" | "needs_review";
+}
+
+export interface SkillGroup {
+  id: string;
+  title: LocalizedText;
+  items: Array<string | LocalizedText>;
+}
+
+export interface SkillProof {
+  id: string;
+  skill: string;
+  kind: "certificate" | "registration" | "recommendation";
+  title: LocalizedText;
+  issuer?: LocalizedText;
+  issuedAt?: string;
+  assetHref?: string;
+  note?: LocalizedText;
 }
 
 export interface ThemeDefinition {
@@ -254,6 +292,9 @@ export interface PortfolioContent {
   experience: ExperienceItem[];
   skills: {
     focusAreas: string[];
+    groups?: SkillGroup[];
+    proofs?: SkillProof[];
+    proofNote?: LocalizedText;
   };
   themes: ThemeCollection;
   localization: LocalizationConfig;

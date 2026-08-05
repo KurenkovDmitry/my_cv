@@ -17,5 +17,10 @@ export class ProjectBusinessService {
       .getFeaturedProjects()
       .map((project) => this.projectViewModelFactory.createCardViewModel(project, localeCode));
   }
-}
 
+  public getAllProjectCards(localeCode: LocaleCode): ProjectCardViewModel[] {
+    return this.projectContentFacade
+      .getAllProjects()
+      .map((project) => this.projectViewModelFactory.createCardViewModel(project, localeCode));
+  }
+}

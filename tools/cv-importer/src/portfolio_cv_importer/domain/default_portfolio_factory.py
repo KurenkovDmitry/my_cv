@@ -27,8 +27,8 @@ def create_base_portfolio_payload(
         "profile": {
             "slug": "primary",
             "displayName": {
-                "ru": display_name_ru or "Дмитрий Андреевич Куренков",
-                "en": display_name_en or "Dmitry Andreevich Kurenkov",
+                "ru": display_name_ru or "Дмитрий Александрович Куренков",
+                "en": display_name_en or "Dmitry Aleksandrovich Kurenkov",
             },
             "headline": {
                 "ru": headline_ru or "Системный аналитик и platform-инженер, который проектирует highload-сервисы, данные и рабочие интерфейсы.",

@@ -3,9 +3,13 @@ import { ProfilePage } from "@portfolio/modules/profile";
 import { ProjectsPage } from "@portfolio/modules/projects";
 import type { ProfileHeroViewModel } from "@portfolio/modules/profile";
 import type { ProjectCardViewModel } from "@portfolio/modules/projects";
+import type { LocaleCode, PortfolioContent } from "@portfolio/shared-types";
+import type { RegionalLocaleCode } from "@portfolio/modules/localization";
 
 interface AppRouterProps {
-  localeCode: "ru" | "en";
+  localeCode: LocaleCode;
+  regionalLocale: RegionalLocaleCode;
+  content: PortfolioContent;
   heroViewModel: ProfileHeroViewModel;
   projectCards: ProjectCardViewModel[];
   onSpeakSummary: () => void;
@@ -17,6 +21,8 @@ interface AppRouterProps {
  */
 export function AppRouter({
   localeCode,
+  regionalLocale,
+  content,
   heroViewModel,
   projectCards,
   onSpeakSummary,
@@ -29,7 +35,10 @@ export function AppRouter({
         element={
           <ProfilePage
             localeCode={localeCode}
+            regionalLocale={regionalLocale}
+            content={content}
             heroViewModel={heroViewModel}
+            projects={projectCards}
             onSpeakSummary={onSpeakSummary}
             onExploreProjects={onExploreProjects}
           />
@@ -37,7 +46,7 @@ export function AppRouter({
       />
       <Route
         path="/projects"
-        element={<ProjectsPage localeCode={localeCode} projects={projectCards} />}
+        element={<ProjectsPage regionalLocale={regionalLocale} projects={projectCards} />}
       />
     </Routes>
   );

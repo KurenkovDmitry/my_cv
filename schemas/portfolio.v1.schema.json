@@ -21,7 +21,53 @@
         "displayName": { "$ref": "#/$defs/localizedText" },
         "headline": { "$ref": "#/$defs/localizedText" },
         "summary": { "$ref": "#/$defs/localizedText" },
-        "avatarAsset": { "type": "string" }
+        "location": { "$ref": "#/$defs/localizedText" },
+        "avatarAsset": { "type": "string" },
+        "availability": { "$ref": "#/$defs/localizedText" },
+        "contacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["kind", "label", "value", "href"],
+            "properties": {
+              "kind": { "type": "string", "enum": ["email", "phone", "github", "telegram", "social"] },
+              "label": { "type": "string" },
+              "value": { "type": "string" },
+              "href": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "education": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "$ref": "#/$defs/localizedText" },
+          "programme": { "$ref": "#/$defs/localizedText" },
+          "period": { "$ref": "#/$defs/localizedText" },
+          "detail": { "$ref": "#/$defs/localizedText" },
+          "status": { "type": "string", "enum": ["draft", "published", "needs_review"] }
+        }
+      }
+    },
+    "experience": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "company", "role", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "company": { "$ref": "#/$defs/localizedText" },
+          "role": { "$ref": "#/$defs/localizedText" },
+          "period": { "$ref": "#/$defs/localizedText" },
+          "description": { "$ref": "#/$defs/localizedText" },
+          "highlights": { "type": "array", "items": { "$ref": "#/$defs/localizedText" } },
+          "status": { "type": "string", "enum": ["published", "needs_review"] }
+        }
       }
     },
     "projects": {
@@ -34,8 +80,39 @@
           "slug": { "type": "string" },
           "featured": { "type": "boolean" },
           "title": { "$ref": "#/$defs/localizedText" },
-          "summary": { "$ref": "#/$defs/localizedText" }
+          "summary": { "$ref": "#/$defs/localizedText" },
+          "category": { "type": "string", "enum": ["commercial", "academic", "hackathon"] },
+          "period": { "$ref": "#/$defs/localizedText" },
+          "role": { "$ref": "#/$defs/localizedText" },
+          "teamSize": { "type": "integer", "minimum": 1 },
+          "responsibilities": { "type": "array", "items": { "$ref": "#/$defs/localizedText" } },
+          "achievements": { "type": "array", "items": { "$ref": "#/$defs/localizedText" } },
+          "technologies": { "type": "array", "items": { "type": "string" } },
+          "links": { "type": "array" }
         }
+      }
+    },
+    "skills": {
+      "type": "object",
+      "properties": {
+        "focusAreas": { "type": "array", "items": { "type": "string" } },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title", "items"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "$ref": "#/$defs/localizedText" },
+              "items": {
+                "type": "array",
+                "items": { "oneOf": [{ "type": "string" }, { "$ref": "#/$defs/localizedText" }] }
+              }
+            }
+          }
+        },
+        "proofs": { "type": "array" },
+        "proofNote": { "$ref": "#/$defs/localizedText" }
       }
     },
     "themes": {
@@ -95,4 +172,3 @@
     }
   }
 }
-

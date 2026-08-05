@@ -5,6 +5,14 @@ export interface LocaleOption {
   label: string;
 }
 
+/** Региональный вариант витрины: перевод общий, а композиция и тон адаптируются под рынок. */
+export type RegionalLocaleCode = "ru" | "en-GB" | "en-US";
+
+export interface RegionalLocaleOption {
+  code: RegionalLocaleCode;
+  label: string;
+}
+
 /**
  * Представление перевода, готовое для UI.
  */
@@ -14,4 +22,3 @@ export interface LocalizedValueViewModel {
 }
 
 export type { LocaleCode, LocalizedText };
-

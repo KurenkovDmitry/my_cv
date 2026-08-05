@@ -12,8 +12,20 @@ export class ProjectViewModelFactory {
   public createCardViewModel(project: ProjectContent, localeCode: LocaleCode): ProjectCardViewModel {
     return {
       id: project.id,
+      slug: project.slug,
+      featured: project.featured,
       title: this.localeService.translate(project.title, localeCode),
       summary: this.localeService.translate(project.summary, localeCode),
+      category: project.category,
+      period: project.period ? this.localeService.translate(project.period, localeCode) : undefined,
+      role: project.role ? this.localeService.translate(project.role, localeCode) : undefined,
+      teamSize: project.teamSize,
+      responsibilities: (project.responsibilities ?? []).map((item) =>
+        this.localeService.translate(item, localeCode),
+      ),
+      achievements: (project.achievements ?? []).map((item) =>
+        this.localeService.translate(item, localeCode),
+      ),
       technologies: project.technologies,
       links: project.links.map((projectLink) => ({
         kind: projectLink.kind,
@@ -23,4 +35,3 @@ export class ProjectViewModelFactory {
     };
   }
 }
-

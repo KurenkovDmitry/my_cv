@@ -192,7 +192,7 @@ jobs:
         shell: bash
         run: |
           ssh deploy-target \
-            "docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'"
+            "if command -v sudo >/dev/null 2>&1; then sudo docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'; else docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'; fi"
 
       - name: Upload deployment package
         if: always() && hashFiles('artifacts/deploy/**') != ''
