@@ -27,10 +27,10 @@ RUN npm run build
 FROM nginx:1.27-alpine
 
 COPY infrastructure/nginx/docker-entrypoint.d/40-render-site.sh /docker-entrypoint.d/40-render-site.sh
-COPY infrastructure/nginx/templates/site.http.conf.template /etc/nginx/templates/site.http.conf.template
-COPY infrastructure/nginx/templates/site.https.conf.template /etc/nginx/templates/site.https.conf.template
+COPY infrastructure/nginx/templates/site.http.conf.template /opt/portfolio-nginx/templates/site.http.conf.template
+COPY infrastructure/nginx/templates/site.https.conf.template /opt/portfolio-nginx/templates/site.https.conf.template
 COPY --from=frontend-builder /workspace/apps/web/dist/ /usr/share/nginx/html/public/
 COPY --from=frontend-builder /workspace/apps/admin/dist/ /usr/share/nginx/html/admin/
 
 RUN chmod +x /docker-entrypoint.d/40-render-site.sh \
-    && mkdir -p /var/www/certbot /etc/letsencrypt/live
+    && mkdir -p /var/www/certbot /etc/letsencrypt/live /opt/portfolio-nginx/templates

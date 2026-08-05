@@ -13,13 +13,15 @@ fi
 
 export ADMIN_BASE_PATH
 
-template_path="/etc/nginx/templates/site.http.conf.template"
+template_path="/opt/portfolio-nginx/templates/site.http.conf.template"
 
 if [ "${ENABLE_HTTPS:-true}" = "true" ] \
   && [ -f "/etc/letsencrypt/live/${DOMAIN_NAME}/fullchain.pem" ] \
   && [ -f "/etc/letsencrypt/live/${DOMAIN_NAME}/privkey.pem" ]; then
-  template_path="/etc/nginx/templates/site.https.conf.template"
+  template_path="/opt/portfolio-nginx/templates/site.https.conf.template"
 fi
+
+rm -f /etc/nginx/conf.d/*.conf
 
 envsubst '${DOMAIN_NAME} ${ADMIN_BASE_PATH} ${API_UPSTREAM}' \
   < "${template_path}" \
