@@ -33,6 +33,13 @@ run_root() {
   fi
 }
 
+CURRENT_STEP="initializing"
+
+log_step() {
+  CURRENT_STEP="$1"
+  printf '\n==> %s\n' "${CURRENT_STEP}"
+}
+
 update_release_link() {
   link_path="$1"
   target_path="$2"
@@ -115,6 +122,28 @@ docker_compose() {
   fi
 }
 
+debug_on_error() {
+  exit_code="$1"
+
+  echo "Deployment failed during step: ${CURRENT_STEP}" >&2
+
+  if command -v docker >/dev/null 2>&1; then
+    echo "--- docker compose ps ---" >&2
+    docker_compose ps >&2 || true
+
+    echo "--- api logs ---" >&2
+    docker_compose logs --tail=80 api >&2 || true
+
+    echo "--- nginx logs ---" >&2
+    docker_compose logs --tail=80 nginx >&2 || true
+  fi
+
+  exit "${exit_code}"
+}
+
+trap 'exit_code="$?"; if [ "${exit_code}" -ne 0 ]; then debug_on_error "${exit_code}"; fi' EXIT
+trap 'exit 130' INT TERM HUP
+
 wait_for_http() {
   target_url="$1"
   shift
@@ -154,6 +183,7 @@ ensure_server_identity() {
 
 export COMPOSE_PROJECT_NAME=portfolio
 
+log_step "Preparing release directory"
 run_root mkdir -p "${DEPLOY_ROOT}/app/releases" "${DEPLOY_ROOT}/config" "${DEPLOY_ROOT}/tmp" /etc/portfolio
 run_root rm -rf "${RELEASE_DIR}"
 run_root mkdir -p "${RELEASE_DIR}"
@@ -161,9 +191,11 @@ run_root tar -xzf "${BUNDLE_ARCHIVE}" -C "${RELEASE_DIR}"
 update_release_link "${ATTEMPT_RELEASE_LINK}" "${RELEASE_DIR}"
 run_root chmod +x "${RELEASE_DIR}/scripts/deploy/"*.sh "${RELEASE_DIR}/scripts/postgres/"*.sh
 
+log_step "Validating server identity and bootstrap"
 ensure_server_identity
 sh "${RELEASE_DIR}/scripts/deploy/bootstrap-server.sh" "${DEPLOY_ROOT}"
 
+log_step "Syncing environment"
 sync_environment_files
 
 set -a
@@ -180,17 +212,20 @@ if [ -z "${TARGET_LETSENCRYPT_EMAIL}" ]; then
   exit 1
 fi
 
+log_step "Loading release images"
 run_root sh -c "gunzip -c '${API_IMAGE_ARCHIVE}' | docker load"
 run_root sh -c "gunzip -c '${NGINX_IMAGE_ARCHIVE}' | docker load"
 run_root docker tag "portfolio-api:${RELEASE_SHA}" portfolio-api:current
 run_root docker tag "portfolio-web-nginx:${RELEASE_SHA}" portfolio-web-nginx:current
 
+log_step "Starting stateful services"
 if [ "${RECREATE_STATEFUL_SERVICES}" = "true" ]; then
   docker_compose up -d --force-recreate postgres redis
 else
   docker_compose up -d --no-recreate postgres redis
 fi
 
+log_step "Waiting for PostgreSQL"
 attempt=1
 while [ "${attempt}" -le 30 ]; do
   if docker_compose exec -T postgres pg_isready -U "${POSTGRES_SUPERUSER_NAME}" -d "${POSTGRES_DB_NAME}" >/dev/null 2>&1; then
@@ -205,12 +240,18 @@ if [ "${attempt}" -gt 30 ]; then
   exit 1
 fi
 
+log_step "Applying database grants"
 docker_compose exec -T postgres sh /docker-entrypoint-initdb.d/00-bootstrap-app-roles.sh
+
+log_step "Running database migrations"
 docker_compose run --rm api sh /app/scripts/deploy/run-migrations.sh
 
+log_step "Deploying application over HTTP"
 ENABLE_HTTPS=false docker_compose up -d --force-recreate --remove-orphans api nginx
 wait_for_http "http://127.0.0.1:8000/health/live"
+wait_for_http "http://127.0.0.1/"
 
+log_step "Issuing or renewing TLS certificate"
 ENABLE_HTTPS=false docker_compose run --rm certbot certonly \
   --webroot \
   -w /var/www/certbot \
@@ -222,9 +263,11 @@ ENABLE_HTTPS=false docker_compose run --rm certbot certonly \
   --cert-name "${TARGET_DOMAIN_NAME}" \
   -d "${TARGET_DOMAIN_NAME}"
 
+log_step "Deploying application over HTTPS"
 ENABLE_HTTPS=true docker_compose up -d --force-recreate --remove-orphans api nginx
 wait_for_http "https://${TARGET_DOMAIN_NAME}/" --resolve "${TARGET_DOMAIN_NAME}:443:127.0.0.1"
 
+log_step "Finalizing release"
 update_release_link "${CURRENT_RELEASE_LINK}" "${RELEASE_DIR}"
 sh "${RELEASE_DIR}/scripts/deploy/install-cert-renew-timer.sh" "${DEPLOY_ROOT}"
 cleanup_runtime_artifacts
