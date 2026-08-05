@@ -7,6 +7,12 @@ export DOMAIN_NAME
 export ADMIN_BASE_PATH="${ADMIN_BASE_PATH:-/admin}"
 export API_UPSTREAM="${API_UPSTREAM:-http://api:8000}"
 
+if [ "${ADMIN_BASE_PATH}" != "/" ]; then
+  ADMIN_BASE_PATH="${ADMIN_BASE_PATH%/}"
+fi
+
+export ADMIN_BASE_PATH
+
 template_path="/etc/nginx/templates/site.http.conf.template"
 
 if [ "${ENABLE_HTTPS:-true}" = "true" ] \

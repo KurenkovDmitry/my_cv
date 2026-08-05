@@ -25,4 +25,4 @@ psql \
   -v ON_ERROR_STOP=1 \
   -f /app/backend/migrations/sql/0001_initial_schema.sql
 
-/app/scripts/postgres/refresh-app-grants.sh
+sh /app/scripts/postgres/refresh-app-grants.sh

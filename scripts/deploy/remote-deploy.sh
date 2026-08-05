@@ -14,6 +14,7 @@ ENV_ARCHIVE="${ENV_ARCHIVE:-/tmp/portfolio-production.env}"
 
 RELEASE_DIR="${DEPLOY_ROOT}/app/releases/${RELEASE_SHA}"
 CURRENT_RELEASE_LINK="${DEPLOY_ROOT}/app/current"
+ATTEMPT_RELEASE_LINK="${DEPLOY_ROOT}/app/last_attempt"
 ENV_FILE="${DEPLOY_ROOT}/config/.env"
 SERVER_ID_FILE="/etc/portfolio/deploy-server-id"
 
@@ -144,6 +145,7 @@ run_root mkdir -p "${DEPLOY_ROOT}/app/releases" "${DEPLOY_ROOT}/config" "${DEPLO
 run_root rm -rf "${RELEASE_DIR}"
 run_root mkdir -p "${RELEASE_DIR}"
 run_root tar -xzf "${BUNDLE_ARCHIVE}" -C "${RELEASE_DIR}"
+run_root ln -sfn "${RELEASE_DIR}" "${ATTEMPT_RELEASE_LINK}"
 run_root chmod +x "${RELEASE_DIR}/scripts/deploy/"*.sh "${RELEASE_DIR}/scripts/postgres/"*.sh
 
 ensure_server_identity
