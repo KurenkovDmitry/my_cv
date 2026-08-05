@@ -39,5 +39,7 @@ COPY infrastructure/nginx/templates/site.https.conf.template /opt/portfolio-ngin
 COPY --from=frontend-builder /workspace/apps/web/dist/ /usr/share/nginx/html/public/
 COPY --from=frontend-builder /workspace/apps/admin/dist/ /usr/share/nginx/html/admin/
 
-RUN chmod +x /docker-entrypoint.d/40-render-site.sh \
+RUN rm -f /docker-entrypoint.d/20-envsubst-on-templates.sh \
+    && rm -f /etc/nginx/templates/*.template \
+    && chmod +x /docker-entrypoint.d/40-render-site.sh \
     && mkdir -p /var/www/certbot /etc/letsencrypt/live /opt/portfolio-nginx/templates
