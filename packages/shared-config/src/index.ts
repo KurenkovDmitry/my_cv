@@ -9,3 +9,4 @@ export {
   runtimeHealthPreview,
 } from "./admin-preview";
 export { portfolioPreviewContent } from "./portfolio-config";
+export { resolveContentAssetUrl } from "./asset-url";

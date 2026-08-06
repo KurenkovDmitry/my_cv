@@ -15,6 +15,9 @@ export function ProjectCard({ viewModel, isRussian }: ProjectCardProps) {
 
   return (
     <article className={`project-card project-card--${viewModel.category ?? "commercial"}`}>
+      {viewModel.coverAsset ? (
+        <img className="project-card__cover" src={viewModel.coverAsset} alt="" loading="lazy" />
+      ) : null}
       <header className="project-card__header">
         <div className="project-card__meta">
           <span>{categoryLabel}</span>

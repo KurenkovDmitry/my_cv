@@ -8,6 +8,7 @@ import type {
   AdminContentStateSnapshot,
   BackupArtifactSummary,
   ContentDiffSnapshot,
+  ContentAssetSummary,
   ImportApplyMode,
   ImportCandidateSummary,
   PortfolioContent,
@@ -39,6 +40,10 @@ export interface AdminExportResponse {
 
 export interface DraftSnapshotUpsertRequest {
   payload: PortfolioContent;
+}
+
+export interface ContentAssetListResponse {
+  items: ContentAssetSummary[];
 }
 
 export interface AdminLoginRequest {

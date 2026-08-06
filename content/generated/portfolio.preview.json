@@ -2,6 +2,7 @@
   "version": "portfolio.v1",
   "draft": true,
   "needsManualReview": true,
+  "contentAssetsVersion": 1,
   "profile": {
     "slug": "primary",
     "displayName": {
@@ -21,6 +22,7 @@
       "en": "Moscow, Russia"
     },
     "avatarAsset": "/media/photo_2025-04-09_22-18-09.jpg",
+    "avatarAssetId": "e6b61031e7c24de94cfb70f4b645c989",
     "availability": {
       "ru": "Открыт к задачам системного анализа и проектирования высоконагруженных систем",
       "en": "Open to system analysis and high-load architecture opportunities"
@@ -89,6 +91,7 @@
         "ru": "Январь 2024 — январь 2026",
         "en": "January 2024 — January 2026"
       },
+      "proofId": "vk-technopark-web-diploma",
       "status": "published"
     },
     {
@@ -322,10 +325,10 @@
         "en": "Split-app"
       },
       "summary": {
-        "ru": "Telegram-приложение для разделения и оплаты счетов с доработкой PostgreSQL-поднагрузку, развитием backend-логики на Python и призовыми результатами на The Open League.",
-        "en": "Telegram-based bill splitting app with PostgreSQL redesign for higher load, Python backend evolution, and award-winning results in The Open League."
+        "ru": "Telegram-приложение для разделения и оплаты счетов. Был привлечён к проекту для переработки PostgreSQL под нагрузку и развития backend-логики на Python.",
+        "en": "Telegram-based bill splitting product. Brought into the project to redesign PostgreSQL for higher load and extend the Python backend."
       },
-      "category": "hackathon",
+      "category": "commercial",
       "period": {
         "ru": "Август 2024 — сентябрь 2024",
         "en": "August 2024 — September 2024"
@@ -337,20 +340,11 @@
       "teamSize": 5,
       "responsibilities": [
         {
-          "ru": "Реинжиниринг PostgreSQL для работы под нагрузкой, оптимизация взаимодействия с БД и развитие серверной логики на Python.",
-          "en": "Re-engineered PostgreSQL for load, optimised database interaction and extended the Python server-side logic."
+          "ru": "Выполнил значимый пласт работ: реинжиниринг PostgreSQL для работы под нагрузкой, оптимизацию взаимодействия с БД и развитие серверной логики на Python.",
+          "en": "Delivered a substantial part of the project: re-engineered PostgreSQL for load, optimised database interaction and extended the Python server-side logic."
         }
       ],
-      "achievements": [
-        {
-          "ru": "3 место на московском хакатоне The Open League by Telegram 2024.",
-          "en": "3rd place at the 2024 Moscow The Open League by Telegram hackathon."
-        },
-        {
-          "ru": "Топ-100 из 1000 проектов международного хакатона The Open League 2024.",
-          "en": "Top 100 of 1,000 projects in the 2024 international The Open League hackathon."
-        }
-      ],
+      "achievements": [],
       "technologies": [
         "Python",
         "PostgreSQL",
@@ -567,7 +561,7 @@
           "ru": "Языки и frontend",
           "en": "Languages & frontend"
         },
-        "items": ["JavaScript", "TypeScript", "Python", "Go", "Java", "SQL", "React"]
+        "items": ["JavaScript", "TypeScript", "Python", "Go", "Java", "SQL", "React", "Web development"]
       },
       {
         "id": "architecture",
@@ -575,7 +569,7 @@
           "ru": "Архитектура и интеграции",
           "en": "Architecture & integration"
         },
-        "items": ["REST", "gRPC / Protobuf", "grpcui", "Kafka", "Microservices", "Highload", "C4 model", "PlantUML", "UML", "BPMN", "IDEF0", "Use Case"]
+        "items": ["API design", "REST", "gRPC / Protobuf", "grpcui", "Kafka", "Microservices", "Highload", "C4 model", "PlantUML", "UML", "BPMN", "IDEF0", "Use Case"]
       },
       {
         "id": "data",
@@ -629,6 +623,101 @@
     ],
     "proofs": [
       {
+        "id": "certificate-api-advanced",
+        "skill": "API design",
+        "kind": "certificate",
+        "title": {
+          "ru": "ИТ-компетенция API — продвинутый уровень",
+          "en": "API IT competency — advanced level"
+        },
+        "level": {
+          "ru": "Продвинутый уровень · теория",
+          "en": "Advanced level · theory"
+        },
+        "validUntil": "2027-08-06",
+        "assetHref": "/media/evidence/certificate-api-advanced.pdf",
+        "assetId": "b4e9d13a6ae57263ee6b3ca8dd2020b3"
+      },
+      {
+        "id": "certificate-docker-intermediate",
+        "skill": "Docker",
+        "kind": "certificate",
+        "title": {
+          "ru": "ИТ-компетенция Docker — средний уровень",
+          "en": "Docker IT competency — intermediate level"
+        },
+        "level": {
+          "ru": "Средний уровень · теория",
+          "en": "Intermediate level · theory"
+        },
+        "validUntil": "2027-07-31",
+        "assetHref": "/media/evidence/certificate-docker-intermediate.pdf",
+        "assetId": "4c10e2659d4679cbae13d7b76c5453f9"
+      },
+      {
+        "id": "certificate-git-intermediate",
+        "skill": "Git",
+        "kind": "certificate",
+        "title": {
+          "ru": "ИТ-компетенция Git — средний уровень",
+          "en": "Git IT competency — intermediate level"
+        },
+        "level": {
+          "ru": "Средний уровень · теория",
+          "en": "Intermediate level · theory"
+        },
+        "validUntil": "2027-07-31",
+        "assetHref": "/media/evidence/certificate-git-intermediate.pdf",
+        "assetId": "6f8adacfff063deee47a280697dd9106"
+      },
+      {
+        "id": "certificate-javascript-intermediate",
+        "skill": "JavaScript",
+        "kind": "certificate",
+        "title": {
+          "ru": "ИТ-компетенция JavaScript — средний уровень",
+          "en": "JavaScript IT competency — intermediate level"
+        },
+        "level": {
+          "ru": "Средний уровень · теория",
+          "en": "Intermediate level · theory"
+        },
+        "validUntil": "2027-08-06",
+        "assetHref": "/media/evidence/certificate-javascript-intermediate.pdf",
+        "assetId": "ff43482301dea9a0fa9a77a1d4125abd"
+      },
+      {
+        "id": "certificate-postgresql-intermediate",
+        "skill": "PostgreSQL",
+        "kind": "certificate",
+        "title": {
+          "ru": "ИТ-компетенция PostgreSQL — средний уровень",
+          "en": "PostgreSQL IT competency — intermediate level"
+        },
+        "level": {
+          "ru": "Средний уровень · теория",
+          "en": "Intermediate level · theory"
+        },
+        "validUntil": "2027-08-06",
+        "assetHref": "/media/evidence/certificate-postgresql-intermediate.pdf",
+        "assetId": "f04d7ef2663f6f141d9d352e8fa4bb7c"
+      },
+      {
+        "id": "vk-technopark-web-diploma",
+        "skill": "Web development",
+        "kind": "diploma",
+        "title": {
+          "ru": "Диплом Технопарка VK — «Веб-разработка»",
+          "en": "VK Technopark diploma — Web Development"
+        },
+        "issuer": {
+          "ru": "Образовательный центр VK в МГТУ им. Н. Э. Баумана",
+          "en": "VK Education Center at Bauman Moscow State Technical University"
+        },
+        "assetHref": "/media/evidence/diploma-vk-technopark-web-development.pdf",
+        "assetId": "f2c55f2afcbe9d11b7de2aec3d13fc48"
+      },
+      {
         "id": "kanban-registration",
         "skill": "Kanban",
         "kind": "registration",
@@ -647,8 +736,8 @@
       }
     ],
     "proofNote": {
-      "ru": "Сертификаты и рекомендации могут быть предоставлены по запросу.",
-      "en": "Certificates and references are available on request."
+      "ru": "Подключены пять сертификатов ИТ-компетенций и диплом Технопарка VK; рекомендации доступны по запросу.",
+      "en": "Five IT competency certificates and the VK Technopark diploma are attached; references are available on request."
     }
   },
   "themes": {
@@ -711,6 +800,7 @@
       "ru": "Портфолио Дмитрия Куренкова",
       "en": "Dmitry Kurenkov Portfolio"
     },
-    "openGraphImage": "/media/photo_2025-04-09_22-18-09.jpg"
+    "openGraphImage": "/media/photo_2025-04-09_22-18-09.jpg",
+    "openGraphAssetId": "e6b61031e7c24de94cfb70f4b645c989"
   }
 }

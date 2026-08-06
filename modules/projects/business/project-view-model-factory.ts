@@ -1,4 +1,5 @@
 import type { LocaleCode } from "@portfolio/shared-types";
+import { resolveContentAssetUrl } from "@portfolio/shared-config";
 import { LocaleService } from "@portfolio/modules/localization";
 import type { ProjectContent } from "@portfolio/shared-types";
 import type { ProjectCardViewModel } from "../types/domain";
@@ -16,6 +17,9 @@ export class ProjectViewModelFactory {
       featured: project.featured,
       title: this.localeService.translate(project.title, localeCode),
       summary: this.localeService.translate(project.summary, localeCode),
+      coverAsset: project.coverAssetId
+        ? resolveContentAssetUrl(project.coverAssetId, "")
+        : undefined,
       category: project.category,
       period: project.period ? this.localeService.translate(project.period, localeCode) : undefined,
       role: project.role ? this.localeService.translate(project.role, localeCode) : undefined,

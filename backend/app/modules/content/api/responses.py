@@ -24,3 +24,22 @@ class AdminPublishResponse(BaseModel):
 
     snapshot: PublicPortfolioResponse
     backup: BackupArtifactResponseItem | None = None
+
+
+class ContentAssetResponseItem(BaseModel):
+    """Метаданные управляемого подтверждения или изображения без внутреннего пути."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    asset_id: str = Field(alias="assetId")
+    file_name: str = Field(alias="fileName")
+    media_type: str = Field(alias="mediaType")
+    file_size_bytes: int = Field(alias="fileSizeBytes")
+    checksum_sha256: str = Field(alias="checksumSha256")
+    public_path: str = Field(alias="publicPath")
+
+
+class ContentAssetListResponse(BaseModel):
+    """Список файлов, которыми управляет администратор портфолио."""
+
+    items: list[ContentAssetResponseItem]

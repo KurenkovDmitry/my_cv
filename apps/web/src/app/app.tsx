@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BrowserRouter, Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { frontendEnvConfig, portfolioPreviewContent } from "@portfolio/shared-config";
+import {
+  frontendEnvConfig,
+  portfolioPreviewContent,
+  resolveContentAssetUrl,
+} from "@portfolio/shared-config";
 import { PageShell } from "@portfolio/shared-ui";
 import {
   AnalyticsEventFacade,
@@ -33,6 +37,17 @@ import {
 const localeStorageFacade = new LocaleStorageFacade();
 const themeStorageFacade = new ThemeStorageFacade();
 const consentStorageFacade = new ConsentStorageFacade();
+
+/** Обновляет или создаёт Open Graph meta без дублирования тегов после смены языка. */
+function updateOpenGraphMeta(propertyName: string, content: string): void {
+  let metaElement = document.querySelector<HTMLMetaElement>(`meta[property="${propertyName}"]`);
+  if (!metaElement) {
+    metaElement = document.createElement("meta");
+    metaElement.setAttribute("property", propertyName);
+    document.head.append(metaElement);
+  }
+  metaElement.content = content;
+}
 const consentService = new ConsentService();
 const analyticsService = new AnalyticsService(
   new AnalyticsEventFacade(frontendEnvConfig.publicApiBaseUrl),
@@ -40,6 +55,13 @@ const analyticsService = new AnalyticsService(
 
 const VISUAL_PREFERENCES_KEY = "portfolio.visual-preferences.v2";
 const KNOWN_THEMES = ["engineering-blueprint", "papyrus-scroll"];
+/** Скорость вращения нижнего вала относительно фактической прокрутки страницы. */
+const PAPYRUS_ROLLER_ROTATION_DEGREES_PER_PIXEL = 0.38;
+/** Скорость смещения бликов на валу, создающая ощущение вращения цилиндра. */
+const PAPYRUS_ROLLER_TEXTURE_PIXELS_PER_PIXEL = 0.16;
+/** Границы фаз нужны, чтобы вал корректно фиксировался у начала и конца документа. */
+const SCROLL_START_PROGRESS_THRESHOLD = 0.002;
+const SCROLL_END_PROGRESS_THRESHOLD = 0.998;
 
 function resolveRouteAnalytics(pathname: string): RouteAnalyticsDescriptor {
   return pathname === "/projects"
@@ -128,6 +150,17 @@ function enrichPortfolioContent(liveContent: PortfolioContent): PortfolioContent
   };
 }
 
+/** Создаёт автономный fallback, использующий статические media при недоступном API. */
+function createStaticPreviewContent(): PortfolioContent {
+  const staticPreview = structuredClone(portfolioPreviewContent);
+  delete staticPreview.profile.avatarAssetId;
+  delete staticPreview.seo.openGraphAssetId;
+  for (const proofItem of staticPreview.skills.proofs ?? []) {
+    delete proofItem.assetId;
+  }
+  return staticPreview;
+}
+
 export function App() {
   return (
     <BrowserRouter>
@@ -139,7 +172,7 @@ export function App() {
 function RoutedApp() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [portfolioContent, setPortfolioContent] = useState<PortfolioContent>(portfolioPreviewContent);
+  const [portfolioContent, setPortfolioContent] = useState<PortfolioContent>(createStaticPreviewContent);
   const [regionalLocale, setRegionalLocale] = useState<RegionalLocaleCode>(resolveRegionalLocale);
   const [themeId, setThemeId] = useState(() => {
     const storedTheme = themeStorageFacade.readPreferredTheme();
@@ -203,10 +236,18 @@ function RoutedApp() {
     localeStorageFacade.persistPreferredLocale(regionalLocale);
     document.documentElement.lang = regionalLocale;
     document.documentElement.dataset.region = regionalLocale.toLowerCase();
-    document.title = localeCode === "ru"
-      ? "Дмитрий Куренков — системный аналитик"
-      : "Dmitry Kurenkov — Technical System Analyst";
-  }, [regionalLocale]);
+    const localizedSiteName = portfolioContent.seo.siteName[localeCode];
+    const localizedHeadline = portfolioContent.profile.headline[localeCode];
+    const configuredOpenGraphImage = resolveContentAssetUrl(
+      portfolioContent.seo.openGraphAssetId,
+      portfolioContent.seo.openGraphImage,
+    );
+    const absoluteOpenGraphImage = new URL(configuredOpenGraphImage, window.location.origin).toString();
+    document.title = `${localizedSiteName} — ${localizedHeadline}`;
+    updateOpenGraphMeta("og:title", document.title);
+    updateOpenGraphMeta("og:site_name", localizedSiteName);
+    updateOpenGraphMeta("og:image", absoluteOpenGraphImage);
+  }, [localeCode, portfolioContent, regionalLocale]);
 
   useEffect(() => {
     themeStorageFacade.persistPreferredTheme(themeId);
@@ -254,7 +295,18 @@ function RoutedApp() {
     const updateScrollProgress = () => {
       const scrollRange = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
       const progress = Math.min(Math.max(window.scrollY / scrollRange, 0), 1);
-      document.documentElement.style.setProperty("--scroll-progress", progress.toFixed(4));
+      const documentRoot = document.documentElement;
+      const rollerRotation = window.scrollY * PAPYRUS_ROLLER_ROTATION_DEGREES_PER_PIXEL;
+      const rollerTextureOffset = window.scrollY * PAPYRUS_ROLLER_TEXTURE_PIXELS_PER_PIXEL;
+
+      documentRoot.style.setProperty("--scroll-progress", progress.toFixed(4));
+      documentRoot.style.setProperty("--roller-rotation", `${rollerRotation.toFixed(2)}deg`);
+      documentRoot.style.setProperty("--roller-texture-offset", `${rollerTextureOffset.toFixed(2)}px`);
+      documentRoot.dataset.scrollPhase = progress <= SCROLL_START_PROGRESS_THRESHOLD
+        ? "start"
+        : progress >= SCROLL_END_PROGRESS_THRESHOLD
+          ? "end"
+          : "moving";
       frameId = 0;
     };
     const handleScroll = () => {

@@ -7,6 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config.settings import get_settings
 from app.database.session import get_read_database_session, get_write_database_session
+from app.modules.content.domain.asset_storage import ContentAssetStorage
+from app.modules.content.infrastructure.dependencies import get_content_asset_storage
 from app.modules.content.infrastructure.sqlalchemy_repository import SqlAlchemyContentRepository
 from app.modules.system.application.admin_service import SystemAdminService
 from app.modules.system.application.compare_service import SystemCompareService
@@ -92,6 +94,7 @@ def get_system_admin_service(
     backup_bundle_storage: BackupBundleStorage = Depends(get_backup_bundle_storage),
     import_candidate_storage: ImportCandidateStorage = Depends(get_import_candidate_storage),
     resume_import_converter: ResumeImportConverter = Depends(get_resume_import_converter),
+    content_asset_storage: ContentAssetStorage = Depends(get_content_asset_storage),
 ) -> SystemAdminService:
     """Собирает system-admin service для backup/download/delete и import upload сценариев."""
 
@@ -102,4 +105,5 @@ def get_system_admin_service(
         backup_storage=backup_bundle_storage,
         import_candidate_storage=import_candidate_storage,
         resume_import_converter=resume_import_converter,
+        asset_storage=content_asset_storage,
     )

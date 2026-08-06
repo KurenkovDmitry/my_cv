@@ -4,6 +4,7 @@ import type {
   PortfolioContent,
   SkillProof,
 } from "@portfolio/shared-types";
+import { resolveContentAssetUrl } from "@portfolio/shared-config";
 import type { RegionalLocaleCode } from "@portfolio/modules/localization";
 import type { ProjectCardViewModel } from "@portfolio/modules/projects";
 import type { ProfileHeroViewModel } from "../../types/domain";
@@ -39,7 +40,7 @@ export function ProfilePage({
 
   const featuredProjects = useMemo(() => {
     const preferredIds = regionalLocale === "en-US"
-      ? ["split-app", "fillusion", "kanban-board-register"]
+      ? ["fillusion", "highload-ozon", "split-app"]
       : regionalLocale === "en-GB"
         ? ["fillusion", "highload-ozon", "flexi-kanban"]
         : ["fillusion", "flexi-kanban", "split-app"];
@@ -135,21 +136,9 @@ export function ProfilePage({
         ))}
       </section>
 
-      <section className="resume-section resume-section--architecture" id="approach">
-        <SectionIntro
-          index="01"
-          eyebrow={isRussian ? "Подход" : "Engineering approach"}
-          title={isRussian ? "Связываю требования, данные и эксплуатацию." : "Connecting requirements, data and operations."}
-          description={isRussian
-            ? "Смотрю на систему целиком: от сценариев и контрактов до нагрузки, отказоустойчивости и удобства команды, которая будет с ней работать."
-            : "I work across the whole system: journeys and contracts, load and resilience, and the operating experience of the team behind it."}
-        />
-        <SystemMap localeCode={localeCode} />
-      </section>
-
       <section className="resume-section" id="experience">
         <SectionIntro
-          index="02"
+          index="01"
           eyebrow={isRussian ? "Опыт" : "Experience"}
           title={isRussian ? "Работа на стыке анализа и реализации." : "Analysis grounded in implementation."}
           description={isRussian
@@ -186,7 +175,7 @@ export function ProfilePage({
 
       <section className="resume-section" id="projects">
         <SectionIntro
-          index="03"
+          index="02"
           eyebrow={isRussian ? "Избранные проекты" : "Selected work"}
           title={isRussian ? "От микросервисов до продуктовых досок." : "From microservices to product workflows."}
           description={isRussian
@@ -216,7 +205,7 @@ export function ProfilePage({
 
       <section className="resume-section" id="skills">
         <SectionIntro
-          index="04"
+          index="03"
           eyebrow={isRussian ? "Навыки" : "Capabilities"}
           title={isRussian ? "Стек сгруппирован по задачам, а не по моде." : "A task-shaped stack, not a trend list."}
           description={content.skills.proofNote ? translate(content.skills.proofNote, localeCode) : undefined}
@@ -249,27 +238,41 @@ export function ProfilePage({
 
       <section className="resume-section" id="education">
         <SectionIntro
-          index="05"
+          index="04"
           eyebrow={isRussian ? "Образование" : "Education"}
           title={isRussian ? "Фундамент и прикладная инженерия." : "Academic foundation, applied engineering."}
         />
         <div className="education-list">
-          {content.education.map((education, index) => (
-            <article className="education-card" key={education.id}>
-              <span className="education-card__year">{String(index + 1).padStart(2, "0")}</span>
-              <div>
-                <p>{education.period ? translate(education.period, localeCode) : ""}</p>
-                <h3>{translate(education.title, localeCode)}</h3>
-                {education.programme ? <span>{translate(education.programme, localeCode)}</span> : null}
-              </div>
-              {education.detail ? <strong>{translate(education.detail, localeCode)}</strong> : null}
-            </article>
-          ))}
+          {content.education.map((education, index) => {
+            const educationProof = content.skills.proofs?.find((proof) => proof.id === education.proofId);
+            return (
+              <article className="education-card" key={education.id}>
+                <span className="education-card__year">{String(index + 1).padStart(2, "0")}</span>
+                <div>
+                  <p>{education.period ? translate(education.period, localeCode) : ""}</p>
+                  <h3>{translate(education.title, localeCode)}</h3>
+                  {education.programme ? <span>{translate(education.programme, localeCode)}</span> : null}
+                </div>
+                <div className="education-card__evidence">
+                  {education.detail ? <strong>{translate(education.detail, localeCode)}</strong> : null}
+                  {educationProof ? (
+                    <button type="button" onClick={() => setSelectedProof(educationProof)}>
+                      {isRussian ? "Открыть диплом" : "View diploma"} <span aria-hidden="true">↗</span>
+                    </button>
+                  ) : education.assetId ? (
+                    <a href={resolveContentAssetUrl(education.assetId, "")} target="_blank" rel="noreferrer">
+                      {isRussian ? "Открыть документ" : "View document"} <span aria-hidden="true">↗</span>
+                    </a>
+                  ) : null}
+                </div>
+              </article>
+            );
+          })}
         </div>
       </section>
 
       <section className="resume-contact" id="contact">
-        <p className="resume-contact__eyebrow">06 / Contact</p>
+        <p className="resume-contact__eyebrow">05 / Contact</p>
         <h2>{isRussian ? "Обсудим систему, которую нужно разобрать или спроектировать." : "Let’s discuss the system you need to understand or design."}</h2>
         <div className="resume-contact__actions">
           <a className="button button--primary" href="mailto:dimakurenkov33557080@gmail.com">dimakurenkov33557080@gmail.com</a>
@@ -306,29 +309,6 @@ function SectionIntro({ index, eyebrow, title, description, actionLabel, onActio
   );
 }
 
-function SystemMap({ localeCode }: { localeCode: LocaleCode }) {
-  const isRussian = localeCode === "ru";
-  return (
-    <div className="system-map" aria-label={isRussian ? "Схема архитектурного подхода" : "Architecture approach diagram"}>
-      <div className="system-map__legend"><span>Architecture map</span><span>RPS / SLA / DATA</span></div>
-      <div className="system-map__canvas">
-        <div className="system-node system-node--requirements"><small>01</small><strong>{isRussian ? "Требования" : "Requirements"}</strong><span>BPMN · Use cases</span></div>
-        <div className="system-node system-node--gateway"><small>02</small><strong>API Gateway</strong><span>REST · gRPC</span></div>
-        <div className="system-node system-node--services"><small>03</small><strong>Services × N</strong><span>Go · Java · Python</span></div>
-        <div className="system-node system-node--events"><small>04</small><strong>Kafka</strong><span>Events / async</span></div>
-        <div className="system-node system-node--data"><small>05</small><strong>PostgreSQL</strong><span>Shard · cache</span></div>
-        <div className="system-node system-node--delivery"><small>06</small><strong>Delivery</strong><span>CI/CD · Nginx</span></div>
-        <div className="system-map__line system-map__line--a" aria-hidden="true" />
-        <div className="system-map__line system-map__line--b" aria-hidden="true" />
-        <div className="system-map__line system-map__line--c" aria-hidden="true" />
-      </div>
-      <div className="system-map__footer">
-        <span>MAU / DAU</span><span>RPS</span><span>Failover</span><span>Observability</span>
-      </div>
-    </div>
-  );
-}
-
 function ProofModal({ proof, localeCode, onClose }: { proof: SkillProof; localeCode: LocaleCode; onClose: () => void }) {
   const isRussian = localeCode === "ru";
   return (
@@ -338,34 +318,50 @@ function ProofModal({ proof, localeCode, onClose }: { proof: SkillProof; localeC
         <div className="proof-modal__seal" aria-hidden="true"><span>✓</span></div>
         <p className="proof-modal__eyebrow">{isRussian ? "Подтверждение компетенции" : "Capability evidence"}</p>
         <h2 id="proof-title">{translate(proof.title, localeCode)}</h2>
+        {proof.level ? <p className="proof-modal__level">{translate(proof.level, localeCode)}</p> : null}
         {proof.issuer ? <p className="proof-modal__issuer">{translate(proof.issuer, localeCode)}</p> : null}
+        {proof.validUntil ? (
+          <p className="proof-modal__validity">
+            {isRussian ? "Действителен до" : "Valid until"}: {formatProofDate(proof.validUntil, localeCode)}
+          </p>
+        ) : null}
         {proof.note ? <p className="proof-modal__note">{translate(proof.note, localeCode)}</p> : null}
-        {proof.assetHref ? <a className="button button--primary" href={proof.assetHref} target="_blank" rel="noreferrer">{isRussian ? "Открыть документ" : "Open document"}</a> : <span className="proof-modal__status">{isRussian ? "Оригинал предоставляется по запросу" : "Original available on request"}</span>}
+        {proof.assetId || proof.assetHref ? <a className="button button--primary" href={resolveContentAssetUrl(proof.assetId, proof.assetHref ?? "")} target="_blank" rel="noreferrer">{isRussian ? "Открыть документ" : "Open document"}</a> : <span className="proof-modal__status">{isRussian ? "Оригинал предоставляется по запросу" : "Original available on request"}</span>}
       </article>
     </div>
   );
+}
+
+/** Форматирует ISO-дату подтверждения без зависимости от локали браузера. */
+function formatProofDate(isoDate: string, localeCode: LocaleCode): string {
+  return new Intl.DateTimeFormat(localeCode === "ru" ? "ru-RU" : "en-GB", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${isoDate}T00:00:00Z`));
 }
 
 function getRegionalStatistics(localeCode: RegionalLocaleCode) {
   if (localeCode === "ru") {
     return [
       { value: "7", label: "проектов в резюме" },
-      { value: "3 место", label: "The Open League" },
-      { value: "с отличием", label: "диплом МГТУ" },
+      { value: "5", label: "сертификатов навыков" },
+      { value: "продвинутый", label: "API-компетенция" },
     ];
   }
 
   if (localeCode === "en-US") {
     return [
-      { value: "Top 10%", label: "global hackathon" },
-      { value: "3rd", label: "Moscow TOL 2024" },
+      { value: "Advanced", label: "API competency" },
+      { value: "5", label: "skill certificates" },
       { value: "7", label: "portfolio projects" },
     ];
   }
 
   return [
-    { value: "7", label: "documented projects" },
-    { value: "3", label: "industry placements" },
-    { value: "Honours", label: "Bauman degree" },
+      { value: "7", label: "documented projects" },
+      { value: "5", label: "skill certificates" },
+      { value: "Honours", label: "Bauman degree" },
   ];
 }

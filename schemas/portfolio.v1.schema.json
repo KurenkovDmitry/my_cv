@@ -14,6 +14,9 @@
     "needsManualReview": {
       "type": "boolean"
     },
+    "contentAssetsVersion": {
+      "const": 1
+    },
     "profile": {
       "type": "object",
       "required": ["displayName", "headline", "summary"],
@@ -23,6 +26,7 @@
         "summary": { "$ref": "#/$defs/localizedText" },
         "location": { "$ref": "#/$defs/localizedText" },
         "avatarAsset": { "type": "string" },
+        "avatarAssetId": { "type": "string", "pattern": "^[a-f0-9]{32}$" },
         "availability": { "$ref": "#/$defs/localizedText" },
         "contacts": {
           "type": "array",
@@ -50,6 +54,8 @@
           "programme": { "$ref": "#/$defs/localizedText" },
           "period": { "$ref": "#/$defs/localizedText" },
           "detail": { "$ref": "#/$defs/localizedText" },
+          "proofId": { "type": "string" },
+          "assetId": { "type": "string", "pattern": "^[a-f0-9]{32}$" },
           "status": { "type": "string", "enum": ["draft", "published", "needs_review"] }
         }
       }
@@ -79,6 +85,7 @@
           "id": { "type": "string" },
           "slug": { "type": "string" },
           "featured": { "type": "boolean" },
+          "status": { "type": "string", "enum": ["active", "archived", "draft"] },
           "title": { "$ref": "#/$defs/localizedText" },
           "summary": { "$ref": "#/$defs/localizedText" },
           "category": { "type": "string", "enum": ["commercial", "academic", "hackathon"] },
@@ -88,7 +95,19 @@
           "responsibilities": { "type": "array", "items": { "$ref": "#/$defs/localizedText" } },
           "achievements": { "type": "array", "items": { "$ref": "#/$defs/localizedText" } },
           "technologies": { "type": "array", "items": { "type": "string" } },
-          "links": { "type": "array" }
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["kind", "label", "href"],
+              "properties": {
+                "kind": { "type": "string", "enum": ["repository", "case-study", "demo"] },
+                "label": { "$ref": "#/$defs/localizedText" },
+                "href": { "type": "string" }
+              }
+            }
+          },
+          "coverAssetId": { "type": "string", "pattern": "^[a-f0-9]{32}$" }
         }
       }
     },
@@ -111,7 +130,26 @@
             }
           }
         },
-        "proofs": { "type": "array" },
+        "proofs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "skill", "kind", "title"],
+            "properties": {
+              "id": { "type": "string" },
+              "skill": { "type": "string" },
+              "kind": { "type": "string", "enum": ["certificate", "diploma", "registration", "recommendation"] },
+              "title": { "$ref": "#/$defs/localizedText" },
+              "level": { "$ref": "#/$defs/localizedText" },
+              "issuer": { "$ref": "#/$defs/localizedText" },
+              "issuedAt": { "type": "string" },
+              "validUntil": { "type": "string" },
+              "assetHref": { "type": "string" },
+              "assetId": { "type": "string", "pattern": "^[a-f0-9]{32}$" },
+              "note": { "$ref": "#/$defs/localizedText" }
+            }
+          }
+        },
         "proofNote": { "$ref": "#/$defs/localizedText" }
       }
     },
@@ -157,7 +195,8 @@
       "required": ["siteName"],
       "properties": {
         "siteName": { "$ref": "#/$defs/localizedText" },
-        "openGraphImage": { "type": "string" }
+        "openGraphImage": { "type": "string" },
+        "openGraphAssetId": { "type": "string", "pattern": "^[a-f0-9]{32}$" }
       }
     }
   },

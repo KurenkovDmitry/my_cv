@@ -10,6 +10,7 @@ import tempfile
 from pathlib import Path
 
 from app.config.settings import Settings
+from app.modules.content.application.asset_bundle import extract_bundled_assets
 from app.modules.system.application.bundle_payloads import extract_portfolio_payload
 
 
@@ -24,8 +25,8 @@ class ResumeImportConverter:
         *,
         source_file_name: str,
         document_bytes: bytes,
-    ) -> tuple[dict[str, object], str]:
-        """Конвертирует входной документ в payload и возвращает определённый тип источника."""
+    ) -> tuple[dict[str, object], str, list[dict[str, object]]]:
+        """Конвертирует документ в payload, тип источника и переносимые asset-записи."""
 
         source_kind = self._detect_source_kind(source_file_name)
         if source_kind == "json_document":
@@ -33,14 +34,19 @@ class ResumeImportConverter:
             if not isinstance(parsed_document, dict):
                 raise ValueError("Import candidate JSON document must be an object.")
 
-            return extract_portfolio_payload(parsed_document), self._detect_json_source_kind(parsed_document)
+            return (
+                extract_portfolio_payload(parsed_document),
+                self._detect_json_source_kind(parsed_document),
+                extract_bundled_assets(parsed_document),
+            )
 
-        return await asyncio.to_thread(
+        converted_payload, converted_source_kind = await asyncio.to_thread(
             self._convert_resume_document,
             source_file_name,
             document_bytes,
             source_kind,
         )
+        return converted_payload, converted_source_kind, []
 
     def _convert_resume_document(
         self,

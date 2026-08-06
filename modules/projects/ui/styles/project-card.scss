@@ -20,6 +20,13 @@
   padding: 1.5rem;
 }
 
+.project-card__cover {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 20px;
+  object-fit: cover;
+}
+
 .project-card__kicker {
   margin: 0;
   color: $color-coral-500;
@@ -68,4 +75,3 @@
   font: 700 0.88rem/1 $font-family-body;
   text-decoration: none;
 }
-

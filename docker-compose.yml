@@ -63,8 +63,13 @@ services:
       ANALYTICS_SPIKE_WINDOW_SECONDS: ${ANALYTICS_SPIKE_WINDOW_SECONDS}
       AUDIT_LOG_RETENTION_DAYS: ${AUDIT_LOG_RETENTION_DAYS}
       BACKUP_STORAGE_PATH: ${BACKUP_STORAGE_PATH}
+      CONTENT_ASSET_STORAGE_PATH: ${CONTENT_ASSET_STORAGE_PATH:-/opt/portfolio/assets}
+      CONTENT_ASSET_MAX_BYTES: ${CONTENT_ASSET_MAX_BYTES:-20971520}
       IMPORT_CANDIDATE_RETENTION_DAYS: ${IMPORT_CANDIDATE_RETENTION_DAYS}
       ENABLE_GRAFANA_INTEGRATION: ${ENABLE_GRAFANA_INTEGRATION}
+    volumes:
+      - portfolio-backups:${BACKUP_STORAGE_PATH}
+      - portfolio-assets:${CONTENT_ASSET_STORAGE_PATH:-/opt/portfolio/assets}
     depends_on:
       - postgres
       - redis
@@ -86,3 +91,5 @@ services:
 volumes:
   postgres-data:
   redis-data:
+  portfolio-backups:
+  portfolio-assets:

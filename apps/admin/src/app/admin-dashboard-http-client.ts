@@ -7,6 +7,7 @@ import type {
   BackupArtifactListResponse,
   BackupArtifactMutationResponse,
   ContentDiffResponse,
+  ContentAssetListResponse,
   CreateBackupArtifactRequest,
   DraftSnapshotUpsertRequest,
   ImportCandidateApplyRequest,
@@ -16,6 +17,7 @@ import type {
   PublicPortfolioResponse,
   RuntimeHealthResponse,
 } from "@portfolio/shared-contracts";
+import type { ContentAssetSummary } from "@portfolio/shared-types";
 import { requestAdminJson } from "./admin-auth-http-client";
 
 /**
@@ -30,6 +32,7 @@ export async function fetchAdminDashboardData(signal?: AbortSignal) {
     importCandidateResponse,
     runtimeHealthResponse,
     auditLogResponse,
+    contentAssetItems,
   ] = await Promise.all([
     requestAdminJson<PublicPortfolioResponse>(
       `${frontendEnvConfig.adminApiBaseUrl}/content/snapshot?kind=draft`,
@@ -66,6 +69,7 @@ export async function fetchAdminDashboardData(signal?: AbortSignal) {
       { method: "GET" },
       signal,
     ),
+    fetchContentAssets(signal),
   ]);
 
   return {
@@ -76,6 +80,7 @@ export async function fetchAdminDashboardData(signal?: AbortSignal) {
     importCandidateResponse,
     runtimeHealthResponse,
     auditLogResponse,
+    contentAssetItems,
   };
 }
 
@@ -90,6 +95,35 @@ export async function publishDraftSnapshot() {
   return requestAdminJson<AdminPublishResponse>(`${frontendEnvConfig.adminApiBaseUrl}/content/publish`, {
     method: "POST",
   });
+}
+
+/** Загружает подтверждение или изображение в защищённое файловое хранилище. */
+export async function uploadContentAsset(file: File): Promise<ContentAssetSummary> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return requestAdminJson<ContentAssetSummary>(`${frontendEnvConfig.adminApiBaseUrl}/content/assets`, {
+    method: "POST",
+    body: formData,
+  });
+}
+
+/** Возвращает реестр файлов для повторного прикрепления и обслуживания. */
+export async function fetchContentAssets(signal?: AbortSignal): Promise<ContentAssetSummary[]> {
+  const response = await requestAdminJson<ContentAssetListResponse>(
+    `${frontendEnvConfig.adminApiBaseUrl}/content/assets`,
+    { method: "GET" },
+    signal,
+  );
+  return response.items;
+}
+
+/** Удаляет один точный asset после подтверждения пользователя в UI. */
+export async function deleteContentAsset(assetId: string): Promise<ContentAssetSummary> {
+  return requestAdminJson<ContentAssetSummary>(
+    `${frontendEnvConfig.adminApiBaseUrl}/content/assets/${encodeURIComponent(assetId)}`,
+    { method: "DELETE" },
+  );
 }
 
 export async function createBackupArtifact(requestPayload: CreateBackupArtifactRequest) {

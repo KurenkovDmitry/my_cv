@@ -22,6 +22,9 @@ export function ProjectsPage({ regionalLocale, projects }: ProjectsPageProps) {
   const labels: Record<ProjectFilter, string> = isRussian
     ? { all: "Все", commercial: "Продуктовые", academic: "Учебные", hackathon: "Хакатоны" }
     : { all: "All", commercial: "Product", academic: "Academic", hackathon: "Hackathons" };
+  const availableFilters = (Object.keys(labels) as ProjectFilter[]).filter(
+    (filterKey) => filterKey === "all" || projects.some((project) => project.category === filterKey),
+  );
 
   return (
     <section className="projects-page">
@@ -37,7 +40,7 @@ export function ProjectsPage({ regionalLocale, projects }: ProjectsPageProps) {
       </header>
 
       <div className="project-filters" aria-label={isRussian ? "Фильтр проектов" : "Project filters"}>
-        {(Object.keys(labels) as ProjectFilter[]).map((filterKey) => (
+        {availableFilters.map((filterKey) => (
           <button
             className={filter === filterKey ? "project-filters__button project-filters__button--active" : "project-filters__button"}
             type="button"

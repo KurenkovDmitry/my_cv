@@ -18,6 +18,7 @@ export interface ProfileContent {
   summary: LocalizedText;
   location: LocalizedText;
   avatarAsset: string;
+  avatarAssetId?: string;
   availability?: LocalizedText;
   contacts?: ProfileContact[];
 }
@@ -35,6 +36,8 @@ export interface EducationItem {
   programme?: LocalizedText;
   period?: LocalizedText;
   detail?: LocalizedText;
+  proofId?: string;
+  assetId?: string;
   status: "draft" | "published" | "needs_review";
 }
 
@@ -59,6 +62,7 @@ export interface ProjectContent {
   achievements?: LocalizedText[];
   technologies: string[];
   links: ProjectLink[];
+  coverAssetId?: string;
 }
 
 export interface ExperienceItem {
@@ -80,11 +84,14 @@ export interface SkillGroup {
 export interface SkillProof {
   id: string;
   skill: string;
-  kind: "certificate" | "registration" | "recommendation";
+  kind: "certificate" | "diploma" | "registration" | "recommendation";
   title: LocalizedText;
+  level?: LocalizedText;
   issuer?: LocalizedText;
   issuedAt?: string;
+  validUntil?: string;
   assetHref?: string;
+  assetId?: string;
   note?: LocalizedText;
 }
 
@@ -113,6 +120,16 @@ export interface AccessibilityConfig {
 export interface SeoConfig {
   siteName: LocalizedText;
   openGraphImage: string;
+  openGraphAssetId?: string;
+}
+
+export interface ContentAssetSummary {
+  assetId: string;
+  fileName: string;
+  mediaType: string;
+  fileSizeBytes: number;
+  checksumSha256: string;
+  publicPath: string;
 }
 
 export interface AnalyticsConsentContent {
@@ -286,6 +303,7 @@ export interface PortfolioContent {
   version: "portfolio.v1";
   draft: boolean;
   needsManualReview: boolean;
+  contentAssetsVersion?: 1;
   profile: ProfileContent;
   education: EducationItem[];
   projects: ProjectContent[];

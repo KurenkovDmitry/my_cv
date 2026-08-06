@@ -1,0 +1,64 @@
+"""Тесты переносимого файлового контура резюме."""
+
+from pathlib import Path
+
+import pytest
+
+from app.config.settings import Settings
+from app.modules.content.application.asset_bundle import (
+    build_asset_bundle_entries,
+    collect_referenced_asset_ids,
+    restore_bundled_assets,
+)
+from app.modules.content.infrastructure.local_asset_storage import LocalContentAssetStorage
+
+_MINIMAL_PDF_BYTES = b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF"
+
+
+def _build_storage(root_directory: Path) -> LocalContentAssetStorage:
+    """Создаёт изолированное файловое хранилище для одного теста."""
+
+    settings = Settings(
+        CONTENT_ASSET_STORAGE_PATH=str(root_directory),
+        CONTENT_ASSET_MAX_BYTES=1024 * 1024,
+    )
+    return LocalContentAssetStorage(settings)
+
+
+@pytest.mark.asyncio
+async def test_asset_is_embedded_and_restored_with_stable_identifier(tmp_path: Path) -> None:
+    """Проверяет, что backup переносит PDF и сохраняет ссылочный asset id."""
+
+    source_storage = _build_storage(tmp_path / "source-assets")
+    target_storage = _build_storage(tmp_path / "target-assets")
+    stored_asset = await source_storage.write_asset(
+        file_name="certificate.pdf",
+        document_bytes=_MINIMAL_PDF_BYTES,
+        requested_media_type="application/pdf",
+    )
+    portfolio_payload = {
+        "profile": {"avatarAssetId": ""},
+        "skills": {"proofs": [{"assetId": stored_asset.asset_id}]},
+    }
+
+    assert collect_referenced_asset_ids(portfolio_payload) == [stored_asset.asset_id]
+    bundle_entries = await build_asset_bundle_entries(portfolio_payload, source_storage)
+    restored_asset_ids = await restore_bundled_assets(bundle_entries, target_storage)
+
+    assert restored_asset_ids == [stored_asset.asset_id]
+    restored_asset = await target_storage.get_asset(stored_asset.asset_id)
+    assert restored_asset.checksum_sha256 == stored_asset.checksum_sha256
+    assert await target_storage.read_asset_bytes(stored_asset.asset_id) == _MINIMAL_PDF_BYTES
+
+
+@pytest.mark.asyncio
+async def test_asset_storage_rejects_executable_payload(tmp_path: Path) -> None:
+    """Проверяет запрет произвольных файлов даже при безопасном имени PDF."""
+
+    asset_storage = _build_storage(tmp_path / "assets")
+    with pytest.raises(ValueError, match="Only PDF"):
+        await asset_storage.write_asset(
+            file_name="fake.pdf",
+            document_bytes=b"MZ-not-a-pdf",
+            requested_media_type="application/pdf",
+        )

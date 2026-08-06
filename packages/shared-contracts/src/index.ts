@@ -12,6 +12,7 @@ export type {
   AuditLogListResponse,
   BackupArtifactListResponse,
   BackupArtifactMutationResponse,
+  ContentAssetListResponse,
   ContentDiffResponse,
   CreateBackupArtifactRequest,
   DraftSnapshotUpsertRequest,

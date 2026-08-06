@@ -13,6 +13,7 @@ export type {
   AdminAuditLogEntry,
   AccessibilityConfig,
   BackupArtifactSummary,
+  ContentAssetSummary,
   ContentDiffSnapshot,
   ContentDiffSummary,
   ConsentDecision,

@@ -70,6 +70,14 @@ class Settings(BaseSettings):
         default="/opt/portfolio/backups",
         alias="BACKUP_STORAGE_PATH",
     )
+    content_asset_storage_path: str = Field(
+        default="/opt/portfolio/assets",
+        alias="CONTENT_ASSET_STORAGE_PATH",
+    )
+    content_asset_max_bytes: int = Field(
+        default=20 * 1024 * 1024,
+        alias="CONTENT_ASSET_MAX_BYTES",
+    )
     import_candidate_retention_days: int = Field(
         default=30,
         alias="IMPORT_CANDIDATE_RETENTION_DAYS",

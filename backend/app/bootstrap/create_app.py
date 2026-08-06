@@ -10,6 +10,8 @@ from app.modules.authentication.api.admin_guard_middleware import AdminGuardMidd
 from app.modules.authentication.api.router import router as authentication_router
 from app.modules.content.api.admin_router import router as admin_content_router
 from app.modules.content.api.router import router as content_router
+from app.modules.content.infrastructure.dependencies import get_content_asset_storage
+from app.modules.content.infrastructure.seed_assets import seed_initial_content_assets
 from app.modules.localization.api.router import router as localization_router
 from app.modules.profile.api.router import router as profile_router
 from app.modules.projects.api.router import router as projects_router
@@ -37,6 +39,12 @@ def create_app() -> FastAPI:
     )
     application.add_middleware(RequestContextMiddleware)
     application.add_middleware(AdminGuardMiddleware)
+
+    @application.on_event("startup")
+    async def seed_bundled_portfolio_assets() -> None:
+        """Гарантирует наличие исходной фотографии, сертификатов и диплома в persistent volume."""
+
+        await seed_initial_content_assets(get_content_asset_storage())
 
     @application.get("/health/live", tags=["system"])
     async def live_healthcheck() -> dict[str, str]:

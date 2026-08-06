@@ -4,6 +4,7 @@ export interface ProjectCardViewModel {
   featured: boolean;
   title: string;
   summary: string;
+  coverAsset?: string;
   category?: "commercial" | "academic" | "hackathon";
   period?: string;
   role?: string;

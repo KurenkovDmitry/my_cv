@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.session import get_read_database_session, get_write_database_session
 from app.modules.content.application.admin_service import ContentAdminService
 from app.modules.content.application.service import ContentService
+from app.modules.content.domain.asset_storage import ContentAssetStorage
+from app.modules.content.infrastructure.dependencies import get_content_asset_storage
 from app.modules.content.infrastructure.preview_repository import InMemoryContentRepository
 from app.modules.content.infrastructure.sqlalchemy_repository import (
     FallbackContentRepository,
@@ -34,6 +36,7 @@ def get_content_service(
 def get_content_admin_service(
     write_database_session: AsyncSession = Depends(get_write_database_session),
     backup_bundle_storage: BackupBundleStorage = Depends(get_backup_bundle_storage),
+    content_asset_storage: ContentAssetStorage = Depends(get_content_asset_storage),
 ) -> ContentAdminService:
     """Собирает content-admin service для сохранения draft и publish-сценариев."""
 
@@ -44,4 +47,5 @@ def get_content_admin_service(
         content_repository=content_repository,
         system_repository=system_repository,
         backup_storage=backup_bundle_storage,
+        asset_storage=content_asset_storage,
     )

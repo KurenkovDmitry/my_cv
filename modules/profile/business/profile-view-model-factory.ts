@@ -1,4 +1,5 @@
 import type { LocaleCode } from "@portfolio/shared-types";
+import { resolveContentAssetUrl } from "@portfolio/shared-config";
 import { LocaleService } from "@portfolio/modules/localization";
 import { ProfileContentFacade } from "../api/profile-content-facade";
 import type { ProfileHeroViewModel } from "../types/domain";
@@ -21,11 +22,10 @@ export class ProfileViewModelFactory {
       headline: this.localeService.translate(profile.headline, localeCode),
       summary: this.localeService.translate(profile.summary, localeCode),
       location: this.localeService.translate(profile.location, localeCode),
-      avatarAsset: profile.avatarAsset,
+      avatarAsset: resolveContentAssetUrl(profile.avatarAssetId, profile.avatarAsset),
       educationBadges: education.map((educationItem) =>
         this.localeService.translate(educationItem.title, localeCode),
       ),
     };
   }
 }
-

@@ -15,6 +15,7 @@ import type {
   AnalyticsDashboardSnapshot,
   AnalyticsSeriesPoint,
   BackupArtifactSummary,
+  ContentAssetSummary,
   ContentDiffSnapshot,
   ImportApplyMode,
   ImportCandidateSummary,
@@ -29,10 +30,12 @@ import {
   compareImportCandidateToSnapshot,
   createBackupArtifact,
   deleteBackupArtifact,
+  deleteContentAsset,
   fetchAdminDashboardData,
   getBackupDownloadUrl,
   publishDraftSnapshot,
   saveDraftSnapshot,
+  uploadContentAsset,
   uploadImportCandidate,
 } from "./admin-dashboard-http-client";
 import {
@@ -42,8 +45,34 @@ import {
   loginToAdminPanel,
   logoutFromAdminPanel,
 } from "./admin-auth-http-client";
+import { PortfolioContentEditor } from "./portfolio-content-editor";
 
 type DashboardSourceKind = "live_api" | "preview_fallback";
+
+const SEEDED_PROOF_ASSET_IDS: Record<string, string> = {
+  "certificate-api-advanced": "b4e9d13a6ae57263ee6b3ca8dd2020b3",
+  "certificate-docker-intermediate": "4c10e2659d4679cbae13d7b76c5453f9",
+  "certificate-git-intermediate": "6f8adacfff063deee47a280697dd9106",
+  "certificate-javascript-intermediate": "ff43482301dea9a0fa9a77a1d4125abd",
+  "certificate-postgresql-intermediate": "f04d7ef2663f6f141d9d352e8fa4bb7c",
+  "vk-technopark-web-diploma": "f2c55f2afcbe9d11b7de2aec3d13fc48",
+};
+const SEEDED_PROFILE_ASSET_ID = "e6b61031e7c24de94cfb70f4b645c989";
+
+/** Добавляет asset id исходным документам старого snapshot без изменения их текста. */
+function migrateSeededAssetReferences(content: PortfolioContent): PortfolioContent {
+  if (content.contentAssetsVersion === 1) {
+    return content;
+  }
+  const migratedContent = structuredClone(content);
+  migratedContent.contentAssetsVersion = 1;
+  migratedContent.profile.avatarAssetId ??= SEEDED_PROFILE_ASSET_ID;
+  migratedContent.seo.openGraphAssetId ??= SEEDED_PROFILE_ASSET_ID;
+  for (const proofItem of migratedContent.skills.proofs ?? []) {
+    proofItem.assetId ??= SEEDED_PROOF_ASSET_IDS[proofItem.id];
+  }
+  return migratedContent;
+}
 
 function formatDateTime(value: string): string {
   return new Intl.DateTimeFormat("ru-RU", {
@@ -97,11 +126,10 @@ function mergeCandidateSelections(
 }
 
 /**
- * Первая административная витрина.
+ * Административная панель полного жизненного цикла портфолио.
  *
- * Сейчас она уже показывает ключевые контуры будущей панели:
- * draft-редактирование, preview, аналитику, import control version,
- * backup registry, service-state, health и audit log.
+ * Объединяет полный редактор snapshot, управляемые файлы, preview, аналитику,
+ * import control version, переносимые backup, service-state, health и audit log.
  */
 export function App() {
   const [adminSession, setAdminSession] = useState<AdminSessionResponse | null>(null);
@@ -124,6 +152,7 @@ export function App() {
   const [importCandidates, setImportCandidates] = useState<ImportCandidateSummary[]>(importCandidatesPreview);
   const [runtimeHealth, setRuntimeHealth] = useState<RuntimeHealthSnapshot>(runtimeHealthPreview);
   const [auditLogs, setAuditLogs] = useState<AdminAuditLogEntry[]>(adminAuditLogPreview);
+  const [contentAssets, setContentAssets] = useState<ContentAssetSummary[]>([]);
   const [candidateSelections, setCandidateSelections] = useState<Record<string, string[]>>({});
   const [currentDiff, setCurrentDiff] = useState<ContentDiffSnapshot | null>(null);
   const [mutationFeedback, setMutationFeedback] = useState<string | null>(null);
@@ -137,8 +166,6 @@ export function App() {
   const hasLocalDraftChangesRef = useRef(false);
 
   const deferredDraftContent = useDeferredValue(draftContent);
-  const firstProject = draftContent.projects[0];
-  const canRenderProjectEditor = Boolean(firstProject);
   const consentContent = deferredDraftContent.legal.analyticsConsent;
 
   const exportFileName = useMemo(() => {
@@ -167,9 +194,14 @@ export function App() {
     importCandidateResponse,
     runtimeHealthResponse,
     auditLogResponse,
+    contentAssetItems,
   }: Awaited<ReturnType<typeof fetchAdminDashboardData>>) => {
     if (!hasLocalDraftChangesRef.current) {
-      setDraftContent(portfolioResponse.payload);
+      const migratedContent = migrateSeededAssetReferences(portfolioResponse.payload);
+      if (JSON.stringify(migratedContent) !== JSON.stringify(portfolioResponse.payload)) {
+        hasLocalDraftChangesRef.current = true;
+      }
+      setDraftContent(migratedContent);
     }
 
     setAnalyticsSnapshot(analyticsResponse.snapshot);
@@ -181,6 +213,7 @@ export function App() {
     );
     setRuntimeHealth(runtimeHealthResponse.snapshot);
     setAuditLogs(auditLogResponse.items);
+    setContentAssets(contentAssetItems);
     setDashboardSource("live_api");
     setDashboardLoadError(null);
   };
@@ -270,50 +303,30 @@ export function App() {
     }
   };
 
-  const updateProfileField = (
-    fieldName: "displayName" | "headline" | "summary",
-    localeCode: "ru" | "en",
-    value: string,
-  ) => {
+  /** Принимает любую типобезопасную версию полного snapshot из универсального редактора. */
+  const handleDraftContentChange = (nextContent: PortfolioContent) => {
     hasLocalDraftChangesRef.current = true;
-
     startTransition(() => {
-      setDraftContent((currentContent) => ({
-        ...currentContent,
-        profile: {
-          ...currentContent.profile,
-          [fieldName]: {
-            ...currentContent.profile[fieldName],
-            [localeCode]: value,
-          },
-        },
-      }));
+      setDraftContent(nextContent);
     });
   };
 
-  const updateFirstProjectField = (
-    fieldName: "title" | "summary",
-    localeCode: "ru" | "en",
-    value: string,
-  ) => {
-    hasLocalDraftChangesRef.current = true;
+  /** Загружает управляемый файл и немедленно добавляет его в локальный реестр формы. */
+  const handleContentAssetUpload = async (file: File): Promise<ContentAssetSummary> => {
+    const uploadedAsset = await uploadContentAsset(file);
+    setContentAssets((currentAssets) => [
+      ...currentAssets.filter((assetItem) => assetItem.assetId !== uploadedAsset.assetId),
+      uploadedAsset,
+    ]);
+    setMutationFeedback(`Файл ${uploadedAsset.fileName} загружен. Сохраните draft после прикрепления.`);
+    return uploadedAsset;
+  };
 
-    startTransition(() => {
-      setDraftContent((currentContent) => ({
-        ...currentContent,
-        projects: currentContent.projects.map((projectItem, projectIndex) =>
-          projectIndex !== 0
-            ? projectItem
-            : {
-                ...projectItem,
-                [fieldName]: {
-                  ...projectItem[fieldName],
-                  [localeCode]: value,
-                },
-              },
-        ),
-      }));
-    });
+  /** Удаляет только неиспользуемый файл; проверка ссылок выполняется редактором до вызова. */
+  const handleContentAssetDelete = async (assetId: string): Promise<void> => {
+    const deletedAsset = await deleteContentAsset(assetId);
+    setContentAssets((currentAssets) => currentAssets.filter((assetItem) => assetItem.assetId !== assetId));
+    setMutationFeedback(`Файл ${deletedAsset.fileName} удалён из управляемого storage.`);
   };
 
   const handleDraftImport = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -434,6 +447,32 @@ export function App() {
       setMutationFeedback(`Создан backup ${backupResponse.item.fileName}.`);
     } catch (error) {
       setMutationFeedback(error instanceof Error ? error.message : "Не удалось создать backup draft.");
+    } finally {
+      setIsCreatingDraftBackup(false);
+    }
+  };
+
+  /** Создаёт серверный bundle вместе со всеми referenced assets и начинает скачивание. */
+  const handleFullBackupExport = async () => {
+    try {
+      setIsCreatingDraftBackup(true);
+      setMutationFeedback(null);
+      if (hasLocalDraftChangesRef.current) {
+        await persistCurrentDraft();
+      }
+      const backupResponse = await createBackupArtifact({
+        snapshotKind: "draft",
+        backupKind: "export_bundle",
+      });
+      const downloadLink = document.createElement("a");
+      downloadLink.href = getBackupDownloadUrl(backupResponse.item.backupId);
+      downloadLink.target = "_blank";
+      downloadLink.rel = "noopener noreferrer";
+      downloadLink.click();
+      await loadDashboardData();
+      setMutationFeedback(`Полный backup ${backupResponse.item.fileName} создан вместе с файлами.`);
+    } catch (error) {
+      setMutationFeedback(error instanceof Error ? error.message : "Не удалось выгрузить полный backup.");
     } finally {
       setIsCreatingDraftBackup(false);
     }
@@ -678,9 +717,9 @@ export function App() {
           <p className="admin-hero__eyebrow">Admin control room</p>
           <h1 className="admin-hero__title">Панель управления контентом и аналитикой</h1>
           <p className="admin-hero__description">
-            Слой уже собран под согласованную архитектуру: один SSR-снимок, staged import
-            как control version workflow, backup registry без хранения старых версий в БД,
-            обезличенная аналитика и компактный runtime health без обязательной Grafana.
+            Здесь редактируется весь snapshot резюме: профиль, опыт, проекты, компетенции,
+            дипломы, сертификаты, SEO, локализация и настройки доступности. Полный backup
+            переносит данные и прикреплённые файлы на другой сервер.
           </p>
         </div>
         <div className="admin-hero__actions">
@@ -704,8 +743,16 @@ export function App() {
           >
             {isPublishingDraft ? "Публикую..." : "Опубликовать draft"}
           </button>
+          <button
+            type="button"
+            className="admin-button admin-button--secondary"
+            onClick={() => void handleFullBackupExport()}
+            disabled={isCreatingDraftBackup}
+          >
+            {isCreatingDraftBackup ? "Собираю backup..." : "Полный backup с файлами"}
+          </button>
           <button type="button" className="admin-button admin-button--ghost" onClick={handleDraftExport}>
-            Выгрузить draft
+            JSON без файлов
           </button>
           <label className="admin-button admin-button--secondary">
             Загрузить draft
@@ -762,79 +809,13 @@ export function App() {
       </section>
 
       <section className="admin-grid">
-        <article className="admin-card">
-          <h2 className="admin-card__title">Профиль</h2>
-          <label className="admin-field">
-            <span>Имя (RU)</span>
-            <input
-              value={draftContent.profile.displayName.ru}
-              onChange={(event) => updateProfileField("displayName", "ru", event.target.value)}
-            />
-          </label>
-          <label className="admin-field">
-            <span>Имя (EN)</span>
-            <input
-              value={draftContent.profile.displayName.en}
-              onChange={(event) => updateProfileField("displayName", "en", event.target.value)}
-            />
-          </label>
-          <label className="admin-field">
-            <span>Заголовок (RU)</span>
-            <textarea
-              rows={4}
-              value={draftContent.profile.headline.ru}
-              onChange={(event) => updateProfileField("headline", "ru", event.target.value)}
-            />
-          </label>
-          <label className="admin-field">
-            <span>Заголовок (EN)</span>
-            <textarea
-              rows={4}
-              value={draftContent.profile.headline.en}
-              onChange={(event) => updateProfileField("headline", "en", event.target.value)}
-            />
-          </label>
-        </article>
-
-        <article className="admin-card">
-          <h2 className="admin-card__title">Проект-эталон</h2>
-          {canRenderProjectEditor ? (
-            <>
-              <label className="admin-field">
-                <span>Название (RU)</span>
-                <input
-                  value={firstProject.title.ru}
-                  onChange={(event) => updateFirstProjectField("title", "ru", event.target.value)}
-                />
-              </label>
-              <label className="admin-field">
-                <span>Название (EN)</span>
-                <input
-                  value={firstProject.title.en}
-                  onChange={(event) => updateFirstProjectField("title", "en", event.target.value)}
-                />
-              </label>
-              <label className="admin-field">
-                <span>Описание (RU)</span>
-                <textarea
-                  rows={6}
-                  value={firstProject.summary.ru}
-                  onChange={(event) => updateFirstProjectField("summary", "ru", event.target.value)}
-                />
-              </label>
-              <label className="admin-field">
-                <span>Описание (EN)</span>
-                <textarea
-                  rows={6}
-                  value={firstProject.summary.en}
-                  onChange={(event) => updateFirstProjectField("summary", "en", event.target.value)}
-                />
-              </label>
-            </>
-          ) : (
-            <p>Проекты ещё не загружены.</p>
-          )}
-        </article>
+        <PortfolioContentEditor
+          content={draftContent}
+          assets={contentAssets}
+          onChange={handleDraftContentChange}
+          onUploadAsset={handleContentAssetUpload}
+          onDeleteAsset={handleContentAssetDelete}
+        />
 
         <article className="admin-card">
           <h2 className="admin-card__title">Preview и consent</h2>

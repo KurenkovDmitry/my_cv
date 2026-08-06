@@ -9,6 +9,13 @@ from pathlib import Path
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.modules.content.application.asset_bundle import (
+    build_asset_bundle_entries,
+    collect_referenced_asset_ids,
+    extract_bundled_assets,
+    restore_bundled_assets,
+)
+from app.modules.content.domain.asset_storage import ContentAssetStorage
 from app.modules.content.domain.entities import PortfolioSnapshotRecord
 from app.modules.content.domain.repository import ContentAdminRepository
 from app.modules.system.application.bundle_payloads import extract_portfolio_payload
@@ -29,6 +36,7 @@ class SystemAdminService:
         backup_storage: BackupBundleStorage,
         import_candidate_storage: ImportCandidateStorage,
         resume_import_converter: ResumeImportConverter,
+        asset_storage: ContentAssetStorage,
     ) -> None:
         self._database_session = database_session
         self._content_repository = content_repository
@@ -36,6 +44,7 @@ class SystemAdminService:
         self._backup_storage = backup_storage
         self._import_candidate_storage = import_candidate_storage
         self._resume_import_converter = resume_import_converter
+        self._asset_storage = asset_storage
 
     async def create_backup_artifact(
         self,
@@ -144,9 +153,11 @@ class SystemAdminService:
         stored_candidate_document = None
 
         try:
-            candidate_payload, source_type = await self._resume_import_converter.convert_to_portfolio_payload(
-                source_file_name=source_file_name,
-                document_bytes=document_bytes,
+            candidate_payload, source_type, bundled_assets = (
+                await self._resume_import_converter.convert_to_portfolio_payload(
+                    source_file_name=source_file_name,
+                    document_bytes=document_bytes,
+                )
             )
             review_summary = _build_review_summary(
                 candidate_payload,
@@ -155,8 +166,13 @@ class SystemAdminService:
             )
             warning_messages = _build_warning_messages(candidate_payload)
             parse_status = "warning" if warning_messages else "parsed"
+            normalized_candidate_document = {
+                "bundleVersion": "portfolio.bundle.v2",
+                "snapshot": {"payload": candidate_payload},
+                "assets": bundled_assets,
+            }
             normalized_candidate_document_bytes = json.dumps(
-                candidate_payload,
+                normalized_candidate_document,
                 ensure_ascii=False,
                 sort_keys=True,
                 indent=2,
@@ -233,6 +249,7 @@ class SystemAdminService:
             import_candidate_record.storage_path,
         )
         candidate_payload = extract_portfolio_payload(candidate_document)
+        bundled_assets = extract_bundled_assets(candidate_document)
         current_draft_snapshot = await self._content_repository.get_snapshot(snapshot_kind="draft")
 
         replaceable_sections = _pick_string_list(import_candidate_record.review_summary.get("replaceableSections"))
@@ -247,10 +264,17 @@ class SystemAdminService:
             candidate_payload=candidate_payload,
             applied_sections=applied_sections,
         )
+        required_asset_ids = set(collect_referenced_asset_ids(next_draft_payload))
+        applicable_bundled_assets = [
+            asset_entry
+            for asset_entry in bundled_assets
+            if asset_entry.get("assetId") in required_asset_ids
+        ]
         import_status = "applied_full" if replace_mode == "full_replace" else "applied_partial"
         warning_messages = _build_warning_messages(candidate_payload)
         source_type = import_candidate_record.review_summary.get("sourceType")
         source_file_name = import_candidate_record.review_summary.get("sourceFileName")
+        restored_asset_ids: list[str] = []
 
         try:
             created_backup = await self._create_backup_from_snapshot_record(
@@ -258,6 +282,10 @@ class SystemAdminService:
                 backup_kind="pre_replace_backup",
                 registry_snapshot_kind="before_replace",
                 actor_login=actor_login,
+            )
+            restored_asset_ids = await restore_bundled_assets(
+                applicable_bundled_assets,
+                self._asset_storage,
             )
             saved_snapshot = await self._content_repository.save_snapshot(
                 snapshot_kind="draft",
@@ -307,6 +335,8 @@ class SystemAdminService:
             await self._database_session.rollback()
             if created_backup is not None:
                 await self._backup_storage.delete_bundle(created_backup.storage_path)
+            for restored_asset_id in restored_asset_ids:
+                await self._asset_storage.delete_asset(restored_asset_id)
             raise
 
     async def _create_backup_from_snapshot_record(
@@ -320,8 +350,12 @@ class SystemAdminService:
         """Создаёт backup по уже загруженному snapshot без хранения полного payload в БД."""
 
         exported_at = datetime.now(timezone.utc)
+        bundled_assets = await build_asset_bundle_entries(
+            snapshot_record.payload,
+            self._asset_storage,
+        )
         bundle_payload = {
-            "bundleVersion": "portfolio.bundle.v1",
+            "bundleVersion": "portfolio.bundle.v2",
             "exportedAt": exported_at.isoformat().replace("+00:00", "Z"),
             "backupKind": backup_kind,
             "snapshotKind": registry_snapshot_kind,
@@ -332,6 +366,7 @@ class SystemAdminService:
                 "updatedAt": snapshot_record.updated_at,
                 "payload": snapshot_record.payload,
             },
+            "assets": bundled_assets,
         }
         stored_bundle = await self._backup_storage.write_bundle(
             snapshot_kind=registry_snapshot_kind,

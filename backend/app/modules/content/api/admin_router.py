@@ -1,18 +1,31 @@
 """Admin router snapshot-модуля контента."""
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile, status
 
-from app.modules.content.api.dependencies import get_content_admin_service, get_content_service
+from app.config.settings import Settings, get_settings
+from app.modules.content.api.dependencies import (
+    get_content_admin_service,
+    get_content_service,
+)
 from app.modules.content.api.requests import DraftSnapshotUpsertRequest
-from app.modules.content.api.responses import AdminPublishResponse, PublicPortfolioResponse
+from app.modules.content.api.responses import (
+    AdminPublishResponse,
+    ContentAssetListResponse,
+    ContentAssetResponseItem,
+    PublicPortfolioResponse,
+)
 from app.modules.content.application.admin_service import ContentAdminService
 from app.modules.content.application.service import ContentService
+from app.modules.content.domain.asset_storage import ContentAssetStorage, StoredContentAsset
 from app.modules.content.domain.entities import PortfolioSnapshotRecord
 from app.modules.content.domain.repository import ContentSnapshotNotFoundError
+from app.modules.content.infrastructure.local_asset_storage import ContentAssetNotFoundError
+from app.modules.content.infrastructure.dependencies import get_content_asset_storage
 from app.modules.system.api.responses import BackupArtifactResponseItem
 from app.modules.system.domain.entities import BackupArtifactRecord
 
 router = APIRouter(prefix="/content", tags=["content-admin"])
+_PUBLIC_ASSET_PATH_PREFIX = "/api/public/portfolio/assets"
 
 
 def _map_snapshot_response(snapshot: PortfolioSnapshotRecord) -> PublicPortfolioResponse:
@@ -40,6 +53,19 @@ def _map_backup_response_item(backup_item: BackupArtifactRecord) -> BackupArtifa
         fileSizeBytes=backup_item.file_size_bytes,
         createdAt=backup_item.created_at,
         createdByActor=backup_item.created_by_actor,
+    )
+
+
+def _map_asset_response_item(asset_item: StoredContentAsset) -> ContentAssetResponseItem:
+    """Преобразует внутренние metadata файла в безопасный admin API-ответ."""
+
+    return ContentAssetResponseItem(
+        assetId=asset_item.asset_id,
+        fileName=asset_item.file_name,
+        mediaType=asset_item.media_type,
+        fileSizeBytes=asset_item.file_size_bytes,
+        checksumSha256=asset_item.checksum_sha256,
+        publicPath=f"{_PUBLIC_ASSET_PATH_PREFIX}/{asset_item.asset_id}",
     )
 
 
@@ -101,3 +127,65 @@ async def publish_admin_draft_snapshot(
         snapshot=_map_snapshot_response(published_snapshot),
         backup=_map_backup_response_item(created_backup) if created_backup else None,
     )
+
+
+@router.get("/assets", response_model=ContentAssetListResponse)
+async def list_content_assets(
+    asset_storage: ContentAssetStorage = Depends(get_content_asset_storage),
+) -> ContentAssetListResponse:
+    """Возвращает реестр загруженных подтверждений и изображений."""
+
+    asset_items = await asset_storage.list_assets()
+    return ContentAssetListResponse(
+        items=[_map_asset_response_item(asset_item) for asset_item in asset_items],
+    )
+
+
+@router.post(
+    "/assets",
+    response_model=ContentAssetResponseItem,
+    status_code=status.HTTP_201_CREATED,
+)
+async def upload_content_asset(
+    request: Request,
+    file: UploadFile = File(...),
+    settings: Settings = Depends(get_settings),
+    content_admin_service: ContentAdminService = Depends(get_content_admin_service),
+) -> ContentAssetResponseItem:
+    """Загружает подтверждение или изображение с лимитом размера и проверкой сигнатуры."""
+
+    document_bytes = await file.read(settings.content_asset_max_bytes + 1)
+    await file.close()
+    try:
+        stored_asset = await content_admin_service.upload_asset(
+            file_name=file.filename or "document",
+            document_bytes=document_bytes,
+            requested_media_type=file.content_type,
+            actor_login=_resolve_actor_login(request),
+            request_id=getattr(request.state, "request_id", None),
+        )
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
+
+    return _map_asset_response_item(stored_asset)
+
+
+@router.delete("/assets/{asset_id}", response_model=ContentAssetResponseItem)
+async def delete_content_asset(
+    asset_id: str,
+    request: Request,
+    content_admin_service: ContentAdminService = Depends(get_content_admin_service),
+) -> ContentAssetResponseItem:
+    """Удаляет выбранный файл; UI предварительно должен удалить ссылки на него из draft."""
+
+    try:
+        deleted_asset = await content_admin_service.delete_asset(
+            asset_id=asset_id,
+            actor_login=_resolve_actor_login(request),
+            request_id=getattr(request.state, "request_id", None),
+        )
+    except ContentAssetNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+    return _map_asset_response_item(deleted_asset)

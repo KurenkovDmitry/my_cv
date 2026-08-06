@@ -41,6 +41,7 @@ services:
       ENABLE_DOCS: "false"
     volumes:
       - portfolio-backups:${BACKUP_STORAGE_PATH}
+      - portfolio-assets:${CONTENT_ASSET_STORAGE_PATH:-/opt/portfolio/assets}
     depends_on:
       postgres:
         condition: service_healthy
@@ -94,5 +95,6 @@ volumes:
   postgres-data:
   redis-data:
   portfolio-backups:
+  portfolio-assets:
   certbot-www:
   letsencrypt:
