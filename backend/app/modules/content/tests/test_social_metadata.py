@@ -21,7 +21,7 @@ class _ContentServiceStub:
                     "siteName": {"ru": "Портфолио Дмитрия Куренкова", "en": "Portfolio"},
                     "shareTitle": {"ru": "Дмитрий Куренков — системный аналитик"},
                     "shareDescription": {"ru": "Highload, данные и архитектура."},
-                    "openGraphAssetId": "5a12d533e165b0e81a4ab7f3d35ef58",
+                    "openGraphAssetId": "5a12d533e165b0e81a4ab7f3d35ef58a",
                 },
             },
         )
@@ -29,7 +29,7 @@ class _ContentServiceStub:
 
 class _AssetStorageStub:
     async def get_asset(self, asset_id: str) -> SimpleNamespace:
-        assert asset_id == "5a12d533e165b0e81a4ab7f3d35ef58"
+        assert asset_id == "5a12d533e165b0e81a4ab7f3d35ef58a"
         return SimpleNamespace(media_type="image/png")
 
 

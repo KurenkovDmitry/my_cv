@@ -65,7 +65,8 @@ const SEEDED_PROOF_ASSET_IDS: Record<string, string> = {
   "vk-technopark-web-diploma": "f2c55f2afcbe9d11b7de2aec3d13fc48",
 };
 const SEEDED_PROFILE_ASSET_ID = "e6b61031e7c24de94cfb70f4b645c989";
-const SEEDED_SOCIAL_PREVIEW_ASSET_ID = "5a12d533e165b0e81a4ab7f3d35ef58";
+const LEGACY_INVALID_SOCIAL_PREVIEW_ASSET_ID = "5a12d533e165b0e81a4ab7f3d35ef58";
+const SEEDED_SOCIAL_PREVIEW_ASSET_ID = "5a12d533e165b0e81a4ab7f3d35ef58a";
 const SEEDED_FAVICON_ASSET_ID = "2de32610b8a3807476da3c26635ed06d";
 
 /** Добавляет asset id исходным документам старого snapshot без изменения их текста. */
@@ -87,7 +88,11 @@ function migrateSeededAssetReferences(content: PortfolioContent): PortfolioConte
     ru: "Highload-архитектура, интеграции, модели данных, backend-системы и продуктовые интерфейсы.",
     en: "High-load architecture, integrations, data models, backend systems, and product interfaces.",
   };
-  if (!migratedContent.seo.openGraphAssetId || migratedContent.seo.openGraphAssetId === SEEDED_PROFILE_ASSET_ID) {
+  if (
+    !migratedContent.seo.openGraphAssetId ||
+    migratedContent.seo.openGraphAssetId === SEEDED_PROFILE_ASSET_ID ||
+    migratedContent.seo.openGraphAssetId === LEGACY_INVALID_SOCIAL_PREVIEW_ASSET_ID
+  ) {
     migratedContent.seo.openGraphAssetId = SEEDED_SOCIAL_PREVIEW_ASSET_ID;
     migratedContent.seo.openGraphImage = "/media/social-preview-v1.png";
   }

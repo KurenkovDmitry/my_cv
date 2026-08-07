@@ -15,7 +15,7 @@ from app.modules.content.infrastructure.local_asset_storage import ContentAssetN
 
 router = APIRouter(prefix="/portfolio", tags=["content"])
 _LEGACY_PROFILE_ASSET_ID = "e6b61031e7c24de94cfb70f4b645c989"
-_DEFAULT_SOCIAL_PREVIEW_ASSET_ID = "5a12d533e165b0e81a4ab7f3d35ef58"
+_DEFAULT_SOCIAL_PREVIEW_ASSET_ID = "5a12d533e165b0e81a4ab7f3d35ef58a"
 _DEFAULT_FAVICON_ASSET_ID = "2de32610b8a3807476da3c26635ed06d"
 
 

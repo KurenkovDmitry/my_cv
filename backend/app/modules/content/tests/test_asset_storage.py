@@ -1,5 +1,6 @@
 """Тесты переносимого файлового контура резюме."""
 
+import hashlib
 from pathlib import Path
 
 import pytest
@@ -11,8 +12,18 @@ from app.modules.content.application.asset_bundle import (
     restore_bundled_assets,
 )
 from app.modules.content.infrastructure.local_asset_storage import LocalContentAssetStorage
+from app.modules.content.infrastructure.seed_assets import _SEED_ASSETS
 
 _MINIMAL_PDF_BYTES = b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF"
+
+
+def test_seed_asset_ids_match_bundled_file_checksums() -> None:
+    """Не допускает невалидные или рассинхронизированные id встроенных файлов."""
+
+    seed_root = Path(__file__).resolve().parents[3] / "seed_assets"
+    for file_name, asset_id, _media_type in _SEED_ASSETS:
+        document_bytes = (seed_root / file_name).read_bytes()
+        assert asset_id == hashlib.sha256(document_bytes).hexdigest()[:32]
 
 
 def _build_storage(root_directory: Path) -> LocalContentAssetStorage:

@@ -28,7 +28,7 @@ _SEED_ASSETS: tuple[tuple[str, str, str], ...] = (
         "application/pdf",
     ),
     ("photo_2025-04-09_22-18-09.jpg", "e6b61031e7c24de94cfb70f4b645c989", "image/jpeg"),
-    ("social-preview-v1.png", "5a12d533e165b0e81a4ab7f3d35ef58", "image/png"),
+    ("social-preview-v1.png", "5a12d533e165b0e81a4ab7f3d35ef58a", "image/png"),
     (
         "favicon-blueprint-animated.svg",
         "2de32610b8a3807476da3c26635ed06d",
