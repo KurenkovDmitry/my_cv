@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Avatar in a suit carrying a hearing folder</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <path d="M13 43v-8q0-11 12-12 12 1 12 12v8z" fill="#3E4652"/>
+  <path d="M19 25l6 11 6-11-3 18h-6z" fill="#F1F1F1"/>
+  <path d="M24 29h2l1 8-2 3-2-3z" fill="#466B9E"/>
+  <circle cx="25" cy="15" r="10" fill="#808080"/>
+  <path d="M17 12c2-7 12-6 16 0-4-6-12-6-16 1z" fill="#606060"/>
+  <circle cx="22" cy="14" r="1" fill="#4F4F4F"/><circle cx="28" cy="14" r="1" fill="#4F4F4F"/>
+  <path d="M22 19h6" stroke="#4F4F4F" stroke-width=".9" stroke-linecap="round"/>
+  <rect x="8.5" y="30" width="12" height="14" rx="1.2" fill="#9A6A43" stroke="#6B472D" stroke-width="1"/>
+  <path d="M12 30v-2h5v2M11 34h7" fill="none" stroke="#E5C49C" stroke-width="1"/>
+  <path d="M16.5 29.5q1 4.5 4.7 7" fill="none" stroke="#3E4652" stroke-width="4" stroke-linecap="round"/>
+  <rect x="18.5" y="34.2" width="4.6" height="5.2" rx="2" fill="#929292" stroke="#666" stroke-width=".55"/>
+  <path d="M19.3 35.8h2.7m-2.7 1.4h2.7" stroke="#707070" stroke-width=".45" stroke-linecap="round"/>
+</svg>

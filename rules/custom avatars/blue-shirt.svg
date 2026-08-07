@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Casual avatar in a blue shirt</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <path d="M13 43v-8q0-11 12-12 12 1 12 12v8z" fill="#4F7EAD"/><path d="M19 24l6 7 6-7-3 10h-6z" fill="#DCE8F2"/><path d="M25 31v12" stroke="#315D87" stroke-width="1"/><circle cx="27.5" cy="35" r=".7" fill="#DCE8F2"/><circle cx="27.5" cy="39" r=".7" fill="#DCE8F2"/>
+  <circle cx="25" cy="15" r="10" fill="#808080"/><path d="M17 12q2-7 8-7t8 7q-8-5-16 1z" fill="#606060"/><circle cx="22" cy="14" r="1" fill="#4F4F4F"/><circle cx="28" cy="14" r="1" fill="#4F4F4F"/><path d="M22 19q3 2 6 0" fill="none" stroke="#4F4F4F" stroke-width=".8"/>
+</svg>

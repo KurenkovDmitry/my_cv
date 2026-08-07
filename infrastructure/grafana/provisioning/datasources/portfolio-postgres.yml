@@ -1,0 +1,17 @@
+apiVersion: 1
+
+datasources:
+  - name: Portfolio PostgreSQL
+    uid: portfolio-postgres
+    type: postgres
+    access: proxy
+    url: $POSTGRES_HOST:$POSTGRES_PORT
+    user: $DB_APP_READ_USERNAME
+    jsonData:
+      database: $POSTGRES_DB_NAME
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: false
+    secureJsonData:
+      password: $DB_APP_READ_PASSWORD
+    editable: false

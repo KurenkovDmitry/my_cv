@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Avatar glancing sideways</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <circle cx="25" cy="15" r="10" fill="#808080"/>
+  <path d="M17 12c2-7 12-6 16 0-4-6-12-6-16 1z" fill="#606060"/>
+  <ellipse cx="21.5" cy="14" rx="2" ry="1.6" fill="#ECECEC"/><circle cx="22.3" cy="14" r=".9" fill="#404040"/>
+  <ellipse cx="28.5" cy="14" rx="2" ry="1.6" fill="#ECECEC"/><circle cx="29.3" cy="14" r=".9" fill="#404040"/>
+  <path d="M21 19q4-1 7 .3" fill="none" stroke="#4F4F4F" stroke-width=".9" stroke-linecap="round"/>
+  <path d="M14 35q0-11 11-12 11 1 11 12v8H14z" fill="#808080"/><path d="M14 43q6-8 11-8t11 8z" fill="#606060"/>
+  <path d="M36 18q3-2 5 0" fill="none" stroke="#666" stroke-width=".8" stroke-linecap="round"/><circle cx="41.5" cy="18" r=".7" fill="#666"/>
+</svg>

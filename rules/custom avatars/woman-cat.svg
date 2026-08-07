@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Woman avatar with a cat</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <path d="M14 35q0-11 11-12 11 1 11 12v8H14z" fill="#A26796"/><path d="M14 43q6-8 11-8t11 8z" fill="#7E4F75"/>
+  <path d="M14.8 18q0-14 10.2-14T35.2 18l-2 8H16.8z" fill="#55575C"/><circle cx="25" cy="15" r="9" fill="#858585"/><path d="M17 12q2-8 8-7 6-1 8 7-5-4-8-4t-8 4z" fill="#55575C"/>
+  <path d="M19.5 14.5q2.5-2 5 0M25.5 14.5q2.5-2 5 0" fill="none" stroke="#4F4F4F" stroke-width="1" stroke-linecap="round"/><path d="M22 19q3 2 6 0" fill="none" stroke="#4F4F4F" stroke-width=".8"/>
+  <ellipse cx="37" cy="37" rx="5" ry="8" fill="#777F88"/>
+  <path d="M32 25l1-5 3.5 3 3.5-3 1 5z" fill="#777F88" stroke="#555E67" stroke-width=".6"/><circle cx="36.5" cy="27" r="5" fill="#858E98" stroke="#555E67" stroke-width=".6"/>
+  <circle cx="34.8" cy="26.5" r=".7" fill="#343434"/><circle cx="38.2" cy="26.5" r=".7" fill="#343434"/><path d="M36.5 27.5l-.8.8.8.5.8-.5z" fill="#D4868C"/>
+</svg>

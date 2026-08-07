@@ -1,5 +1,7 @@
 """Response-модели служебного admin/system-контура."""
 
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -76,6 +78,29 @@ class ImportCandidateMutationResponse(BaseModel):
     item: ImportCandidateResponseItem
 
 
+class ImportCandidateFieldReviewItem(BaseModel):
+    """Одно изменение поля между текущим draft и import candidate."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    path: str
+    section: str
+    label: str
+    operation: str
+    change_kind: str = Field(alias="changeKind")
+    has_current_value: bool = Field(alias="hasCurrentValue")
+    has_candidate_value: bool = Field(alias="hasCandidateValue")
+    current_value: Any = Field(alias="currentValue")
+    candidate_value: Any = Field(alias="candidateValue")
+
+
+class ImportCandidateFieldReviewResponse(BaseModel):
+    """Git-подобное полевое сравнение candidate с актуальным draft."""
+
+    item: ImportCandidateResponseItem
+    fields: list[ImportCandidateFieldReviewItem]
+
+
 class PortfolioSnapshotResponseItem(BaseModel):
     """Упрощённое snapshot-представление для import replace workflow."""
 
@@ -119,6 +144,7 @@ class ImportCandidateApplyResponse(BaseModel):
     item: ImportCandidateResponseItem
     replace_mode: str = Field(alias="replaceMode")
     applied_sections: list[str] = Field(alias="appliedSections")
+    applied_fields: list[str] = Field(alias="appliedFields")
 
 
 class ContentDiffResponse(BaseModel):

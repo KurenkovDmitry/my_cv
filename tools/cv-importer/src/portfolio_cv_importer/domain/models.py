@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +30,7 @@ class ResumeEntry:
 
     text: str
     period: str
+    lines: list[str] = field(default_factory=list)
 
 
 @dataclass(slots=True, frozen=True)
@@ -42,6 +43,9 @@ class ResumeSections:
     experience_lines: list[str]
     project_lines: list[str]
     study_project_lines: list[str]
+    header_lines: list[str] = field(default_factory=list)
+    section_lines: dict[str, list[str]] = field(default_factory=dict)
+    detected_layout: str = "unstructured"
 
 
 @dataclass(slots=True, frozen=True)

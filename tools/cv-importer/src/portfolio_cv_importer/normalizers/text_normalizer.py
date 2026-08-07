@@ -3,35 +3,32 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 
 PERIOD_PATTERN = re.compile(
-    r"(Январь|Февраль|Март|Апрель|Май|Июнь|Июль|Август|Сентябрь|Октябрь|Ноябрь|Декабрь|[A-Za-z]+)\s*\d{4}",
+    r"(?:"
+    r"(?:январь|февраль|март|апрель|май|июнь|июль|август|сентябрь|октябрь|ноябрь|декабрь|"
+    r"jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|"
+    r"sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{4}"
+    r"|(?:19|20)\d{2}\s*(?:-|to|по|до)\s*(?:(?:19|20)\d{2}|present|current|now|н\.\s*в\.|настоящее время)"
+    r"|(?:19|20)\d{2}"
+    r")",
+    flags=re.IGNORECASE,
 )
 
 
 def normalize_extracted_line(raw_line: str) -> str:
     """Нормализует строку после извлечения из PDF/Markdown/TXT и восстанавливает базовые пробелы."""
 
-    normalized_line = raw_line
-    replacement_pairs = (
-        ("Языкипрограммированияифреймворки", "Языки программирования и фреймворки"),
-        ("Технологии:", "Технологии:"),
-        ("Управлениепроектами", "Управление проектами"),
-        ("Личныекачества", "Личные качества"),
-        ("Сертификатыирекомендации", "Сертификаты и рекомендации"),
-        ("УЧЕБНЫЕПРОЕКТЫ", "УЧЕБНЫЕ ПРОЕКТЫ"),
-        ("Бауманскаяинженернаяшкола", "Бауманская инженерная школа"),
-        ("Московскийгосударственныйтехническийуниверситет", "Московский государственный технический университет"),
-        ("Производственнаяпрактика", "Производственная практика"),
-        ("инженернойшколе", "инженерной школе"),
-        ("поднагрузкой", "под нагрузкой"),
-    )
-
-    for source_fragment, target_fragment in replacement_pairs:
-        normalized_line = normalized_line.replace(source_fragment, target_fragment)
-
-    normalized_line = normalized_line.replace("\u00a0", " ")
+    normalized_line = unicodedata.normalize("NFKC", raw_line)
+    normalized_line = normalized_line.replace("\t", " | ")
+    normalized_line = normalized_line.replace("\u00a0", " ").replace("\u00ad", "")
+    normalized_line = normalized_line.replace("\u200b", "").replace("\ufeff", "")
+    normalized_line = normalized_line.replace("—", "-").replace("–", "-").replace("−", "-")
     normalized_line = re.sub(r"\s+", " ", normalized_line)
+    for _ in range(3):
+        normalized_line = re.sub(r"\b([A-ZА-ЯЁ]{2,})\s+([A-ZА-ЯЁ])\b", r"\1\2", normalized_line)
+    normalized_line = re.sub(r"\b((?:19|20)\d)\s+(\d)\b", r"\1\2", normalized_line)
     normalized_line = re.sub(r"([А-Яа-яA-Za-z])(\d)", r"\1 \2", normalized_line)
     normalized_line = re.sub(r"(\d)([А-Яа-яA-Za-z])", r"\1 \2", normalized_line)
     return normalized_line.strip()

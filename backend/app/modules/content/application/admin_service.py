@@ -134,6 +134,9 @@ class ContentAdminService:
                 raise ValueError(
                     f"Content asset '{asset_id}' is still referenced by {snapshot_kind} snapshot.",
                 )
+        stored_asset = await self._asset_storage.get_asset(asset_id)
+        if stored_asset.source_kind != "upload":
+            raise ValueError("Bundled and system content assets cannot be deleted from the admin UI.")
         deleted_asset = await self._asset_storage.delete_asset(asset_id)
         try:
             await self._system_repository.append_audit_log(

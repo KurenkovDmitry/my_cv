@@ -48,6 +48,29 @@ function updateOpenGraphMeta(propertyName: string, content: string): void {
   }
   metaElement.content = content;
 }
+
+/** Обновляет обычные SEO/Twitter meta после загрузки опубликованного snapshot. */
+function updateNamedMeta(name: string, content: string): void {
+  let metaElement = document.querySelector<HTMLMetaElement>(`meta[name="${name}"]`);
+  if (!metaElement) {
+    metaElement = document.createElement("meta");
+    metaElement.name = name;
+    document.head.append(metaElement);
+  }
+  metaElement.content = content;
+}
+
+/** Обновляет favicon и touch-icon после загрузки опубликованного snapshot. */
+function updateIconLink(rel: "icon" | "apple-touch-icon", href: string): void {
+  let linkElement = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
+  if (!linkElement) {
+    linkElement = document.createElement("link");
+    linkElement.rel = rel;
+    document.head.append(linkElement);
+  }
+  linkElement.removeAttribute("type");
+  linkElement.href = href;
+}
 const consentService = new ConsentService();
 const analyticsService = new AnalyticsService(
   new AnalyticsEventFacade(frontendEnvConfig.publicApiBaseUrl),
@@ -155,6 +178,7 @@ function createStaticPreviewContent(): PortfolioContent {
   const staticPreview = structuredClone(portfolioPreviewContent);
   delete staticPreview.profile.avatarAssetId;
   delete staticPreview.seo.openGraphAssetId;
+  delete staticPreview.seo.faviconAssetId;
   for (const proofItem of staticPreview.skills.proofs ?? []) {
     delete proofItem.assetId;
   }
@@ -238,15 +262,35 @@ function RoutedApp() {
     document.documentElement.dataset.region = regionalLocale.toLowerCase();
     const localizedSiteName = portfolioContent.seo.siteName[localeCode];
     const localizedHeadline = portfolioContent.profile.headline[localeCode];
+    const shareTitle = portfolioContent.seo.shareTitle?.[localeCode]
+      ?? `${portfolioContent.profile.displayName[localeCode]} — ${localizedHeadline}`;
+    const shareDescription = portfolioContent.seo.shareDescription?.[localeCode]
+      ?? portfolioContent.profile.summary[localeCode];
     const configuredOpenGraphImage = resolveContentAssetUrl(
       portfolioContent.seo.openGraphAssetId,
       portfolioContent.seo.openGraphImage,
     );
     const absoluteOpenGraphImage = new URL(configuredOpenGraphImage, window.location.origin).toString();
-    document.title = `${localizedSiteName} — ${localizedHeadline}`;
-    updateOpenGraphMeta("og:title", document.title);
+    const configuredFavicon = resolveContentAssetUrl(
+      portfolioContent.seo.faviconAssetId,
+      portfolioContent.seo.faviconImage ?? portfolioContent.profile.avatarAsset,
+    );
+    const absoluteFavicon = new URL(configuredFavicon, window.location.origin).toString();
+    document.title = `${localizedSiteName} - ${localizedHeadline}`;
+    updateNamedMeta("description", shareDescription);
+    updateOpenGraphMeta("og:title", shareTitle);
+    updateOpenGraphMeta("og:description", shareDescription);
     updateOpenGraphMeta("og:site_name", localizedSiteName);
+    updateOpenGraphMeta("og:url", `${window.location.origin}/`);
+    updateOpenGraphMeta("og:locale", localeCode === "ru" ? "ru_RU" : "en_US");
     updateOpenGraphMeta("og:image", absoluteOpenGraphImage);
+    updateOpenGraphMeta("og:image:alt", `${portfolioContent.profile.displayName[localeCode]} — ${localizedHeadline}`);
+    updateNamedMeta("twitter:card", "summary_large_image");
+    updateNamedMeta("twitter:title", shareTitle);
+    updateNamedMeta("twitter:description", shareDescription);
+    updateNamedMeta("twitter:image", absoluteOpenGraphImage);
+    updateIconLink("icon", absoluteFavicon);
+    updateIconLink("apple-touch-icon", absoluteFavicon);
   }, [localeCode, portfolioContent, regionalLocale]);
 
   useEffect(() => {
@@ -410,6 +454,7 @@ function RoutedApp() {
         <div className="papyrus-edge papyrus-edge--right" aria-hidden="true" />
         <div className="papyrus-roller papyrus-roller--top" aria-hidden="true"><span /></div>
         <div className="papyrus-roller papyrus-roller--bottom" aria-hidden="true"><span /></div>
+        <div className="papyrus-paper-cutoff" aria-hidden="true" />
 
         <PageShell>
           <header className="topbar">

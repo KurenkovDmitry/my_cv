@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Avatar reading a book</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <circle cx="25" cy="15" r="10" fill="#808080"/><path d="M17 12q2-7 8-7t8 7q-8-5-16 1z" fill="#606060"/>
+  <circle cx="21.5" cy="14.3" r="3" fill="#D7EFF5" fill-opacity=".3" stroke="#454545" stroke-width="1"/><circle cx="28.5" cy="14.3" r="3" fill="#D7EFF5" fill-opacity=".3" stroke="#454545" stroke-width="1"/><path d="M24.5 14h1" stroke="#454545"/><circle cx="21.5" cy="14.7" r=".8" fill="#4F4F4F"/><circle cx="28.5" cy="14.7" r=".8" fill="#4F4F4F"/><path d="M22 19q3 1.5 6 0" fill="none" stroke="#4F4F4F" stroke-width=".8"/>
+  <path d="M14 35q0-11 11-12 11 1 11 12v8H14z" fill="#6A7A64"/>
+  <path d="M16 29q1 6 7 10m11-10q-1 6-7 10" fill="none" stroke="#53604F" stroke-width="4" stroke-linecap="round"/>
+  <path d="M7 33q9-3 18 4v10Q16 42 7 44zm36 0q-9-3-18 4v10q9-5 18-3z" fill="#E8E1CE" stroke="#7D6C55" stroke-width=".8" stroke-linejoin="round"/>
+  <ellipse cx="21" cy="39" rx="2.2" ry="1.8" fill="#929292" stroke="#666" stroke-width=".5"/><ellipse cx="29" cy="39" rx="2.2" ry="1.8" fill="#929292" stroke="#666" stroke-width=".5"/>
+  <path d="M11 36q5-1 9 1m19-1q-5-1-9 1M25 37v10" fill="none" stroke="#A89B83" stroke-width=".5"/>
+</svg>

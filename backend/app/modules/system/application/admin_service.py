@@ -19,6 +19,10 @@ from app.modules.content.domain.asset_storage import ContentAssetStorage
 from app.modules.content.domain.entities import PortfolioSnapshotRecord
 from app.modules.content.domain.repository import ContentAdminRepository
 from app.modules.system.application.bundle_payloads import extract_portfolio_payload
+from app.modules.system.application.import_field_review import (
+    apply_import_field_patches,
+    build_import_field_review,
+)
 from app.modules.system.application.resume_import_converter import ResumeImportConverter
 from app.modules.system.domain.entities import BackupArtifactRecord, ImportCandidateRecord
 from app.modules.system.domain.repository import SystemAdminRepository
@@ -234,10 +238,11 @@ class SystemAdminService:
         import_candidate_id: str,
         replace_mode: str,
         sections: list[str] | None,
+        fields: list[dict[str, object]] | None,
         actor_login: str,
         request_id: str | None,
-    ) -> tuple[PortfolioSnapshotRecord, BackupArtifactRecord | None, ImportCandidateRecord, list[str], str]:
-        """Применяет staged import candidate к текущему draft полностью или по выбранным разделам."""
+    ) -> tuple[PortfolioSnapshotRecord, BackupArtifactRecord | None, ImportCandidateRecord, list[str], list[str], str]:
+        """Применяет candidate целиком, по разделам или по выбранным полям."""
 
         occurred_at = datetime.now(timezone.utc)
         created_backup: BackupArtifactRecord | None = None
@@ -253,17 +258,32 @@ class SystemAdminService:
         current_draft_snapshot = await self._content_repository.get_snapshot(snapshot_kind="draft")
 
         replaceable_sections = _pick_string_list(import_candidate_record.review_summary.get("replaceableSections"))
-        applied_sections = _resolve_applied_sections(
-            replace_mode=replace_mode,
-            replaceable_sections=replaceable_sections,
-            requested_sections=sections or [],
-        )
-        next_draft_payload = _build_next_draft_payload(
-            replace_mode=replace_mode,
-            current_payload=current_draft_snapshot.payload,
-            candidate_payload=candidate_payload,
-            applied_sections=applied_sections,
-        )
+        applied_fields: list[str] = []
+        if replace_mode == "field_replace":
+            next_draft_payload, applied_fields = apply_import_field_patches(
+                current_draft_snapshot.payload,
+                candidate_payload,
+                fields or [],
+            )
+            applied_sections = sorted({path.removeprefix("/").split("/", 1)[0] for path in applied_fields})
+        else:
+            applied_sections = _resolve_applied_sections(
+                replace_mode=replace_mode,
+                replaceable_sections=replaceable_sections,
+                requested_sections=sections or [],
+            )
+            next_draft_payload = _build_next_draft_payload(
+                replace_mode=replace_mode,
+                current_payload=current_draft_snapshot.payload,
+                candidate_payload=candidate_payload,
+                applied_sections=applied_sections,
+            )
+
+        next_draft_payload["version"] = _extract_content_schema_version(candidate_payload)
+        next_draft_payload["draft"] = True
+        current_requires_review = bool(current_draft_snapshot.payload.get("needsManualReview"))
+        candidate_requires_review = bool(candidate_payload.get("needsManualReview"))
+        next_draft_payload["needsManualReview"] = current_requires_review or candidate_requires_review
         required_asset_ids = set(collect_referenced_asset_ids(next_draft_payload))
         applicable_bundled_assets = [
             asset_entry
@@ -307,7 +327,7 @@ class SystemAdminService:
                         else Path(import_candidate_record.storage_path).name
                     ),
                     "lastAppliedImportCandidateId": import_candidate_id,
-                    "manualOverrides": [] if replace_mode == "full_replace" else applied_sections,
+                    "manualOverrides": [] if replace_mode == "full_replace" else (applied_fields or applied_sections),
                     "warnings": warning_messages,
                 },
             )
@@ -322,6 +342,7 @@ class SystemAdminService:
                 change_summary={
                     "replaceMode": replace_mode,
                     "appliedSections": applied_sections,
+                    "appliedFields": applied_fields,
                     "draftChecksumSha256": saved_snapshot.content_checksum_sha256,
                 },
                 metadata={
@@ -330,7 +351,14 @@ class SystemAdminService:
                 },
             )
             await self._database_session.commit()
-            return saved_snapshot, created_backup, import_candidate_record, applied_sections, replace_mode
+            return (
+                saved_snapshot,
+                created_backup,
+                import_candidate_record,
+                applied_sections,
+                applied_fields,
+                replace_mode,
+            )
         except Exception:
             await self._database_session.rollback()
             if created_backup is not None:
@@ -338,6 +366,23 @@ class SystemAdminService:
             for restored_asset_id in restored_asset_ids:
                 await self._asset_storage.delete_asset(restored_asset_id)
             raise
+
+    async def get_import_candidate_field_review(
+        self,
+        *,
+        import_candidate_id: str,
+    ) -> tuple[ImportCandidateRecord, list[dict[str, object]]]:
+        """Возвращает актуальный полевой diff candidate относительно текущего draft."""
+
+        import_candidate_record = await self._system_repository.get_import_candidate(
+            import_candidate_id=import_candidate_id,
+        )
+        candidate_document = await self._import_candidate_storage.load_candidate_document(
+            import_candidate_record.storage_path,
+        )
+        candidate_payload = extract_portfolio_payload(candidate_document)
+        current_draft_snapshot = await self._content_repository.get_snapshot(snapshot_kind="draft")
+        return import_candidate_record, build_import_field_review(current_draft_snapshot.payload, candidate_payload)
 
     async def _create_backup_from_snapshot_record(
         self,
@@ -454,6 +499,9 @@ def _build_review_summary(
         for top_level_key in candidate_payload.keys()
         if top_level_key not in {"version", "draft", "needsManualReview"}
     )
+    import_metadata = candidate_payload.get("importMetadata")
+    detected_layout = import_metadata.get("detectedLayout") if isinstance(import_metadata, dict) else None
+    detected_sections = import_metadata.get("detectedSections") if isinstance(import_metadata, dict) else None
 
     return {
         "replaceableSections": replaceable_sections,
@@ -461,6 +509,8 @@ def _build_review_summary(
         "canReplaceFully": bool(replaceable_sections),
         "sourceType": source_type,
         "sourceFileName": source_file_name,
+        "detectedLayout": detected_layout if isinstance(detected_layout, str) else None,
+        "detectedSections": _pick_string_list(detected_sections),
     }
 
 

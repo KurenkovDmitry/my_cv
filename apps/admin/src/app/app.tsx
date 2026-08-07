@@ -18,6 +18,7 @@ import type {
   ContentAssetSummary,
   ContentDiffSnapshot,
   ImportApplyMode,
+  ImportCandidateFieldReview,
   ImportCandidateSummary,
   PortfolioContent,
   RuntimeHealthSnapshot,
@@ -33,6 +34,7 @@ import {
   deleteContentAsset,
   fetchAdminDashboardData,
   getBackupDownloadUrl,
+  getImportCandidateFieldReview,
   publishDraftSnapshot,
   saveDraftSnapshot,
   uploadContentAsset,
@@ -49,6 +51,11 @@ import { PortfolioContentEditor } from "./portfolio-content-editor";
 
 type DashboardSourceKind = "live_api" | "preview_fallback";
 
+interface CandidateFieldDraft {
+  selected: boolean;
+  editorValue: string;
+}
+
 const SEEDED_PROOF_ASSET_IDS: Record<string, string> = {
   "certificate-api-advanced": "b4e9d13a6ae57263ee6b3ca8dd2020b3",
   "certificate-docker-intermediate": "4c10e2659d4679cbae13d7b76c5453f9",
@@ -58,18 +65,35 @@ const SEEDED_PROOF_ASSET_IDS: Record<string, string> = {
   "vk-technopark-web-diploma": "f2c55f2afcbe9d11b7de2aec3d13fc48",
 };
 const SEEDED_PROFILE_ASSET_ID = "e6b61031e7c24de94cfb70f4b645c989";
+const SEEDED_SOCIAL_PREVIEW_ASSET_ID = "5a12d533e165b0e81a4ab7f3d35ef58";
+const SEEDED_FAVICON_ASSET_ID = "2de32610b8a3807476da3c26635ed06d";
 
 /** Добавляет asset id исходным документам старого snapshot без изменения их текста. */
 function migrateSeededAssetReferences(content: PortfolioContent): PortfolioContent {
-  if (content.contentAssetsVersion === 1) {
-    return content;
-  }
   const migratedContent = structuredClone(content);
-  migratedContent.contentAssetsVersion = 1;
-  migratedContent.profile.avatarAssetId ??= SEEDED_PROFILE_ASSET_ID;
-  migratedContent.seo.openGraphAssetId ??= SEEDED_PROFILE_ASSET_ID;
-  for (const proofItem of migratedContent.skills.proofs ?? []) {
-    proofItem.assetId ??= SEEDED_PROOF_ASSET_IDS[proofItem.id];
+  if (content.contentAssetsVersion !== 1) {
+    migratedContent.contentAssetsVersion = 1;
+    migratedContent.profile.avatarAssetId ??= SEEDED_PROFILE_ASSET_ID;
+    migratedContent.seo.openGraphAssetId ??= SEEDED_PROFILE_ASSET_ID;
+    for (const proofItem of migratedContent.skills.proofs ?? []) {
+      proofItem.assetId ??= SEEDED_PROOF_ASSET_IDS[proofItem.id];
+    }
+  }
+  migratedContent.seo.shareTitle ??= {
+    ru: "Дмитрий Куренков — системный аналитик",
+    en: "Dmitry Kurenkov — System Analyst",
+  };
+  migratedContent.seo.shareDescription ??= {
+    ru: "Highload-архитектура, интеграции, модели данных, backend-системы и продуктовые интерфейсы.",
+    en: "High-load architecture, integrations, data models, backend systems, and product interfaces.",
+  };
+  if (!migratedContent.seo.openGraphAssetId || migratedContent.seo.openGraphAssetId === SEEDED_PROFILE_ASSET_ID) {
+    migratedContent.seo.openGraphAssetId = SEEDED_SOCIAL_PREVIEW_ASSET_ID;
+    migratedContent.seo.openGraphImage = "/media/social-preview-v1.png";
+  }
+  if (!migratedContent.seo.faviconAssetId || migratedContent.seo.faviconAssetId === SEEDED_PROFILE_ASSET_ID) {
+    migratedContent.seo.faviconAssetId = SEEDED_FAVICON_ASSET_ID;
+    migratedContent.seo.faviconImage = "/media/favicon-blueprint-animated.svg";
   }
   return migratedContent;
 }
@@ -103,6 +127,28 @@ function getSeriesMaxValue(series: AnalyticsSeriesPoint[]): number {
 
 function pickStringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
+}
+
+function formatReviewValue(value: unknown): string {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (value === undefined) {
+    return "";
+  }
+  return JSON.stringify(value, null, 2) ?? "";
+}
+
+function parseReviewEditorValue(editorValue: string, originalValue: unknown): unknown {
+  if (typeof originalValue === "string") {
+    return editorValue;
+  }
+  return JSON.parse(editorValue);
+}
+
+function getSafeAdminReturnTo(): string | null {
+  const returnTo = new URLSearchParams(window.location.search).get("returnTo");
+  return returnTo?.startsWith("/grafana/") ? returnTo : null;
 }
 
 function mergeCandidateSelections(
@@ -154,6 +200,8 @@ export function App() {
   const [auditLogs, setAuditLogs] = useState<AdminAuditLogEntry[]>(adminAuditLogPreview);
   const [contentAssets, setContentAssets] = useState<ContentAssetSummary[]>([]);
   const [candidateSelections, setCandidateSelections] = useState<Record<string, string[]>>({});
+  const [candidateFieldReviews, setCandidateFieldReviews] = useState<Record<string, ImportCandidateFieldReview[]>>({});
+  const [candidateFieldDrafts, setCandidateFieldDrafts] = useState<Record<string, Record<string, CandidateFieldDraft>>>({});
   const [currentDiff, setCurrentDiff] = useState<ContentDiffSnapshot | null>(null);
   const [mutationFeedback, setMutationFeedback] = useState<string | null>(null);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
@@ -163,6 +211,7 @@ export function App() {
   const [busyBackupId, setBusyBackupId] = useState<string | null>(null);
   const [busyDiffKey, setBusyDiffKey] = useState<string | null>(null);
   const [busyImportActionKey, setBusyImportActionKey] = useState<string | null>(null);
+  const [busyFieldReviewId, setBusyFieldReviewId] = useState<string | null>(null);
   const hasLocalDraftChangesRef = useRef(false);
 
   const deferredDraftContent = useDeferredValue(draftContent);
@@ -185,6 +234,7 @@ export function App() {
     () => getSeriesMaxValue(analyticsSnapshot.clicksLast7Days),
     [analyticsSnapshot.clicksLast7Days],
   );
+  const analyticsIsReliable = analyticsSnapshot.sourceKind === "postgres";
 
   const applyDashboardData = ({
     portfolioResponse,
@@ -235,6 +285,10 @@ export function App() {
 
         setAdminSession(currentAdminSession);
         await loadDashboardData(abortController.signal);
+        const returnTo = getSafeAdminReturnTo();
+        if (returnTo) {
+          window.location.replace(returnTo);
+        }
       } catch (error) {
         if (abortController.signal.aborted) {
           return;
@@ -279,6 +333,10 @@ export function App() {
       const nextAdminSession = await loginToAdminPanel(loginRequest);
       setAdminSession(nextAdminSession);
       await loadDashboardData();
+      const returnTo = getSafeAdminReturnTo();
+      if (returnTo) {
+        window.location.assign(returnTo);
+      }
     } catch (error) {
       if (error instanceof AdminUnauthorizedError) {
         setAuthError("Логин или пароль администратора неверны.");
@@ -524,6 +582,69 @@ export function App() {
     });
   };
 
+  const handleImportCandidateFieldReview = async (importCandidateId: string) => {
+    try {
+      setBusyFieldReviewId(importCandidateId);
+      setMutationFeedback(null);
+      if (hasLocalDraftChangesRef.current) {
+        await persistCurrentDraft();
+        hasLocalDraftChangesRef.current = false;
+      }
+      const reviewResponse = await getImportCandidateFieldReview(importCandidateId);
+      setCandidateFieldReviews((currentReviews) => ({
+        ...currentReviews,
+        [importCandidateId]: reviewResponse.fields,
+      }));
+      setCandidateFieldDrafts((currentDrafts) => ({
+        ...currentDrafts,
+        [importCandidateId]: Object.fromEntries(
+          reviewResponse.fields.map((reviewField) => [
+            reviewField.path,
+            {
+              selected: true,
+              editorValue: formatReviewValue(reviewField.candidateValue),
+            },
+          ]),
+        ),
+      }));
+      setMutationFeedback(`Полевой разбор готов: найдено изменений ${reviewResponse.fields.length}.`);
+    } catch (error) {
+      setMutationFeedback(error instanceof Error ? error.message : "Не удалось получить полевой разбор candidate.");
+    } finally {
+      setBusyFieldReviewId(null);
+    }
+  };
+
+  const updateCandidateFieldDraft = (
+    importCandidateId: string,
+    path: string,
+    patch: Partial<CandidateFieldDraft>,
+  ) => {
+    setCandidateFieldDrafts((currentDrafts) => ({
+      ...currentDrafts,
+      [importCandidateId]: {
+        ...(currentDrafts[importCandidateId] ?? {}),
+        [path]: {
+          selected: currentDrafts[importCandidateId]?.[path]?.selected ?? false,
+          editorValue: currentDrafts[importCandidateId]?.[path]?.editorValue ?? "",
+          ...patch,
+        },
+      },
+    }));
+  };
+
+  const setAllCandidateFieldsSelected = (importCandidateId: string, selected: boolean) => {
+    setCandidateFieldDrafts((currentDrafts) => ({
+      ...currentDrafts,
+      [importCandidateId]: Object.fromEntries(
+        Object.entries(currentDrafts[importCandidateId] ?? {}).map(([path, fieldDraft]) => [
+          path,
+          { ...fieldDraft, selected },
+        ]),
+      ),
+    }));
+  };
+
   const handleBackupCompare = async (backupId: string) => {
     const comparisonBackupId = resolvePreferredBackupId(backupId);
     const diffKey = `backup:${backupId}`;
@@ -596,6 +717,8 @@ export function App() {
     replaceMode: ImportApplyMode,
   ) => {
     const selectedSections = candidateSelections[importCandidateId] ?? [];
+    const fieldReview = candidateFieldReviews[importCandidateId] ?? [];
+    const fieldDrafts = candidateFieldDrafts[importCandidateId] ?? {};
     const busyKey = `${importCandidateId}:${replaceMode}`;
 
     if (replaceMode === "partial_replace" && selectedSections.length === 0) {
@@ -603,10 +726,45 @@ export function App() {
       return;
     }
 
+    if (replaceMode === "field_replace" && fieldReview.length === 0) {
+      setMutationFeedback("Сначала откройте полевой разбор candidate.");
+      return;
+    }
+
+    let selectedFieldPatches: Array<{ path: string; operation: "set" | "remove"; value?: unknown }> = [];
+    if (replaceMode === "field_replace") {
+      try {
+        selectedFieldPatches = fieldReview
+          .filter((reviewField) => fieldDrafts[reviewField.path]?.selected)
+          .map((reviewField) => ({
+            path: reviewField.path,
+            operation: reviewField.operation,
+            ...(reviewField.operation === "set"
+              ? {
+                  value: parseReviewEditorValue(
+                    fieldDrafts[reviewField.path]?.editorValue ?? "",
+                    reviewField.candidateValue,
+                  ),
+                }
+              : {}),
+          }));
+      } catch (error) {
+        setMutationFeedback(error instanceof Error ? `Некорректное значение поля: ${error.message}` : "Некорректное значение поля.");
+        return;
+      }
+    }
+
+    if (replaceMode === "field_replace" && selectedFieldPatches.length === 0) {
+      setMutationFeedback("Для полевой замены отметьте хотя бы одно изменение.");
+      return;
+    }
+
     const isConfirmed = window.confirm(
       replaceMode === "full_replace"
         ? "Полностью заменить текущий draft содержимым import candidate? Перед заменой будет создан backup."
-        : `Применить к draft только выбранные разделы (${selectedSections.join(", ")})? Перед заменой будет создан backup.`,
+        : replaceMode === "field_replace"
+          ? `Применить выбранные изменения полей (${selectedFieldPatches.length})? Перед заменой будет создан backup.`
+          : `Применить к draft только выбранные разделы (${selectedSections.join(", ")})? Перед заменой будет создан backup.`,
     );
 
     if (!isConfirmed) {
@@ -624,11 +782,22 @@ export function App() {
       const applyResponse = await applyImportCandidateToDraft(importCandidateId, {
         replaceMode,
         sections: replaceMode === "partial_replace" ? selectedSections : [],
+        fields: replaceMode === "field_replace" ? selectedFieldPatches : [],
       });
 
       hasLocalDraftChangesRef.current = false;
       setDraftContent(applyResponse.snapshot.payload);
       await loadDashboardData();
+      setCandidateFieldReviews((currentReviews) => {
+        const nextReviews = { ...currentReviews };
+        delete nextReviews[importCandidateId];
+        return nextReviews;
+      });
+      setCandidateFieldDrafts((currentDrafts) => {
+        const nextDrafts = { ...currentDrafts };
+        delete nextDrafts[importCandidateId];
+        return nextDrafts;
+      });
       setMutationFeedback(
         applyResponse.backup
           ? `Import candidate применен (${applyResponse.replaceMode}); предыдущий draft сохранен в backup ${applyResponse.backup.fileName}.`
@@ -758,6 +927,9 @@ export function App() {
             Загрузить draft
             <input type="file" accept="application/json" hidden onChange={handleDraftImport} />
           </label>
+          <a className="admin-button admin-button--secondary" href="/grafana/" target="_blank" rel="noreferrer">
+            Открыть Grafana
+          </a>
           <button type="button" className="admin-button admin-button--ghost" onClick={() => void handleAdminLogout()}>
             Выйти
           </button>
@@ -783,20 +955,33 @@ export function App() {
 
       {mutationFeedback ? <div className="admin-runtime-alert">{mutationFeedback}</div> : null}
 
+      {!analyticsIsReliable ? (
+        <div className="admin-runtime-alert">
+          <strong>Аналитика недоступна:</strong> PostgreSQL не подтвердил данные. Демонстрационные числа отключены,
+          поэтому метрики показаны как «—», а не как вымышленные посещения.
+        </div>
+      ) : null}
+
       <section className="admin-summary-grid">
         <article className="admin-stat-card">
-          <span className="admin-stat-card__label">All-time sessions</span>
-          <strong className="admin-stat-card__value">{analyticsSnapshot.allTimeTotals.sessions}</strong>
-          <span className="admin-stat-card__hint">Daily retention: 548 дней</span>
+          <span className="admin-stat-card__label">Посетители / уникальные сессии</span>
+          <strong className="admin-stat-card__value">
+            {analyticsIsReliable ? analyticsSnapshot.allTimeTotals.sessions.toLocaleString("ru-RU") : "—"}
+          </strong>
+          <span className="admin-stat-card__hint">Повтор одной сессии не учитывается 12 часов</span>
         </article>
         <article className="admin-stat-card">
           <span className="admin-stat-card__label">All-time section views</span>
-          <strong className="admin-stat-card__value">{analyticsSnapshot.allTimeTotals.sectionViews}</strong>
+          <strong className="admin-stat-card__value">
+            {analyticsIsReliable ? analyticsSnapshot.allTimeTotals.sectionViews.toLocaleString("ru-RU") : "—"}
+          </strong>
           <span className="admin-stat-card__hint">Daily retention: 365 дней</span>
         </article>
         <article className="admin-stat-card">
           <span className="admin-stat-card__label">All-time section clicks</span>
-          <strong className="admin-stat-card__value">{analyticsSnapshot.allTimeTotals.sectionClicks}</strong>
+          <strong className="admin-stat-card__value">
+            {analyticsIsReliable ? analyticsSnapshot.allTimeTotals.sectionClicks.toLocaleString("ru-RU") : "—"}
+          </strong>
           <span className="admin-stat-card__hint">Daily retention: 365 дней</span>
         </article>
         <article className="admin-stat-card">
@@ -804,7 +989,9 @@ export function App() {
           <strong className="admin-stat-card__value">
             {runtimeHealth.grafanaEnabled ? "Enabled" : "Fallback mode"}
           </strong>
-          <span className="admin-stat-card__hint">Включать только если сервер выдержит</span>
+          <a className="admin-stat-card__hint" href="/grafana/" target="_blank" rel="noreferrer">
+            Открыть защищённые дашборды
+          </a>
         </article>
       </section>
 
@@ -1102,9 +1289,16 @@ export function App() {
 
           {importCandidates.map((candidateItem) => {
             const selectedSections = candidateSelections[candidateItem.importCandidateId] ?? [];
+            const fieldReview = candidateFieldReviews[candidateItem.importCandidateId] ?? [];
+            const fieldDrafts = candidateFieldDrafts[candidateItem.importCandidateId] ?? {};
+            const fieldReviewSections = [...new Set(fieldReview.map((reviewField) => reviewField.section))];
+            const selectedFieldCount = fieldReview.filter(
+              (reviewField) => fieldDrafts[reviewField.path]?.selected,
+            ).length;
             const draftCompareKey = `candidate-draft:${candidateItem.importCandidateId}`;
             const backupCompareKey = `candidate-backup:${candidateItem.importCandidateId}`;
             const partialApplyKey = `${candidateItem.importCandidateId}:partial_replace`;
+            const fieldApplyKey = `${candidateItem.importCandidateId}:field_replace`;
             const fullApplyKey = `${candidateItem.importCandidateId}:full_replace`;
 
             return (
@@ -1125,6 +1319,14 @@ export function App() {
                   <div className="admin-meta-row">
                     <span>Warnings</span>
                     <strong>{candidateItem.reviewSummary.warningsCount}</strong>
+                  </div>
+                  <div className="admin-meta-row">
+                    <span>Source</span>
+                    <strong>{candidateItem.reviewSummary.sourceFileName ?? candidateItem.reviewSummary.sourceType ?? "unknown"}</strong>
+                  </div>
+                  <div className="admin-meta-row">
+                    <span>Layout</span>
+                    <strong>{candidateItem.reviewSummary.detectedLayout ?? "structured JSON"}</strong>
                   </div>
                   <div className="admin-meta-row">
                     <span>Can replace fully</span>
@@ -1150,6 +1352,110 @@ export function App() {
                 <p className="admin-card__description">
                   Для partial replace выбрано: {selectedSections.length > 0 ? selectedSections.join(", ") : "ничего"}.
                 </p>
+                <div className="admin-field-review-toolbar">
+                  <button
+                    type="button"
+                    className="admin-button admin-button--secondary"
+                    onClick={() => void handleImportCandidateFieldReview(candidateItem.importCandidateId)}
+                    disabled={busyFieldReviewId === candidateItem.importCandidateId || Boolean(busyImportActionKey)}
+                  >
+                    {busyFieldReviewId === candidateItem.importCandidateId
+                      ? "Разбираю поля..."
+                      : fieldReview.length > 0
+                        ? "Обновить разбор по полям"
+                        : "Разобрать по полям"}
+                  </button>
+                  {fieldReview.length > 0 ? (
+                    <>
+                      <button
+                        type="button"
+                        className="admin-button admin-button--ghost"
+                        onClick={() => setAllCandidateFieldsSelected(candidateItem.importCandidateId, true)}
+                      >
+                        Выбрать все
+                      </button>
+                      <button
+                        type="button"
+                        className="admin-button admin-button--ghost"
+                        onClick={() => setAllCandidateFieldsSelected(candidateItem.importCandidateId, false)}
+                      >
+                        Снять все
+                      </button>
+                      <span className="admin-field-review-toolbar__count">
+                        {selectedFieldCount} / {fieldReview.length}
+                      </span>
+                    </>
+                  ) : null}
+                </div>
+                {fieldReview.length > 0 ? (
+                  <div className="admin-field-review">
+                    {fieldReviewSections.map((sectionName) => (
+                      <details key={sectionName} className="admin-field-review__section" open>
+                        <summary>
+                          <span>{sectionName}</span>
+                          <strong>{fieldReview.filter((reviewField) => reviewField.section === sectionName).length}</strong>
+                        </summary>
+                        <div className="admin-field-review__list">
+                          {fieldReview
+                            .filter((reviewField) => reviewField.section === sectionName)
+                            .map((reviewField) => {
+                              const fieldDraft = fieldDrafts[reviewField.path] ?? {
+                                selected: false,
+                                editorValue: formatReviewValue(reviewField.candidateValue),
+                              };
+
+                              return (
+                                <article
+                                  key={reviewField.path}
+                                  className={`admin-field-change admin-field-change--${reviewField.changeKind}`}
+                                >
+                                  <label className="admin-field-change__choice">
+                                    <input
+                                      type="checkbox"
+                                      checked={fieldDraft.selected}
+                                      onChange={(event) => updateCandidateFieldDraft(
+                                        candidateItem.importCandidateId,
+                                        reviewField.path,
+                                        { selected: event.target.checked },
+                                      )}
+                                    />
+                                    <span>
+                                      <strong>{reviewField.label}</strong>
+                                      <code>{reviewField.path}</code>
+                                    </span>
+                                    <em>{reviewField.changeKind}</em>
+                                  </label>
+                                  <div className="admin-field-change__comparison">
+                                    <div>
+                                      <span>Сейчас</span>
+                                      <pre>{reviewField.hasCurrentValue ? formatReviewValue(reviewField.currentValue) : "Нет поля"}</pre>
+                                    </div>
+                                    <div>
+                                      <span>После импорта</span>
+                                      {reviewField.operation === "remove" ? (
+                                        <p className="admin-field-change__remove">Поле будет удалено</p>
+                                      ) : (
+                                        <textarea
+                                          value={fieldDraft.editorValue}
+                                          rows={Math.min(8, Math.max(2, fieldDraft.editorValue.split("\n").length))}
+                                          onChange={(event) => updateCandidateFieldDraft(
+                                            candidateItem.importCandidateId,
+                                            reviewField.path,
+                                            { editorValue: event.target.value },
+                                          )}
+                                          aria-label={`Новое значение ${reviewField.label}`}
+                                        />
+                                      )}
+                                    </div>
+                                  </div>
+                                </article>
+                              );
+                            })}
+                        </div>
+                      </details>
+                    ))}
+                  </div>
+                ) : null}
                 <div className="admin-row-actions">
                   <button
                     type="button"
@@ -1170,8 +1476,26 @@ export function App() {
                   <button
                     type="button"
                     className="admin-button admin-button--primary"
+                    onClick={() => void handleImportCandidateApply(candidateItem.importCandidateId, "field_replace")}
+                    disabled={
+                      fieldReview.length === 0 ||
+                      selectedFieldCount === 0 ||
+                      busyImportActionKey === fullApplyKey ||
+                      busyImportActionKey === partialApplyKey ||
+                      busyImportActionKey === fieldApplyKey
+                    }
+                  >
+                    {busyImportActionKey === fieldApplyKey ? "Применяю поля..." : "Применить отмеченные поля"}
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-button admin-button--primary"
                     onClick={() => void handleImportCandidateApply(candidateItem.importCandidateId, "partial_replace")}
-                    disabled={busyImportActionKey === fullApplyKey || busyImportActionKey === partialApplyKey}
+                    disabled={
+                      busyImportActionKey === fullApplyKey ||
+                      busyImportActionKey === partialApplyKey ||
+                      busyImportActionKey === fieldApplyKey
+                    }
                   >
                     {busyImportActionKey === partialApplyKey ? "Применяю..." : "Подтверждаю выборочную замену"}
                   </button>
@@ -1182,7 +1506,8 @@ export function App() {
                     disabled={
                       !candidateItem.reviewSummary.canReplaceFully ||
                       busyImportActionKey === fullApplyKey ||
-                      busyImportActionKey === partialApplyKey
+                      busyImportActionKey === partialApplyKey ||
+                      busyImportActionKey === fieldApplyKey
                     }
                   >
                     {busyImportActionKey === fullApplyKey ? "Заменяю..." : "Полностью заменить"}

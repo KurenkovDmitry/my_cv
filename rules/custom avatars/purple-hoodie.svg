@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Casual avatar in a purple hoodie</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <path d="M12 43v-8q0-10 8-12l5 3 5-3q8 2 8 12v8z" fill="#74569B"/>
+  <path d="M18 25q7 9 14 0l2 9-5-2-4 3-4-3-5 2z" fill="#5E427F"/>
+  <circle cx="25" cy="15" r="10" fill="#808080"/><path d="M17 12q2-7 8-7t8 7q-8-5-16 1z" fill="#606060"/><circle cx="22" cy="14" r="1" fill="#4F4F4F"/><circle cx="28" cy="14" r="1" fill="#4F4F4F"/><path d="M22 19q3 2 6 0" fill="none" stroke="#4F4F4F" stroke-width=".8"/>
+  <path d="M22 29v6m6-6v6" stroke="#D8CBEA" stroke-width=".7"/><circle cx="22" cy="35" r=".9" fill="#D8CBEA"/><circle cx="28" cy="35" r=".9" fill="#D8CBEA"/><path d="M19 39h12v4H19z" fill="#65458A"/>
+</svg>

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from portfolio_cv_importer.domain.constants import (
-    DEFAULT_AVATAR_PATH,
     DEFAULT_SUPPORTED_LOCALES,
     PORTFOLIO_VERSION,
 )
@@ -27,22 +26,21 @@ def create_base_portfolio_payload(
         "profile": {
             "slug": "primary",
             "displayName": {
-                "ru": display_name_ru or "Дмитрий Александрович Куренков",
-                "en": display_name_en or "Dmitry Aleksandrovich Kurenkov",
+                "ru": display_name_ru or "Имя не распознано",
+                "en": display_name_en or "Name not detected",
             },
             "headline": {
-                "ru": headline_ru or "Системный аналитик и platform-инженер, который проектирует highload-сервисы, данные и рабочие интерфейсы.",
-                "en": headline_en or "System analyst and platform-minded engineer focused on highload services, data architecture, and production-grade interfaces.",
+                "ru": headline_ru or "Профессиональный профиль требует проверки",
+                "en": headline_en or "Professional profile requires review",
             },
             "summary": {
-                "ru": "Строю архитектуру вокруг нагрузки, интеграций и эксплуатационной устойчивости: от требований и моделей данных до backend-контуров, CI/CD и админ-панелей.",
-                "en": "I build architecture around load, integrations, and operational resilience, spanning requirements, data models, backend services, CI/CD, and admin tooling.",
+                "ru": "Импортировано из резюме и требует ручной проверки.",
+                "en": "Imported from a resume and requires manual review.",
             },
             "location": {
-                "ru": location_ru or "Россия, Москва",
-                "en": location_en or "Moscow, Russia",
+                "ru": location_ru,
+                "en": location_en,
             },
-            "avatarAsset": DEFAULT_AVATAR_PATH,
         },
         "education": [],
         "projects": [],
@@ -112,9 +110,8 @@ def create_base_portfolio_payload(
         },
         "seo": {
             "siteName": {
-                "ru": "Портфолио Дмитрия Куренкова",
-                "en": "Dmitry Kurenkov Portfolio",
+                "ru": display_name_ru or "Импортированное резюме",
+                "en": display_name_en or "Imported resume",
             },
-            "openGraphImage": DEFAULT_AVATAR_PATH,
         },
     }

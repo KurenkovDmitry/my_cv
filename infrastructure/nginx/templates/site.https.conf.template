@@ -45,6 +45,39 @@ server {
         proxy_set_header X-Request-ID $request_id;
     }
 
+    location = /_grafana_auth {
+        internal;
+        proxy_pass ${API_UPSTREAM}/api/admin/auth/grafana;
+        proxy_pass_request_body off;
+        proxy_set_header Content-Length "";
+        proxy_set_header Cookie $http_cookie;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    location @grafana_login {
+        return 302 ${ADMIN_BASE_PATH}/?returnTo=/grafana/;
+    }
+
+    location = /grafana {
+        return 301 /grafana/;
+    }
+
+    location ^~ /grafana/ {
+        auth_request /_grafana_auth;
+        auth_request_set $grafana_user $upstream_http_x_authenticated_user;
+        error_page 401 = @grafana_login;
+
+        proxy_pass http://grafana:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-WEBAUTH-USER $grafana_user;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Prefix /grafana;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
     location = ${ADMIN_BASE_PATH} {
         return 301 ${ADMIN_BASE_PATH}/;
     }
@@ -56,6 +89,7 @@ server {
 
     location / {
         root /usr/share/nginx/html/public;
+        ssi on;
         try_files $uri $uri/ /index.html;
     }
 }

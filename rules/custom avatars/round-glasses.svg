@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Avatar in round glasses</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <circle cx="25" cy="15" r="10" fill="#808080"/>
+  <path d="M17 12c2-7 12-6 16 0-4-6-12-6-16 1z" fill="#606060"/>
+  <circle cx="21.5" cy="14.3" r="3.1" fill="#D7EFF5" fill-opacity=".35" stroke="#454545" stroke-width="1"/>
+  <circle cx="28.5" cy="14.3" r="3.1" fill="#D7EFF5" fill-opacity=".35" stroke="#454545" stroke-width="1"/>
+  <path d="M24.6 14h.8" stroke="#454545"/><circle cx="21.5" cy="14.3" r=".8" fill="#4F4F4F"/><circle cx="28.5" cy="14.3" r=".8" fill="#4F4F4F"/>
+  <path d="M22 19q3 2 6 0" fill="none" stroke="#4F4F4F" stroke-width=".9" stroke-linecap="round"/>
+  <path d="M14 35c0-6 6-12 11-12s11 6 11 12v8H14z" fill="#808080"/>
+  <path d="M14 43s6-8 11-8 11 8 11 8z" fill="#606060"/>
+</svg>

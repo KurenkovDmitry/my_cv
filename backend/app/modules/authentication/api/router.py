@@ -41,6 +41,22 @@ async def get_admin_session(request: Request) -> AdminSessionResponse:
     )
 
 
+@router.get("/grafana", status_code=status.HTTP_204_NO_CONTENT)
+async def authorize_grafana_proxy(request: Request) -> Response:
+    """Разрешает Nginx проксировать Grafana только при действующей admin-cookie."""
+
+    admin_session = get_admin_session_service().read_session_from_request(request)
+    if admin_session is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Administrative session is required for Grafana.",
+        )
+    return Response(
+        status_code=status.HTTP_204_NO_CONTENT,
+        headers={"X-Authenticated-User": admin_session.login},
+    )
+
+
 @router.post("/session", response_model=AdminSessionResponse)
 async def create_admin_session(
     request_payload: AdminLoginRequest,

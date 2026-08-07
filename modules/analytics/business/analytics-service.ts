@@ -10,7 +10,7 @@ import { AnalyticsEventFacade } from "../api/analytics-event-facade";
 const SESSION_NONCE_STORAGE_KEY = "portfolio.analytics.session-nonce";
 const DEDUPE_BUCKET_STORAGE_KEY = "portfolio.analytics.dedupe-bucket";
 
-const SESSION_EVENT_TTL_MS = 45_000;
+const SESSION_EVENT_TTL_MS = 12 * 60 * 60 * 1_000;
 const SECTION_VIEW_TTL_MS = 15_000;
 const SECTION_CLICK_TTL_MS = 5_000;
 const MAX_DEDUPE_ITEMS = 120;
@@ -47,7 +47,7 @@ export class AnalyticsService {
       occurredAt: new Date().toISOString(),
     };
 
-    const sessionEventKey = `session:${entryRouteKey}:${localeCode}`;
+    const sessionEventKey = "session";
 
     if (this.shouldSkipEvent(sessionEventKey, SESSION_EVENT_TTL_MS)) {
       return;

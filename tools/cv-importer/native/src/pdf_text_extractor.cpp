@@ -70,16 +70,10 @@ std::string SourceCodeToKey(int source_code, std::size_t width) {
 std::string NormalizeExtractedLine(const std::string& raw_line) {
   std::string normalized_line = raw_line;
   const std::pair<const char*, const char*> replacements[] = {
-    {"Языкипрограммированияифреймворки", "Языки программирования и фреймворки"},
-    {"Управлениепроектами", "Управление проектами"},
-    {"Личныекачества", "Личные качества"},
-    {"Сертификатыирекомендации", "Сертификаты и рекомендации"},
-    {"УЧЕБНЫЕПРОЕКТЫ", "УЧЕБНЫЕ ПРОЕКТЫ"},
-    {"Бауманскаяинженернаяшкола", "Бауманская инженерная школа"},
-    {"Московскийгосударственныйтехническийуниверситет", "Московский государственный технический университет"},
-    {"Производственнаяпрактика", "Производственная практика"},
-    {"инженернойшколе", "инженерной школе"},
-    {"поднагрузкой", "под нагрузкой"},
+    {"\xC2\xA0", " "},
+    {"\xE2\x80\x8B", ""},
+    {"\xE2\x80\x94", "-"},
+    {"\xE2\x80\x93", "-"},
   };
 
   for (const auto& [source_fragment, target_fragment] : replacements) {
@@ -383,8 +377,17 @@ std::vector<std::string> GroupTextItemsIntoLines(const std::vector<TextItem>& te
     );
 
     std::string line_text;
+    std::optional<double> previous_x;
     for (const TextItem& text_item : grouped_line.items) {
+      const double horizontal_delta = previous_x.has_value() ? text_item.x - previous_x.value() : 0.0;
+      if (previous_x.has_value() && horizontal_delta > 96.0) {
+        line_text.append(" | ");
+      } else if (previous_x.has_value() && horizontal_delta > 3.0 && !line_text.empty() && line_text.back() != ' '
+                 && !text_item.text.empty() && text_item.text.front() != ' ') {
+        line_text.push_back(' ');
+      }
       line_text.append(text_item.text);
+      previous_x = text_item.x;
     }
 
     line_text = NormalizeExtractedLine(line_text);
@@ -420,11 +423,18 @@ std::vector<std::string> ExtractLinesFromPdfBytes(const std::vector<unsigned cha
   const FontUnicodeMaps font_to_unicode_maps = BuildFontToUnicodeMaps(pdf_objects);
   std::vector<std::string> page_lines;
 
+  std::vector<std::pair<int, const std::string*>> page_objects;
   for (const auto& [object_id, body_text] : pdf_objects) {
-    (void)object_id;
     if (body_text.find("/Type/Page") == std::string::npos) {
       continue;
     }
+    page_objects.push_back({object_id, &body_text});
+  }
+  std::sort(page_objects.begin(), page_objects.end());
+
+  for (const auto& [object_id, body_text_pointer] : page_objects) {
+    (void)object_id;
+    const std::string& body_text = *body_text_pointer;
 
     const std::regex content_reference_pattern(R"(\/Contents\s+(\d+)\s+0\s+R)");
     std::smatch content_reference_match;

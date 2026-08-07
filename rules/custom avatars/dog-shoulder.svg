@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Avatar with a dog on the shoulder</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <path d="M13 35q0-11 11-12 11 1 11 12v8H13z" fill="#718096"/><path d="M13 43q6-8 11-8t11 8z" fill="#586779"/>
+  <circle cx="24" cy="15" r="10" fill="#808080"/><path d="M16 12q2-7 8-7t8 7q-8-5-16 1z" fill="#606060"/><circle cx="21" cy="14" r="1" fill="#4F4F4F"/><circle cx="27" cy="14" r="1" fill="#4F4F4F"/><path d="M21 19q3 2 6 0" fill="none" stroke="#4F4F4F" stroke-width=".8"/>
+  <ellipse cx="36" cy="37" rx="5" ry="8" fill="#8B6B55"/><circle cx="36" cy="27" r="5" fill="#98765E" stroke="#684D3D" stroke-width=".6"/>
+  <ellipse cx="31.2" cy="27" rx="2.2" ry="4" fill="#684D3D"/><ellipse cx="40.8" cy="27" rx="2.2" ry="4" fill="#684D3D"/>
+  <circle cx="34.5" cy="26.2" r=".7" fill="#303030"/><circle cx="37.5" cy="26.2" r=".7" fill="#303030"/><ellipse cx="36" cy="28.2" rx="1.3" ry="1" fill="#303030"/><path d="M34.7 29.5q1.3 1 2.6 0" fill="none" stroke="#4B352A" stroke-width=".5"/>
+</svg>

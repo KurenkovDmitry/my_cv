@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Woman developer avatar with laptop</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <path d="M14.8 18q0-14 10.2-14T35.2 18l-2 8H16.8z" fill="#55575C"/>
+  <circle cx="25" cy="15" r="9" fill="#858585"/>
+  <path d="M17 12q2-8 8-7 6-1 8 7-5-4-8-4t-8 4z" fill="#55575C"/>
+  <circle cx="22" cy="14" r="1" fill="#4F4F4F"/><circle cx="28" cy="14" r="1" fill="#4F4F4F"/><path d="M22 18q3 2 6 0" fill="none" stroke="#4F4F4F" stroke-width=".8"/>
+  <path d="M14 35q0-11 11-12 11 1 11 12v8H14z" fill="#6B7280"/>
+  <rect x="10" y="30" width="30" height="14" rx="1.5" fill="#48515C" stroke="#363C44" stroke-width="1"/>
+  <circle cx="25" cy="36.5" r="2" fill="#A7C7E7"/><path d="M21 44h8" stroke="#2F353C" stroke-width="1.2"/>
+</svg>

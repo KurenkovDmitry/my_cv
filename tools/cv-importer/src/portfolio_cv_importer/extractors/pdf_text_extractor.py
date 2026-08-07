@@ -237,10 +237,18 @@ def group_text_items_into_lines(text_items: list[dict[str, object]]) -> list[str
 
     result_lines: list[str] = []
     for grouped_line in sorted(grouped_lines, key=lambda line: -float(line["y"])):
-        line_text = "".join(
-            str(item["text"])
-            for item in sorted(grouped_line["items"], key=lambda line_item: float(line_item["x"]))
-        )
+        sorted_line_items = sorted(grouped_line["items"], key=lambda line_item: float(line_item["x"]))
+        line_fragments: list[str] = []
+        previous_x: float | None = None
+        for line_item in sorted_line_items:
+            current_x = float(line_item["x"])
+            if previous_x is not None and current_x - previous_x > 96:
+                line_fragments.append(" | ")
+            elif previous_x is not None and current_x - previous_x > 3:
+                line_fragments.append(" ")
+            line_fragments.append(str(line_item["text"]))
+            previous_x = current_x
+        line_text = "".join(line_fragments)
         line_text = re.sub(r"\s+", " ", line_text).strip()
         if line_text:
             result_lines.append(line_text)

@@ -57,10 +57,14 @@ class AnalyticsService:
             consent_state=consent_state,
             storage_mode=storage_mode,
         )
-        event_key = f"session:{entry_route_key}:{locale_code}:{storage_mode}:{session_nonce}"
+        event_key = f"session:{session_nonce}"
         spike_key = f"session:{entry_route_key}:{locale_code}"
 
-        if self._is_duplicate(event_key=event_key, now=now):
+        if self._is_duplicate(
+            event_key=event_key,
+            now=now,
+            window_seconds=self._settings.analytics_session_dedupe_window_seconds,
+        ):
             return AnalyticsEventResult(status="deduplicated")
 
         rollback_events = self._consume_spike_bucket(spike_key=spike_key, now=now)
@@ -166,11 +170,18 @@ class AnalyticsService:
         )
         return AnalyticsEventResult(status="accepted")
 
-    def _is_duplicate(self, event_key: str, now: datetime) -> bool:
+    def _is_duplicate(
+        self,
+        event_key: str,
+        now: datetime,
+        window_seconds: int | None = None,
+    ) -> bool:
         """Проверяет дедупликацию в коротком окне и очищает просроченные записи."""
 
         self._prune_recent_events(now=now)
-        dedupe_window = timedelta(seconds=self._settings.analytics_event_dedupe_window_seconds)
+        dedupe_window = timedelta(
+            seconds=window_seconds or self._settings.analytics_event_dedupe_window_seconds,
+        )
         recent_event_time = self._analytics_store.recent_events.get(event_key)
         return recent_event_time is not None and now - recent_event_time < dedupe_window
 
@@ -182,7 +193,12 @@ class AnalyticsService:
     def _prune_recent_events(self, now: datetime) -> None:
         """Удаляет из памяти старые dedupe-ключи, чтобы процесс не накапливал мусор."""
 
-        dedupe_window = timedelta(seconds=self._settings.analytics_event_dedupe_window_seconds)
+        dedupe_window = timedelta(
+            seconds=max(
+                self._settings.analytics_event_dedupe_window_seconds,
+                self._settings.analytics_session_dedupe_window_seconds,
+            ),
+        )
         stale_event_keys = [
             event_key
             for event_key, occurred_at in self._analytics_store.recent_events.items()

@@ -37,6 +37,7 @@ class ContentAssetResponseItem(BaseModel):
     file_size_bytes: int = Field(alias="fileSizeBytes")
     checksum_sha256: str = Field(alias="checksumSha256")
     public_path: str = Field(alias="publicPath")
+    source_kind: str = Field(alias="sourceKind")
 
 
 class ContentAssetListResponse(BaseModel):

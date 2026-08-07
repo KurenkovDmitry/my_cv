@@ -56,9 +56,38 @@ async def test_asset_storage_rejects_executable_payload(tmp_path: Path) -> None:
     """Проверяет запрет произвольных файлов даже при безопасном имени PDF."""
 
     asset_storage = _build_storage(tmp_path / "assets")
-    with pytest.raises(ValueError, match="Only PDF"):
+    with pytest.raises(ValueError, match="Only PDF, JPEG"):
         await asset_storage.write_asset(
             file_name="fake.pdf",
             document_bytes=b"MZ-not-a-pdf",
             requested_media_type="application/pdf",
+        )
+
+
+@pytest.mark.asyncio
+async def test_asset_storage_accepts_safe_svg_and_marks_source_kind(tmp_path: Path) -> None:
+    """Проверяет безопасные встроенные SVG без скриптов и внешних ресурсов."""
+
+    asset_storage = _build_storage(tmp_path / "assets")
+    stored_asset = await asset_storage.write_asset(
+        file_name="avatar.svg",
+        document_bytes=b'<svg xmlns="http://www.w3.org/2000/svg"><circle cx="5" cy="5" r="5"/></svg>',
+        requested_media_type="image/svg+xml",
+        source_kind="custom_avatar",
+    )
+
+    assert stored_asset.media_type == "image/svg+xml"
+    assert stored_asset.source_kind == "custom_avatar"
+
+
+@pytest.mark.asyncio
+async def test_asset_storage_rejects_active_svg(tmp_path: Path) -> None:
+    """Не допускает SVG со скриптом даже при корректном MIME-типе."""
+
+    asset_storage = _build_storage(tmp_path / "assets")
+    with pytest.raises(ValueError, match="safe SVG"):
+        await asset_storage.write_asset(
+            file_name="unsafe.svg",
+            document_bytes=b'<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',
+            requested_media_type="image/svg+xml",
         )

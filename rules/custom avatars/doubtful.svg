@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Doubtful avatar</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <circle cx="24" cy="15" r="10" fill="#808080"/><path d="M16 12q2-7 8-7t8 7q-8-5-16 1z" fill="#606060"/>
+  <path d="M18.5 12.5q2.5-1 5 .4M25 11.5q2.5-2 5 .2" fill="none" stroke="#4F4F4F" stroke-width="1" stroke-linecap="round"/>
+  <ellipse cx="21" cy="14.5" rx="2" ry="1.5" fill="#ECECEC"/><circle cx="21.7" cy="14.5" r=".8" fill="#404040"/><ellipse cx="27.5" cy="14" rx="2" ry="1.5" fill="#ECECEC"/><circle cx="28.2" cy="14" r=".8" fill="#404040"/>
+  <path d="M21 19.5q3-1.8 6 .4" fill="none" stroke="#4F4F4F" stroke-width=".9" stroke-linecap="round"/>
+  <path d="M13 35q0-11 11-12 11 1 11 12v8H13z" fill="#6E7884"/><path d="M13 43q6-8 11-8t11 8z" fill="#56616D"/>
+  <path d="M36 10q0-4 3.5-4 3 0 3 2.5 0 1.7-2 2.5-1.5.6-1.5 2" fill="none" stroke="#6B5D86" stroke-width="1.3" stroke-linecap="round"/><circle cx="39" cy="16" r=".9" fill="#6B5D86"/>
+</svg>

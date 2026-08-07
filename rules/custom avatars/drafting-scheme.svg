@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Engineer drawing a technical scheme</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <path d="M13 35q0-11 12-12 12 1 12 12v8H13z" fill="#4D6F91"/>
+  <circle cx="25" cy="15" r="10" fill="#808080"/><path d="M17 12q2-7 8-7t8 7q-8-5-16 1z" fill="#606060"/>
+  <rect x="18.2" y="12" width="6.2" height="5" rx="1" fill="#B9DBE8" fill-opacity=".4" stroke="#434343" stroke-width="1"/><rect x="25.6" y="12" width="6.2" height="5" rx="1" fill="#B9DBE8" fill-opacity=".4" stroke="#434343" stroke-width="1"/><path d="M24.4 14h1.2" stroke="#434343"/>
+  <path d="M22 19q3 1.5 6 0" fill="none" stroke="#4F4F4F" stroke-width=".8"/>
+  <rect x="6" y="29" width="38" height="15" rx="1.2" fill="#E7EAED" stroke="#59636F" stroke-width="1"/>
+  <path d="M10 40V34h8v6zm12-8h7v5h-7zm11 3h7v6h-7zM18 37h4m7-2h4" fill="none" stroke="#547DA3" stroke-width=".8" stroke-linejoin="round"/>
+  <circle cx="14" cy="37" r="1.2" fill="#B95D67"/><circle cx="25.5" cy="34.5" r="1.2" fill="#B95D67"/><circle cx="36.5" cy="38" r="1.2" fill="#B95D67"/>
+  <path d="M35 28.5q4 1 4.5 5" fill="none" stroke="#4D6F91" stroke-width="4" stroke-linecap="round"/>
+  <ellipse cx="39.5" cy="34" rx="2.1" ry="1.8" fill="#929292" stroke="#666" stroke-width=".5"/>
+  <path d="M39 34l5-6" stroke="#D3A14A" stroke-width="1.1" stroke-linecap="round"/><path d="M44 28l.8-1.5" stroke="#454545" stroke-width="1"/>
+</svg>

@@ -3,6 +3,7 @@
 from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile, status
 from fastapi.responses import FileResponse
 
+from app.config.settings import Settings, get_settings
 from app.modules.content.domain.entities import PortfolioSnapshotRecord
 from app.modules.content.domain.repository import ContentSnapshotNotFoundError
 from app.modules.system.api.dependencies import (
@@ -22,6 +23,8 @@ from app.modules.system.api.responses import (
     ContentDiffSnapshotResponse,
     ContentDiffSummaryResponse,
     ImportCandidateApplyResponse,
+    ImportCandidateFieldReviewItem,
+    ImportCandidateFieldReviewResponse,
     ImportCandidateListResponse,
     ImportCandidateMutationResponse,
     ImportCandidateResponseItem,
@@ -318,6 +321,32 @@ async def compare_import_candidate_to_snapshot(
 
 
 @router.get(
+    "/import-candidates/{import_candidate_id}/field-review",
+    response_model=ImportCandidateFieldReviewResponse,
+)
+async def get_import_candidate_field_review(
+    import_candidate_id: str,
+    system_admin_service: SystemAdminService = Depends(get_system_admin_service),
+) -> ImportCandidateFieldReviewResponse:
+    """Возвращает редактируемые различия по каждому полю candidate."""
+
+    try:
+        import_candidate_item, review_fields = await system_admin_service.get_import_candidate_field_review(
+            import_candidate_id=import_candidate_id,
+        )
+    except (ImportCandidateNotFoundError, ContentSnapshotNotFoundError) as error:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(error),
+        ) from error
+
+    return ImportCandidateFieldReviewResponse(
+        item=_map_import_candidate_response_item(import_candidate_item),
+        fields=[ImportCandidateFieldReviewItem.model_validate(review_field) for review_field in review_fields],
+    )
+
+
+@router.get(
     "/import-candidates/{import_candidate_id}/compare/backup/{backup_id}",
     response_model=ContentDiffResponse,
 )
@@ -355,11 +384,12 @@ async def apply_import_candidate_to_draft(
     """Применяет staged import candidate к draft полностью или выборочно по разделам."""
 
     try:
-        saved_snapshot, created_backup, import_candidate_item, applied_sections, replace_mode = (
+        saved_snapshot, created_backup, import_candidate_item, applied_sections, applied_fields, replace_mode = (
             await system_admin_service.apply_import_candidate_to_draft(
                 import_candidate_id=import_candidate_id,
                 replace_mode=request_payload.replace_mode,
                 sections=request_payload.sections,
+                fields=[field.model_dump() for field in request_payload.fields],
                 actor_login=_resolve_actor_login(request),
                 request_id=getattr(request.state, "request_id", None),
             )
@@ -381,16 +411,20 @@ async def apply_import_candidate_to_draft(
         item=_map_import_candidate_response_item(import_candidate_item),
         replaceMode=replace_mode,
         appliedSections=applied_sections,
+        appliedFields=applied_fields,
     )
 
 
 @router.get("/runtime-health", response_model=RuntimeHealthResponse)
 async def get_runtime_health(
+    settings: Settings = Depends(get_settings),
     system_service: SystemService = Depends(get_system_service),
 ) -> RuntimeHealthResponse:
     """Возвращает runtime health snapshot или fallback без тяжёлой Grafana."""
 
-    return RuntimeHealthResponse(snapshot=await system_service.get_runtime_health())
+    runtime_health_snapshot = await system_service.get_runtime_health()
+    runtime_health_snapshot["grafanaEnabled"] = settings.enable_grafana_integration
+    return RuntimeHealthResponse(snapshot=runtime_health_snapshot)
 
 
 @router.get("/audit-log", response_model=AuditLogListResponse)

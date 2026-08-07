@@ -144,7 +144,7 @@ export function SettingsPanel({
           <PreferenceToggle
             checked={preferences.pointerEdges}
             title={isRussian ? "Края за курсором" : "Pointer-responsive edges"}
-            description={isRussian ? "Двигаются только поля и кромка листа — текст остаётся стабильным." : "Only the margins and paper edge react; text remains stable."}
+            description={isRussian ? "Двигаются только поля и кромка листа - текст остаётся стабильным." : "Only the margins and paper edge react; text remains stable."}
             onChange={(checked) => updatePreference("pointerEdges", checked)}
           />
           <PreferenceToggle

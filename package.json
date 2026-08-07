@@ -2,6 +2,7 @@
   "name": "portfolio-monorepo",
   "private": true,
   "version": "0.1.0",
+  "license": "UNLICENSED",
   "description": "Монорепозиторий персонального сайта-портфолио с публичной и административной частью.",
   "workspaces": [
     "apps/*",
@@ -16,4 +17,3 @@
     "test": "npm run test --workspaces --if-present"
   }
 }
-

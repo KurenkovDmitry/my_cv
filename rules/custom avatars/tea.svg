@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Relaxed avatar drinking tea</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <circle cx="25" cy="15" r="10" fill="#808080"/><path d="M17 12q2-7 8-7t8 7q-8-5-16 1z" fill="#606060"/>
+  <path d="M19.5 14.5q2.5 1.4 5 0M25.5 14.5q2.5 1.4 5 0" fill="none" stroke="#4F4F4F" stroke-width="1" stroke-linecap="round"/><path d="M22 19q3 2 6 0" fill="none" stroke="#4F4F4F" stroke-width=".8"/>
+  <path d="M14 35q0-11 11-12 11 1 11 12v8H14z" fill="#76619A"/><path d="M14 43q6-8 11-8t11 8z" fill="#5D4A7D"/>
+  <path d="M31 31h9v10h-9z" fill="#E9EFF2" stroke="#617681" stroke-width=".8"/><path d="M40 33h2q3 0 3 3t-3 3h-2" fill="none" stroke="#617681" stroke-width="1.2"/><path d="M35 31v5h2" fill="none" stroke="#9A7754" stroke-width=".55"/><rect x="36" y="35" width="2.5" height="2.5" fill="#C69A5C"/>
+  <path d="M33 28q-2-2 0-4m4 4q-2-2 0-4" fill="none" stroke="#8F795E" stroke-width=".8" stroke-linecap="round"/>
+</svg>

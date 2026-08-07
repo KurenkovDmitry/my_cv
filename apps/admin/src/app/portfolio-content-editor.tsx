@@ -1,4 +1,5 @@
 import { ChangeEvent, useMemo, useState } from "react";
+import { resolveContentAssetUrl } from "@portfolio/shared-config";
 import type { ContentAssetSummary, PortfolioContent } from "@portfolio/shared-types";
 
 type JsonPrimitive = string | number | boolean | null;
@@ -25,6 +26,13 @@ interface JsonValueEditorProps {
   onRemove: (path: JsonPath) => void;
   onMove: (path: JsonPath, direction: -1 | 1) => void;
   onUploadAsset: (file: File) => Promise<ContentAssetSummary>;
+}
+
+type AssetPickerKind = "image" | "document" | "any";
+
+interface AttachmentFieldConfig {
+  fieldName: string;
+  kind: AssetPickerKind;
 }
 
 const ROOT_SECTION_KEYS: Array<keyof PortfolioContent> = [
@@ -120,6 +128,10 @@ const FIELD_LABELS: Record<string, string> = {
   siteName: "Название сайта",
   openGraphImage: "Резервное изображение Open Graph",
   openGraphAssetId: "Изображение карточки ссылки",
+  faviconImage: "Резервный favicon",
+  faviconAssetId: "Favicon сайта",
+  shareTitle: "Заголовок при отправке ссылки",
+  shareDescription: "Описание при отправке ссылки",
   ru: "Русский",
   en: "Английский",
 };
@@ -307,15 +319,32 @@ export function PortfolioContentEditor({
           {assets.length === 0 ? <p>Загруженных через админку файлов пока нет.</p> : null}
           {assets.map((assetItem) => (
             <article key={assetItem.assetId} className="content-editor__asset-row">
-              <div>
-                <strong>{assetItem.fileName}</strong>
-                <p>{assetItem.mediaType} · {formatBytes(assetItem.fileSizeBytes)}</p>
+              <div className="content-editor__asset-info">
+                {assetItem.mediaType.startsWith("image/") ? (
+                  <img
+                    src={resolveContentAssetUrl(assetItem.assetId, assetItem.publicPath)}
+                    alt=""
+                    loading="lazy"
+                  />
+                ) : null}
+                <div>
+                  <strong>{assetItem.fileName}</strong>
+                  <p>{assetItem.mediaType} · {formatBytes(assetItem.fileSizeBytes)}</p>
+                </div>
               </div>
-              <span>{referencedAssetIds.has(assetItem.assetId) ? "используется" : "не прикреплён"}</span>
+              <span>
+                {assetItem.sourceKind === "custom_avatar"
+                  ? "встроенный аватар"
+                  : referencedAssetIds.has(assetItem.assetId)
+                    ? "используется"
+                    : "не прикреплён"}
+              </span>
               <button
                 type="button"
                 className="admin-button admin-button--ghost"
                 onClick={() => void handleAssetDelete(assetItem.assetId)}
+                disabled={assetItem.sourceKind !== "upload"}
+                title={assetItem.sourceKind === "upload" ? "Удалить файл" : "Системные файлы защищены от удаления"}
               >
                 Удалить
               </button>
@@ -390,26 +419,32 @@ function JsonValueEditor({
   }
 
   if (isJsonObject(value)) {
-    const attachmentFieldName = resolveAttachmentFieldName(path);
+    const attachmentFields = resolveAttachmentFields(path, value);
+    const attachmentFieldNames = new Set(attachmentFields.map((field) => field.fieldName));
     return (
       <fieldset className="content-field content-field--object">
         <legend>{label}</legend>
-        {attachmentFieldName ? (
-          <AssetPicker
-            fieldLabel={getFieldLabel(attachmentFieldName)}
-            assetId={typeof value[attachmentFieldName] === "string" ? value[attachmentFieldName] : ""}
-            assets={assets}
-            onChange={(nextAssetId) => {
-              const attachmentPath = [...path, attachmentFieldName];
-              if (nextAssetId) onReplace(attachmentPath, nextAssetId);
-              else onRemove(attachmentPath);
-            }}
-            onUploadAsset={onUploadAsset}
-          />
-        ) : null}
+        {attachmentFields.map((attachmentField) => {
+          const selectedAssetId = value[attachmentField.fieldName];
+          return (
+            <AssetPicker
+              key={`${normalizedPath}.${attachmentField.fieldName}`}
+              fieldLabel={getFieldLabel(attachmentField.fieldName)}
+              assetId={typeof selectedAssetId === "string" ? selectedAssetId : ""}
+              assets={assets}
+              onChange={(nextAssetId) => {
+                const attachmentPath = [...path, attachmentField.fieldName];
+                if (nextAssetId) onReplace(attachmentPath, nextAssetId);
+                else onRemove(attachmentPath);
+              }}
+              onUploadAsset={onUploadAsset}
+              kind={attachmentField.kind}
+            />
+          );
+        })}
         <div className="content-field__object-grid">
           {Object.entries(value).map(([nestedFieldName, nestedValue]) => {
-            if (nestedFieldName === attachmentFieldName) {
+            if (attachmentFieldNames.has(nestedFieldName)) {
               return null;
             }
             return (
@@ -489,12 +524,24 @@ interface AssetPickerProps {
   assets: ContentAssetSummary[];
   onChange: (assetId: string) => void;
   onUploadAsset: (file: File) => Promise<ContentAssetSummary>;
+  kind: AssetPickerKind;
 }
 
 /** Позволяет выбрать ранее загруженный файл или безопасно загрузить новый. */
-function AssetPicker({ fieldLabel, assetId, assets, onChange, onUploadAsset }: AssetPickerProps) {
+function AssetPicker({ fieldLabel, assetId, assets, onChange, onUploadAsset, kind }: AssetPickerProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const availableAssets = useMemo(
+    () => assets.filter((assetItem) => {
+      if (kind === "image") return assetItem.mediaType.startsWith("image/");
+      if (kind === "document") return assetItem.mediaType === "application/pdf" || assetItem.mediaType.startsWith("image/");
+      return true;
+    }),
+    [assets, kind],
+  );
+  const avatarAssets = availableAssets.filter((assetItem) => assetItem.sourceKind === "custom_avatar");
+  const regularAssets = availableAssets.filter((assetItem) => assetItem.sourceKind !== "custom_avatar");
+  const selectedAsset = availableAssets.find((assetItem) => assetItem.assetId === assetId);
 
   const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -516,25 +563,64 @@ function AssetPicker({ fieldLabel, assetId, assets, onChange, onUploadAsset }: A
 
   return (
     <div className="asset-picker">
+      {selectedAsset?.mediaType.startsWith("image/") ? (
+        <img
+          className="asset-picker__preview"
+          src={resolveContentAssetUrl(selectedAsset.assetId, selectedAsset.publicPath)}
+          alt={`Предпросмотр: ${selectedAsset.fileName}`}
+        />
+      ) : null}
       <label className="content-field">
         <span>{fieldLabel}</span>
         <select value={assetId} onChange={(event) => onChange(event.target.value)}>
           <option value="">Не прикреплён</option>
-          {assets.map((assetItem) => (
-            <option key={assetItem.assetId} value={assetItem.assetId}>{assetItem.fileName}</option>
-          ))}
+          {avatarAssets.length > 0 ? (
+            <optgroup label="Custom avatars">
+              {avatarAssets.map((assetItem) => (
+                <option key={assetItem.assetId} value={assetItem.assetId}>{assetItem.fileName}</option>
+              ))}
+            </optgroup>
+          ) : null}
+          {regularAssets.length > 0 ? (
+            <optgroup label="Загруженные и исходные файлы">
+              {regularAssets.map((assetItem) => (
+                <option key={assetItem.assetId} value={assetItem.assetId}>{assetItem.fileName}</option>
+              ))}
+            </optgroup>
+          ) : null}
         </select>
       </label>
       <label className="admin-button admin-button--secondary asset-picker__upload">
-        {isUploading ? "Загрузка..." : "Загрузить PDF или изображение"}
+        {isUploading ? "Загрузка..." : kind === "image" ? "Загрузить своё изображение" : "Загрузить файл"}
         <input
           type="file"
-          accept="application/pdf,image/jpeg,image/png,image/webp"
+          accept={kind === "image"
+            ? "image/jpeg,image/png,image/webp,image/svg+xml,image/x-icon,image/vnd.microsoft.icon,.ico"
+            : "application/pdf,image/jpeg,image/png,image/webp,image/svg+xml"}
           hidden
           disabled={isUploading}
           onChange={(event) => void handleUpload(event)}
         />
       </label>
+      {kind === "image" && avatarAssets.length > 0 ? (
+        <details className="asset-picker__avatar-library">
+          <summary>Выбрать визуально из {avatarAssets.length} аватаров</summary>
+          <div className="asset-picker__avatar-grid">
+            {avatarAssets.map((assetItem) => (
+              <button
+                key={assetItem.assetId}
+                type="button"
+                className={assetItem.assetId === assetId ? "asset-picker__avatar asset-picker__avatar--active" : "asset-picker__avatar"}
+                onClick={() => onChange(assetItem.assetId)}
+                title={assetItem.fileName}
+              >
+                <img src={resolveContentAssetUrl(assetItem.assetId, assetItem.publicPath)} alt="" loading="lazy" />
+                <span>{assetItem.fileName.replace(/\.svg$/i, "")}</span>
+              </button>
+            ))}
+          </div>
+        </details>
+      ) : null}
       {uploadError ? <p className="content-editor__error">{uploadError}</p> : null}
     </div>
   );
@@ -596,14 +682,26 @@ function createEmptyShape(value: JsonValue): JsonValue {
   return "";
 }
 
-function resolveAttachmentFieldName(path: JsonPath): string | null {
+function resolveAttachmentFields(path: JsonPath, value: JsonObject): AttachmentFieldConfig[] {
   const pathKey = normalizePath(path);
-  if (pathKey === "profile") return "avatarAssetId";
-  if (pathKey === "seo") return "openGraphAssetId";
-  if (/^projects\.\d+$/.test(pathKey)) return "coverAssetId";
-  if (/^education\.\d+$/.test(pathKey)) return "assetId";
-  if (/^skills\.proofs\.\d+$/.test(pathKey)) return "assetId";
-  return null;
+  const configuredFields: AttachmentFieldConfig[] = [];
+  if (pathKey === "profile") configuredFields.push({ fieldName: "avatarAssetId", kind: "image" });
+  if (pathKey === "seo") configuredFields.push(
+    { fieldName: "openGraphAssetId", kind: "image" },
+    { fieldName: "faviconAssetId", kind: "image" },
+  );
+  if (/^projects\.\d+$/.test(pathKey)) configuredFields.push({ fieldName: "coverAssetId", kind: "image" });
+  if (/^education\.\d+$/.test(pathKey)) configuredFields.push({ fieldName: "assetId", kind: "document" });
+  if (/^skills\.proofs\.\d+$/.test(pathKey)) configuredFields.push({ fieldName: "assetId", kind: "document" });
+
+  for (const fieldName of Object.keys(value)) {
+    if (!fieldName.toLowerCase().endsWith("assetid") || configuredFields.some((field) => field.fieldName === fieldName)) continue;
+    configuredFields.push({
+      fieldName,
+      kind: /(avatar|cover|image|favicon|logo)/i.test(fieldName) ? "image" : "any",
+    });
+  }
+  return configuredFields;
 }
 
 function findEnumOptions(path: JsonPath): string[] | null {

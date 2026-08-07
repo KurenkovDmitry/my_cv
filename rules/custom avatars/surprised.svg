@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Surprised avatar</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <circle cx="25" cy="15" r="10" fill="#808080"/>
+  <path d="M17 11.5q8-6 16 0-7-4-16 .5z" fill="#606060"/>
+  <path d="M19.5 11.7q2.5-1.8 5 0M25.5 11.7q2.5-1.8 5 0" fill="none" stroke="#555" stroke-width=".7" stroke-linecap="round"/>
+  <circle cx="22" cy="14.5" r="2.1" fill="#F4F4F4"/><circle cx="22" cy="14.5" r=".9" fill="#404040"/>
+  <circle cx="28" cy="14.5" r="2.1" fill="#F4F4F4"/><circle cx="28" cy="14.5" r=".9" fill="#404040"/>
+  <ellipse cx="25" cy="19" rx="2.1" ry="2.7" fill="#4F4F4F"/>
+  <path d="M14 35c0-6 6-12 11-12s11 6 11 12v8H14z" fill="#808080"/>
+  <path d="M14 43s6-8 11-8 11 8 11 8z" fill="#606060"/>
+</svg>

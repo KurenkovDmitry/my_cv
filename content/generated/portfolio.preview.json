@@ -72,8 +72,8 @@
         "en": "Master's degree, Faculty of Computer Science"
       },
       "period": {
-        "ru": "Сентябрь 2026 — июль 2028",
-        "en": "September 2026 — July 2028"
+        "ru": "Сентябрь 2026 - июль 2028",
+        "en": "September 2026 - July 2028"
       },
       "status": "draft"
     },
@@ -88,8 +88,8 @@
         "en": "Web development"
       },
       "period": {
-        "ru": "Январь 2024 — январь 2026",
-        "en": "January 2024 — January 2026"
+        "ru": "Январь 2024 - январь 2026",
+        "en": "January 2024 - January 2026"
       },
       "proofId": "vk-technopark-web-diploma",
       "status": "published"
@@ -101,12 +101,12 @@
         "en": "Bauman Moscow State Technical University, bachelor's degree in informatics and control systems with honors"
       },
       "programme": {
-        "ru": "Факультет ИУ — информатика и системы управления",
+        "ru": "Факультет ИУ - информатика и системы управления",
         "en": "Informatics and Control Systems faculty"
       },
       "period": {
-        "ru": "Сентябрь 2022 — июль 2026",
-        "en": "September 2022 — July 2026"
+        "ru": "Сентябрь 2022 - июль 2026",
+        "en": "September 2022 - July 2026"
       },
       "detail": {
         "ru": "Красный диплом",
@@ -121,12 +121,12 @@
         "en": "Bauman Engineering School No. 1580, informatics profile"
       },
       "programme": {
-        "ru": "Профильный класс — информатика",
+        "ru": "Профильный класс - информатика",
         "en": "Specialised informatics programme"
       },
       "period": {
-        "ru": "Сентябрь 2018 — июнь 2022",
-        "en": "September 2018 — June 2022"
+        "ru": "Сентябрь 2018 - июнь 2022",
+        "en": "September 2018 - June 2022"
       },
       "status": "published"
     }
@@ -143,8 +143,8 @@
         "en": "System Analyst Intern"
       },
       "period": {
-        "ru": "Январь 2026 — май 2026",
-        "en": "January 2026 — May 2026"
+        "ru": "Январь 2026 - май 2026",
+        "en": "January 2026 - May 2026"
       },
       "description": {
         "ru": "Системный анализ в команде кредитных продуктов: импортозамещение и сопровождение функциональности при изменении способов хранения данных и инфраструктуры.",
@@ -173,8 +173,8 @@
         "en": "System Analyst / Backend Architect / Full-Stack Developer"
       },
       "period": {
-        "ru": "Август 2023 — июль 2026",
-        "en": "August 2023 — July 2026"
+        "ru": "Август 2023 - июль 2026",
+        "en": "August 2023 - July 2026"
       },
       "description": {
         "ru": "Проектный опыт в компании «Латеко» и при её поддержке: внутренние IT-продукты Fillusion, FlexiKanban и Twirly-Quirly.",
@@ -199,8 +199,8 @@
         "en": "Architecture and analysis intern"
       },
       "period": {
-        "ru": "Июль 2020 — ноябрь 2020",
-        "en": "July 2020 — November 2020"
+        "ru": "Июль 2020 - ноябрь 2020",
+        "en": "July 2020 - November 2020"
       },
       "description": {
         "ru": "Производственная практика в инженерной школе при МГТУ им. Н. Э. Баумана на проекте цифровой трансформации холдинга.",
@@ -231,8 +231,8 @@
       },
       "category": "commercial",
       "period": {
-        "ru": "Июль 2025 — январь 2026",
-        "en": "July 2025 — January 2026"
+        "ru": "Июль 2025 - январь 2026",
+        "en": "July 2025 - January 2026"
       },
       "role": {
         "ru": "Team Lead / System Analyst / Backend Architect & Developer",
@@ -286,8 +286,8 @@
       },
       "category": "commercial",
       "period": {
-        "ru": "Август 2025 — июль 2026",
-        "en": "August 2025 — July 2026"
+        "ru": "Август 2025 - июль 2026",
+        "en": "August 2025 - July 2026"
       },
       "role": {
         "ru": "Team Lead / System Analyst / Backend Developer / Admin Frontend Developer",
@@ -330,8 +330,8 @@
       },
       "category": "commercial",
       "period": {
-        "ru": "Август 2024 — сентябрь 2024",
-        "en": "August 2024 — September 2024"
+        "ru": "Август 2024 - сентябрь 2024",
+        "en": "August 2024 - September 2024"
       },
       "role": {
         "ru": "System Analyst / Backend Developer",
@@ -377,8 +377,8 @@
       },
       "category": "commercial",
       "period": {
-        "ru": "Август 2023 — февраль 2024",
-        "en": "August 2023 — February 2024"
+        "ru": "Август 2023 - февраль 2024",
+        "en": "August 2023 - February 2024"
       },
       "role": {
         "ru": "Junior System Analyst / QA Engineer",
@@ -413,8 +413,8 @@
       },
       "category": "academic",
       "period": {
-        "ru": "Февраль 2025 — май 2025",
-        "en": "February 2025 — May 2025"
+        "ru": "Февраль 2025 - май 2025",
+        "en": "February 2025 - May 2025"
       },
       "role": {
         "ru": "System Analyst / Architect",
@@ -463,8 +463,8 @@
       },
       "category": "academic",
       "period": {
-        "ru": "Июль 2024 — декабрь 2024",
-        "en": "July 2024 — December 2024"
+        "ru": "Июль 2024 - декабрь 2024",
+        "en": "July 2024 - December 2024"
       },
       "role": {
         "ru": "Автор и правообладатель",
@@ -500,12 +500,12 @@
       },
       "category": "academic",
       "period": {
-        "ru": "Сентябрь 2024 — декабрь 2024",
-        "en": "September 2024 — December 2024"
+        "ru": "Сентябрь 2024 - декабрь 2024",
+        "en": "September 2024 - December 2024"
       },
       "role": {
-        "ru": "Full-Stack Developer — frontend focus",
-        "en": "Full-Stack Developer — frontend focus"
+        "ru": "Full-Stack Developer - frontend focus",
+        "en": "Full-Stack Developer - frontend focus"
       },
       "teamSize": 4,
       "responsibilities": [
@@ -627,8 +627,8 @@
         "skill": "API design",
         "kind": "certificate",
         "title": {
-          "ru": "ИТ-компетенция API — продвинутый уровень",
-          "en": "API IT competency — advanced level"
+          "ru": "ИТ-компетенция API - продвинутый уровень",
+          "en": "API IT competency - advanced level"
         },
         "level": {
           "ru": "Продвинутый уровень · теория",
@@ -643,8 +643,8 @@
         "skill": "Docker",
         "kind": "certificate",
         "title": {
-          "ru": "ИТ-компетенция Docker — средний уровень",
-          "en": "Docker IT competency — intermediate level"
+          "ru": "ИТ-компетенция Docker - средний уровень",
+          "en": "Docker IT competency - intermediate level"
         },
         "level": {
           "ru": "Средний уровень · теория",
@@ -659,8 +659,8 @@
         "skill": "Git",
         "kind": "certificate",
         "title": {
-          "ru": "ИТ-компетенция Git — средний уровень",
-          "en": "Git IT competency — intermediate level"
+          "ru": "ИТ-компетенция Git - средний уровень",
+          "en": "Git IT competency - intermediate level"
         },
         "level": {
           "ru": "Средний уровень · теория",
@@ -675,8 +675,8 @@
         "skill": "JavaScript",
         "kind": "certificate",
         "title": {
-          "ru": "ИТ-компетенция JavaScript — средний уровень",
-          "en": "JavaScript IT competency — intermediate level"
+          "ru": "ИТ-компетенция JavaScript - средний уровень",
+          "en": "JavaScript IT competency - intermediate level"
         },
         "level": {
           "ru": "Средний уровень · теория",
@@ -691,8 +691,8 @@
         "skill": "PostgreSQL",
         "kind": "certificate",
         "title": {
-          "ru": "ИТ-компетенция PostgreSQL — средний уровень",
-          "en": "PostgreSQL IT competency — intermediate level"
+          "ru": "ИТ-компетенция PostgreSQL - средний уровень",
+          "en": "PostgreSQL IT competency - intermediate level"
         },
         "level": {
           "ru": "Средний уровень · теория",
@@ -707,8 +707,8 @@
         "skill": "Web development",
         "kind": "diploma",
         "title": {
-          "ru": "Диплом Технопарка VK — «Веб-разработка»",
-          "en": "VK Technopark diploma — Web Development"
+          "ru": "Диплом Технопарка VK - «Веб-разработка»",
+          "en": "VK Technopark diploma - Web Development"
         },
         "issuer": {
           "ru": "Образовательный центр VK в МГТУ им. Н. Э. Баумана",
@@ -800,7 +800,17 @@
       "ru": "Портфолио Дмитрия Куренкова",
       "en": "Dmitry Kurenkov Portfolio"
     },
-    "openGraphImage": "/media/photo_2025-04-09_22-18-09.jpg",
-    "openGraphAssetId": "e6b61031e7c24de94cfb70f4b645c989"
+    "shareTitle": {
+      "ru": "Дмитрий Куренков — системный аналитик",
+      "en": "Dmitry Kurenkov — System Analyst"
+    },
+    "shareDescription": {
+      "ru": "Highload-архитектура, интеграции, модели данных, backend-системы и продуктовые интерфейсы.",
+      "en": "High-load architecture, integrations, data models, backend systems, and product interfaces."
+    },
+    "openGraphImage": "/media/social-preview-v1.png",
+    "openGraphAssetId": "5a12d533e165b0e81a4ab7f3d35ef58",
+    "faviconImage": "/media/favicon-blueprint-animated.svg",
+    "faviconAssetId": "2de32610b8a3807476da3c26635ed06d"
   }
 }

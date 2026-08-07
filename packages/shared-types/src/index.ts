@@ -21,6 +21,7 @@ export type {
   EducationItem,
   ExperienceItem,
   ImportApplyMode,
+  ImportCandidateFieldReview,
   ImportCandidateSummary,
   LegalContent,
   LocaleCode,

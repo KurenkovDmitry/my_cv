@@ -4,7 +4,10 @@ coverage
 .git
 .gitignore
 .idea
-rules
+rules/*
+!rules/custom avatars/
+rules/custom avatars/*
+!rules/custom avatars/*.svg
 **/__pycache__
 **/*.pyc
 **/.pytest_cache

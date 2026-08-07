@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="DK">
+  <rect width="64" height="64" rx="15" fill="#071b22"/>
+  <circle cx="24" cy="20" r="28" fill="#183f49" opacity=".42"/>
+  <path d="M8 16h48M8 32h48M8 48h48M16 8v48M32 8v48M48 8v48" stroke="#55d8e8" stroke-opacity=".12"/>
+  <circle cx="32" cy="32" r="23" fill="none" stroke="#55d8e8" stroke-opacity=".38" stroke-width="1.5"/>
+  <circle cx="32" cy="32" r="27" fill="none" stroke="#55d8e8" stroke-width="2" stroke-linecap="round" stroke-dasharray="22 148">
+    <animateTransform attributeName="transform" type="rotate" from="0 32 32" to="360 32 32" dur="3.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="50" cy="18" r="2.2" fill="#f0c78f">
+    <animate attributeName="opacity" values=".35;1;.35" dur="1.6s" repeatCount="indefinite"/>
+  </circle>
+  <text x="32" y="39" text-anchor="middle" fill="#f6f2e8" font-family="Arial, sans-serif" font-size="21" font-weight="800" letter-spacing="-1">DK</text>
+</svg>

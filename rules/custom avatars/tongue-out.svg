@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Avatar sticking its tongue out</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <circle cx="25" cy="15" r="10" fill="#808080"/>
+  <path d="M17 12c2-7 12-6 16 0-4-6-12-6-16 1z" fill="#606060"/>
+  <path d="M19.5 14.5q2.5-2 5 0" fill="none" stroke="#4F4F4F" stroke-width="1.1" stroke-linecap="round"/><circle cx="28.5" cy="14" r="1.2" fill="#4F4F4F"/>
+  <path d="M21 18h8q-.7 4-4 4t-4-4z" fill="#4F4F4F"/>
+  <path d="M23 20q2-1 4 0v1.5q-2 1.8-4 0z" fill="#E37A9B"/>
+  <path d="M25 20v2" stroke="#B95676" stroke-width=".5"/>
+  <path d="M14 35c0-6 6-12 11-12s11 6 11 12v8H14z" fill="#808080"/>
+  <path d="M14 43s6-8 11-8 11 8 11 8z" fill="#606060"/>
+</svg>

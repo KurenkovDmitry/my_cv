@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Avatar with spiky hair</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <circle cx="25" cy="15" r="10" fill="#808080"/>
+  <path d="M16.5 12l1-7 3 3 2-6 3.2 5L29 2l1.2 6L35 5l-1.5 8q-8-5-17 0z" fill="#56585D" stroke="#4B4D51" stroke-width=".5" stroke-linejoin="round"/>
+  <circle cx="22" cy="14" r="1" fill="#4F4F4F"/><circle cx="28" cy="14" r="1" fill="#4F4F4F"/>
+  <path d="M22 18q3 2.2 6 0" fill="none" stroke="#4F4F4F" stroke-width=".9" stroke-linecap="round"/>
+  <path d="M14 35q0-11 11-12 11 1 11 12v8H14z" fill="#808080"/><path d="M14 43q6-8 11-8t11 8z" fill="#606060"/>
+</svg>

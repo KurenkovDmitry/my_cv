@@ -27,6 +27,7 @@ add_library(portfolio_cv_importer_native
   src/pdf_object_reader.cpp
   src/pdf_stream_decoder.cpp
   src/pdf_text_extractor.cpp
+  src/resume_layout_parser.cpp
 )
 
 target_include_directories(

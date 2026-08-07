@@ -16,6 +16,7 @@ class StoredContentAsset:
     media_type: str
     file_size_bytes: int
     checksum_sha256: str
+    source_kind: str = "upload"
 
 
 class ContentAssetStorage(Protocol):
@@ -28,6 +29,7 @@ class ContentAssetStorage(Protocol):
         document_bytes: bytes,
         requested_media_type: str | None,
         preferred_asset_id: str | None = None,
+        source_kind: str = "upload",
     ) -> StoredContentAsset:
         """Проверяет и сохраняет файл, при импорте позволяя восстановить стабильный asset id."""
 

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Artist avatar in a beret and paint-stained smock</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <path d="M13 43v-8q0-11 12-12 12 1 12 12v8z" fill="#725887"/><circle cx="19" cy="34" r="1.5" fill="#D95B61"/><circle cx="28" cy="38" r="1.3" fill="#5E86B7"/><circle cx="32" cy="31" r="1" fill="#D5AA42"/>
+  <circle cx="25" cy="15" r="10" fill="#808080"/><path d="M17 12q2-7 8-7t8 7q-8-5-16 1z" fill="#606060"/><path d="M15 10q5-7 15-5 5 1 5 5-10-2-20 0z" fill="#5D456D"/><circle cx="31" cy="5.5" r="1.5" fill="#5D456D"/>
+  <circle cx="22" cy="14" r="1" fill="#4F4F4F"/><circle cx="28" cy="14" r="1" fill="#4F4F4F"/><path d="M22 19q3 2 6 0" fill="none" stroke="#4F4F4F" stroke-width=".8"/>
+  <path d="M32 15l7-8" stroke="#C89B4D" stroke-width="1"/><path d="M39 7l1-2" stroke="#517DA6" stroke-width="1.6"/>
+</svg>

@@ -66,6 +66,7 @@ def _map_asset_response_item(asset_item: StoredContentAsset) -> ContentAssetResp
         fileSizeBytes=asset_item.file_size_bytes,
         checksumSha256=asset_item.checksum_sha256,
         publicPath=f"{_PUBLIC_ASSET_PATH_PREFIX}/{asset_item.asset_id}",
+        sourceKind=asset_item.source_kind,
     )
 
 

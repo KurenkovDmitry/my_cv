@@ -18,6 +18,8 @@ export type {
   DraftSnapshotUpsertRequest,
   ImportCandidateApplyRequest,
   ImportCandidateApplyResponse,
+  ImportCandidateFieldPatch,
+  ImportCandidateFieldReviewResponse,
   ImportCandidateListResponse,
   ImportCandidateMutationResponse,
   ProjectListResponse,

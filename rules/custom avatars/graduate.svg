@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Graduate avatar</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <circle cx="25" cy="16" r="10" fill="#808080"/>
+  <path d="M17 13c2-7 12-6 16 0-4-6-12-6-16 1z" fill="#606060"/>
+  <path d="M12 5l13-5 13 5-13 5z" fill="#3E4652"/><path d="M18 7v4q7 3 14 0V7" fill="#3E4652"/><path d="M38 5v8" stroke="#D4AF37" stroke-width="1"/><circle cx="38" cy="14" r="1.4" fill="#D4AF37"/>
+  <circle cx="22" cy="15" r="1" fill="#4F4F4F"/><circle cx="28" cy="15" r="1" fill="#4F4F4F"/><path d="M22 19q3 2.4 6 0" fill="none" stroke="#4F4F4F" stroke-width=".9"/>
+  <path d="M14 36q0-11 11-12 11 1 11 12v7H14z" fill="#3E4652"/><path d="M19 25l6 8 6-8-2 18h-8z" fill="#E7E7E7"/>
+</svg>

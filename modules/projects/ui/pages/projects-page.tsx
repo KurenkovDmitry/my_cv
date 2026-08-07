@@ -29,7 +29,7 @@ export function ProjectsPage({ regionalLocale, projects }: ProjectsPageProps) {
   return (
     <section className="projects-page">
       <header className="projects-page__hero">
-        <p className="projects-page__eyebrow">Portfolio archive / 2023—2026</p>
+        <p className="projects-page__eyebrow">Portfolio archive / 2023-2026</p>
         <div>
           <h1>{isRussian ? "Проекты без сокращений." : "Projects, without the shorthand."}</h1>
           <p>{isRussian

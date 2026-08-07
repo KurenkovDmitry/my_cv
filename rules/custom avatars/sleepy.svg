@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Sleepy avatar</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <circle cx="24" cy="15" r="10" fill="#808080"/>
+  <path d="M16 12c2-7 12-6 16 0-4-6-12-6-16 1z" fill="#606060"/>
+  <path d="M18.5 14.5q2.5 1.4 5 0M24.5 14.5q2.5 1.4 5 0" fill="none" stroke="#4F4F4F" stroke-width="1" stroke-linecap="round"/>
+  <ellipse cx="24" cy="19" rx="1.5" ry="1.9" fill="#4F4F4F"/>
+  <path d="M13 35q0-11 11-12 11 1 11 12v8H13z" fill="#808080"/><path d="M13 43q6-8 11-8t11 8z" fill="#606060"/>
+  <path d="M34 14h5l-5 5h5M39 7h4l-4 4h4" fill="none" stroke="#687A9B" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

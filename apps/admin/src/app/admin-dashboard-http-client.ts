@@ -12,6 +12,7 @@ import type {
   DraftSnapshotUpsertRequest,
   ImportCandidateApplyRequest,
   ImportCandidateApplyResponse,
+  ImportCandidateFieldReviewResponse,
   ImportCandidateListResponse,
   ImportCandidateMutationResponse,
   PublicPortfolioResponse,
@@ -189,6 +190,13 @@ export async function compareImportCandidateToSnapshot(
 export async function compareImportCandidateToBackup(importCandidateId: string, backupId: string) {
   return requestAdminJson<ContentDiffResponse>(
     `${frontendEnvConfig.adminApiBaseUrl}/system/import-candidates/${importCandidateId}/compare/backup/${backupId}`,
+    { method: "GET" },
+  );
+}
+
+export async function getImportCandidateFieldReview(importCandidateId: string) {
+  return requestAdminJson<ImportCandidateFieldReviewResponse>(
+    `${frontendEnvConfig.adminApiBaseUrl}/system/import-candidates/${importCandidateId}/field-review`,
     { method: "GET" },
   );
 }

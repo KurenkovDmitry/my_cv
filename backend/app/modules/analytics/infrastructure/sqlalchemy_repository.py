@@ -77,6 +77,7 @@ class SqlAlchemyAnalyticsRepository:
         all_time_totals = await self._query_all_time_totals(database_session=read_database_session)
 
         return {
+            "sourceKind": "postgres",
             "sessionsLast7Days": sessions_last_7_days,
             "viewsLast7Days": views_last_7_days,
             "clicksLast7Days": clicks_last_7_days,
@@ -665,4 +666,3 @@ class FallbackAnalyticsRepository:
                 blocked=blocked,
                 rollback_events=rollback_events,
             )
-

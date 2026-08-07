@@ -79,8 +79,8 @@ async def test_analytics_service_deduplicates_same_session_event() -> None:
         session_nonce="same-session",
     )
     second_result = await analytics_service.register_session_event(
-        entry_route_key="/",
-        locale_code="ru",
+        entry_route_key="/projects",
+        locale_code="en",
         consent_state="accepted",
         storage_mode="local_storage",
         session_nonce="same-session",

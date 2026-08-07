@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Casual avatar in a red jacket</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <path d="M12 43v-8q0-11 13-12 13 1 13 12v8z" fill="#B74E57"/><path d="M19 24l6 7 6-7-2 19h-8z" fill="#DD6A72"/><path d="M25 31v12" stroke="#7E3037" stroke-width="1.2"/><path d="M16 35h5v5h-5m18-5h-5v5h5" fill="none" stroke="#8E373F" stroke-width=".8"/>
+  <circle cx="25" cy="15" r="10" fill="#808080"/><path d="M17 12q2-7 8-7t8 7q-8-5-16 1z" fill="#606060"/><circle cx="22" cy="14" r="1" fill="#4F4F4F"/><circle cx="28" cy="14" r="1" fill="#4F4F4F"/><path d="M22 19q3 2 6 0" fill="none" stroke="#4F4F4F" stroke-width=".8"/>
+</svg>

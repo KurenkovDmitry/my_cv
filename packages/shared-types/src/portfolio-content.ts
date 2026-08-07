@@ -118,9 +118,13 @@ export interface AccessibilityConfig {
 }
 
 export interface SeoConfig {
-  siteName: LocalizedText;
-  openGraphImage: string;
+    siteName: LocalizedText;
+    shareTitle?: LocalizedText;
+    shareDescription?: LocalizedText;
+    openGraphImage: string;
   openGraphAssetId?: string;
+  faviconImage?: string;
+  faviconAssetId?: string;
 }
 
 export interface ContentAssetSummary {
@@ -130,6 +134,7 @@ export interface ContentAssetSummary {
   fileSizeBytes: number;
   checksumSha256: string;
   publicPath: string;
+  sourceKind: "upload" | "seed" | "custom_avatar" | "backup_restore";
 }
 
 export interface AnalyticsConsentContent {
@@ -182,10 +187,26 @@ export interface ImportCandidateSummary {
     replaceableSections: string[];
     warningsCount: number;
     canReplaceFully: boolean;
+    sourceType?: string;
+    sourceFileName?: string;
+    detectedLayout?: "chronological" | "functional" | "combination" | "academic" | "two_column" | "unstructured" | null;
+    detectedSections?: string[];
   };
 }
 
-export type ImportApplyMode = "full_replace" | "partial_replace";
+export type ImportApplyMode = "full_replace" | "partial_replace" | "field_replace";
+
+export interface ImportCandidateFieldReview {
+  path: string;
+  section: string;
+  label: string;
+  operation: "set" | "remove";
+  changeKind: "added" | "changed" | "removed";
+  hasCurrentValue: boolean;
+  hasCandidateValue: boolean;
+  currentValue: unknown;
+  candidateValue: unknown;
+}
 
 export interface ContentDiffSummary {
   changedPathsCount: number;
@@ -219,6 +240,7 @@ export interface AnalyticsActionTotal {
 }
 
 export interface AnalyticsDashboardSnapshot {
+  sourceKind: "postgres" | "memory_fallback" | "preview_fallback";
   sessionsLast7Days: AnalyticsSeriesPoint[];
   viewsLast7Days: AnalyticsSeriesPoint[];
   clicksLast7Days: AnalyticsSeriesPoint[];

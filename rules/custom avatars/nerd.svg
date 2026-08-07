@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Nerd avatar with glasses and teeth</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <circle cx="25" cy="15" r="10" fill="#808080"/>
+  <path d="M17 12q2-7 7-6l1.5 4L27 6q4 1 6 6-8-4-16 0z" fill="#606060"/>
+  <rect x="18.2" y="12" width="6.2" height="5" rx="1" fill="#B9DBE8" fill-opacity=".42" stroke="#434343" stroke-width="1"/>
+  <rect x="25.6" y="12" width="6.2" height="5" rx="1" fill="#B9DBE8" fill-opacity=".42" stroke="#434343" stroke-width="1"/>
+  <path d="M24.4 14h1.2" stroke="#434343"/><circle cx="21.5" cy="14.3" r=".8" fill="#404040"/><circle cx="28.5" cy="14.3" r=".8" fill="#404040"/>
+  <path d="M21.5 18.7q3.5 3.2 7 0" fill="#FFFFFF" stroke="#4F4F4F" stroke-width=".8"/>
+  <path d="M25 19v2" stroke="#B7B7B7" stroke-width=".6"/>
+  <path d="M14 35c0-6 6-12 11-12s11 6 11 12v8H14z" fill="#808080"/>
+  <path d="M14 43s6-8 11-8 11 8 11 8z" fill="#606060"/>
+</svg>

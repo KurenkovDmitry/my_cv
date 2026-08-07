@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Woman avatar in glasses</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <path d="M14.8 18q0-14 10.2-14T35.2 18l-2 8H16.8z" fill="#55575C"/>
+  <circle cx="25" cy="15" r="9" fill="#858585"/>
+  <path d="M17 12q2-8 8-7 6-1 8 7-5-4-8-4t-8 4z" fill="#55575C"/>
+  <circle cx="21.5" cy="14.3" r="3" fill="#D7EFF5" fill-opacity=".35" stroke="#454545" stroke-width="1"/>
+  <circle cx="28.5" cy="14.3" r="3" fill="#D7EFF5" fill-opacity=".35" stroke="#454545" stroke-width="1"/>
+  <path d="M24.5 14h1" stroke="#454545"/><circle cx="21.5" cy="14.3" r=".8" fill="#4F4F4F"/><circle cx="28.5" cy="14.3" r=".8" fill="#4F4F4F"/>
+  <path d="M22 19q3 2 6 0" fill="none" stroke="#4F4F4F" stroke-width=".9" stroke-linecap="round"/>
+  <path d="M14 35q0-11 11-12 11 1 11 12v8H14z" fill="#808080"/><path d="M14 43q6-8 11-8t11 8z" fill="#67696E"/>
+</svg>

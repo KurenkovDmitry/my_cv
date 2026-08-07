@@ -57,6 +57,14 @@ class Settings(BaseSettings):
         default=30,
         alias="ANALYTICS_EVENT_DEDUPE_WINDOW_SECONDS",
     )
+    analytics_session_dedupe_window_seconds: int = Field(
+        default=12 * 60 * 60,
+        alias="ANALYTICS_SESSION_DEDUPE_WINDOW_SECONDS",
+    )
+    analytics_track_non_production: bool = Field(
+        default=False,
+        alias="ANALYTICS_TRACK_NON_PRODUCTION",
+    )
     analytics_spike_threshold: int = Field(
         default=20,
         alias="ANALYTICS_SPIKE_THRESHOLD",
@@ -83,7 +91,7 @@ class Settings(BaseSettings):
         alias="IMPORT_CANDIDATE_RETENTION_DAYS",
     )
     enable_grafana_integration: bool = Field(
-        default=False,
+        default=True,
         alias="ENABLE_GRAFANA_INTEGRATION",
     )
 

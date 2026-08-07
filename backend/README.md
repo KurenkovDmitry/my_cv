@@ -24,12 +24,12 @@ Backend реализуется на FastAPI с разделением на мо�
 
 Основные административные endpoints:
 
-- `PUT /api/admin/content/draft` — сохранить полный draft;
-- `POST /api/admin/content/publish` — опубликовать draft;
-- `GET|POST|DELETE /api/admin/content/assets` — реестр и загрузка файлов;
-- `POST /api/admin/system/backups` — создать полный backup;
-- `POST /api/admin/system/import-candidates` — загрузить bundle на review;
-- `POST /api/admin/system/import-candidates/{id}/apply-to-draft` — восстановить данные и файлы.
+- `PUT /api/admin/content/draft` - сохранить полный draft;
+- `POST /api/admin/content/publish` - опубликовать draft;
+- `GET|POST|DELETE /api/admin/content/assets` - реестр и загрузка файлов;
+- `POST /api/admin/system/backups` - создать полный backup;
+- `POST /api/admin/system/import-candidates` - загрузить bundle на review;
+- `POST /api/admin/system/import-candidates/{id}/apply-to-draft` - восстановить данные и файлы.
 
 Для persistent storage обязательны volume и переменные:
 

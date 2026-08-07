@@ -10,6 +10,7 @@ import type {
   ContentDiffSnapshot,
   ContentAssetSummary,
   ImportApplyMode,
+  ImportCandidateFieldReview,
   ImportCandidateSummary,
   PortfolioContent,
   RuntimeHealthSnapshot,
@@ -107,9 +108,21 @@ export interface ImportCandidateMutationResponse {
   item: ImportCandidateSummary;
 }
 
+export interface ImportCandidateFieldReviewResponse {
+  item: ImportCandidateSummary;
+  fields: ImportCandidateFieldReview[];
+}
+
+export interface ImportCandidateFieldPatch {
+  path: string;
+  operation: "set" | "remove";
+  value?: unknown;
+}
+
 export interface ImportCandidateApplyRequest {
   replaceMode: ImportApplyMode;
   sections: string[];
+  fields: ImportCandidateFieldPatch[];
 }
 
 export interface ImportCandidateApplyResponse {
@@ -118,6 +131,7 @@ export interface ImportCandidateApplyResponse {
   item: ImportCandidateSummary;
   replaceMode: ImportApplyMode;
   appliedSections: string[];
+  appliedFields: string[];
 }
 
 export interface ContentDiffResponse {

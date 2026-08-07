@@ -7,6 +7,7 @@ import hashlib
 import json
 import re
 import shutil
+import xml.etree.ElementTree as ElementTree
 from pathlib import Path
 from uuid import uuid4
 
@@ -21,7 +22,11 @@ _SUPPORTED_MEDIA_TYPES = {
     "image/jpeg": ".jpg",
     "image/png": ".png",
     "image/webp": ".webp",
+    "image/svg+xml": ".svg",
+    "image/x-icon": ".ico",
 }
+_ALLOWED_SOURCE_KINDS = {"upload", "seed", "custom_avatar", "backup_restore"}
+_FORBIDDEN_SVG_ELEMENTS = {"script", "foreignobject", "iframe", "object", "embed"}
 
 
 class ContentAssetNotFoundError(FileNotFoundError):
@@ -45,8 +50,9 @@ class LocalContentAssetStorage(ContentAssetStorage):
         document_bytes: bytes,
         requested_media_type: str | None,
         preferred_asset_id: str | None = None,
+        source_kind: str = "upload",
     ) -> StoredContentAsset:
-        """Сохраняет только PDF/JPEG/PNG/WebP после проверки размера и magic bytes."""
+        """Сохраняет разрешённые документы и изображения после проверки содержимого."""
 
         if not document_bytes:
             raise ValueError("Content asset file is empty.")
@@ -56,11 +62,16 @@ class LocalContentAssetStorage(ContentAssetStorage):
             )
 
         media_type = _detect_media_type(document_bytes)
-        if requested_media_type and requested_media_type not in {
+        normalized_requested_media_type = {
+            "image/vnd.microsoft.icon": "image/x-icon",
+        }.get(requested_media_type or "", requested_media_type)
+        if normalized_requested_media_type and normalized_requested_media_type not in {
             media_type,
             "application/octet-stream",
         }:
             raise ValueError("Declared content type does not match the uploaded file signature.")
+        if source_kind not in _ALLOWED_SOURCE_KINDS:
+            raise ValueError("Content asset source kind is invalid.")
 
         safe_file_name = _normalize_file_name(file_name, media_type)
         asset_id = preferred_asset_id or uuid4().hex
@@ -82,6 +93,7 @@ class LocalContentAssetStorage(ContentAssetStorage):
             "mediaType": media_type,
             "fileSizeBytes": len(document_bytes),
             "checksumSha256": checksum_sha256,
+            "sourceKind": source_kind,
         }
         await asyncio.to_thread(asset_directory.mkdir, parents=True, exist_ok=True)
         await asyncio.to_thread(payload_path.write_bytes, document_bytes)
@@ -173,7 +185,50 @@ def _detect_media_type(document_bytes: bytes) -> str:
         and document_bytes[8:12] == b"WEBP"
     ):
         return "image/webp"
-    raise ValueError("Only PDF, JPEG, PNG and WebP content assets are allowed.")
+    if document_bytes.startswith(b"\x00\x00\x01\x00"):
+        return "image/x-icon"
+    if _is_safe_svg(document_bytes):
+        return "image/svg+xml"
+    raise ValueError("Only PDF, JPEG, PNG, WebP, ICO and safe SVG content assets are allowed.")
+
+
+def _is_safe_svg(document_bytes: bytes) -> bool:
+    """Разрешает только автономный SVG без скриптов, внешних ссылок и обработчиков событий."""
+
+    try:
+        svg_text = document_bytes.decode("utf-8").lstrip("\ufeff\r\n\t ")
+    except UnicodeDecodeError:
+        return False
+    if not svg_text.startswith("<"):
+        return False
+    normalized_text = svg_text.lower()
+    if "<!doctype" in normalized_text or "<!entity" in normalized_text:
+        return False
+    try:
+        root_element = ElementTree.fromstring(svg_text)
+    except ElementTree.ParseError:
+        return False
+    if _xml_local_name(root_element.tag) != "svg":
+        return False
+    for element in root_element.iter():
+        if _xml_local_name(element.tag) in _FORBIDDEN_SVG_ELEMENTS:
+            return False
+        for attribute_name, attribute_value in element.attrib.items():
+            normalized_name = _xml_local_name(attribute_name)
+            normalized_value = attribute_value.strip().lower()
+            if normalized_name.startswith("on"):
+                return False
+            if normalized_name in {"href", "src"} and normalized_value and not normalized_value.startswith("#"):
+                return False
+            if "url(" in normalized_value:
+                return False
+    return True
+
+
+def _xml_local_name(qualified_name: str) -> str:
+    """Убирает namespace XML для безопасного сравнения имён SVG."""
+
+    return qualified_name.rsplit("}", 1)[-1].lower()
 
 
 def _normalize_file_name(file_name: str, media_type: str) -> str:
@@ -200,4 +255,5 @@ def _map_metadata(metadata_payload: dict[str, object]) -> StoredContentAsset:
         media_type=str(metadata_payload["mediaType"]),
         file_size_bytes=int(metadata_payload["fileSizeBytes"]),
         checksum_sha256=str(metadata_payload["checksumSha256"]),
+        source_kind=str(metadata_payload.get("sourceKind", "upload")),
     )

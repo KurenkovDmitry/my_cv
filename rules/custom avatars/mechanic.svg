@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Mechanic avatar in overalls</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <path d="M12 43v-8q0-11 13-12 13 1 13 12v8z" fill="#5B6570"/><path d="M18 26h14v17H18z" fill="#3F6C8E"/><path d="M18 26l-3 7m17-7 3 7" stroke="#3F6C8E" stroke-width="2"/><rect x="21" y="34" width="8" height="5" rx=".7" fill="#31536B"/>
+  <circle cx="25" cy="15" r="10" fill="#808080"/><path d="M17 12q2-7 8-7t8 7q-8-5-16 1z" fill="#606060"/><path d="M16 8q8-6 16 0v3H16z" fill="#485560"/><path d="M16 11h20q-3 2-10 1" fill="#596875"/>
+  <circle cx="22" cy="14" r="1" fill="#4F4F4F"/><circle cx="28" cy="14" r="1" fill="#4F4F4F"/><path d="M22 19q3 1.5 6 0" fill="none" stroke="#4F4F4F" stroke-width=".8"/>
+  <path d="M36 20l7-7m-8 5 3 3m2-10 5 5" fill="none" stroke="#636B72" stroke-width="1.2" stroke-linecap="round"/>
+</svg>

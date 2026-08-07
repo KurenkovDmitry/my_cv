@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Avatar with a curious cat peeking nearby</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <path d="M4 12l1-6 4 3 4-3 1 6z" fill="#817364"/><circle cx="9" cy="13" r="6" fill="#8E8070"/>
+  <circle cx="7" cy="12.5" r=".8" fill="#343434"/><circle cx="11" cy="12.5" r=".8" fill="#343434"/><path d="M9 13.5l-.8.8.8.5.8-.5z" fill="#D4868C"/>
+  <path d="M14 35q0-11 11-12 11 1 11 12v8H14z" fill="#808080"/><path d="M14 43q6-8 11-8t11 8z" fill="#606060"/>
+  <circle cx="25" cy="15" r="10" fill="#808080"/><path d="M17 12q2-7 8-7t8 7q-8-5-16 1z" fill="#606060"/>
+  <ellipse cx="22" cy="14" rx="2" ry="1.5" fill="#ECECEC"/><circle cx="21.3" cy="14" r=".8" fill="#404040"/><ellipse cx="28" cy="14" rx="2" ry="1.5" fill="#ECECEC"/><circle cx="27.3" cy="14" r=".8" fill="#404040"/>
+  <path d="M22 19q3 2 6 0" fill="none" stroke="#4F4F4F" stroke-width=".8"/>
+</svg>

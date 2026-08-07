@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Sleepy avatar in blue pajamas</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <circle cx="23" cy="15" r="10" fill="#808080"/><path d="M15 12q2-7 8-7t8 7q-8-5-16 1z" fill="#606060"/>
+  <path d="M17.5 14.5q2.5 1.4 5 0M23.5 14.5q2.5 1.4 5 0" fill="none" stroke="#4F4F4F" stroke-width="1" stroke-linecap="round"/><ellipse cx="23" cy="19" rx="1.5" ry="1.8" fill="#4F4F4F"/>
+  <path d="M12 35q0-11 11-12 11 1 11 12v8H12z" fill="#5C7EA6"/><path d="M18 24l5 7 5-7m-5 7v12" fill="none" stroke="#B8D3ED" stroke-width="1"/><circle cx="25" cy="34" r=".7" fill="#E8EEF4"/><circle cx="25" cy="38" r=".7" fill="#E8EEF4"/>
+  <path d="M33 14h5l-5 5h5M38 7h4l-4 4h4" fill="none" stroke="#687A9B" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M36 43q4-6 8 0" fill="#D8E2EF"/><path d="M37 42q3-4 6 0" fill="none" stroke="#98AFC8" stroke-width=".6"/>
+</svg>

@@ -21,6 +21,7 @@ COPY backend/README.md /app/backend/README.md
 COPY backend/app /app/backend/app
 COPY backend/migrations /app/backend/migrations
 COPY scripts /app/scripts
+COPY ["rules/custom avatars", "/app/backend/app/custom_avatars"]
 
 RUN python -m pip install --upgrade pip \
     && python -m pip install /app/backend

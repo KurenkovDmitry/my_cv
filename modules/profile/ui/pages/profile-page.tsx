@@ -142,7 +142,7 @@ export function ProfilePage({
           eyebrow={isRussian ? "Опыт" : "Experience"}
           title={isRussian ? "Работа на стыке анализа и реализации." : "Analysis grounded in implementation."}
           description={isRussian
-            ? "Роли и задачи приведены полностью по резюме — без маркетингового пересказа."
+            ? "Роли и задачи приведены полностью по резюме - без маркетингового пересказа."
             : "Roles and scope are retained from the source CV, with implementation context kept intact."}
         />
         <div className="timeline">
@@ -179,7 +179,7 @@ export function ProfilePage({
           eyebrow={isRussian ? "Избранные проекты" : "Selected work"}
           title={isRussian ? "От микросервисов до продуктовых досок." : "From microservices to product workflows."}
           description={isRussian
-            ? "На главной — три акцента для выбранного рынка. Полная история из семи проектов открывается отдельно."
+            ? "На главной - три акцента для выбранного рынка. Полная история из семи проектов открывается отдельно."
             : "The overview prioritises three market-relevant cases; the full seven-project history remains one click away."}
           actionLabel={isRussian ? "Все 7 проектов" : "All 7 projects"}
           onAction={onExploreProjects}

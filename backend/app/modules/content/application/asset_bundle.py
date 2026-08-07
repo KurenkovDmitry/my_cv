@@ -52,6 +52,7 @@ async def build_asset_bundle_entries(
                 "mediaType": stored_asset.media_type,
                 "fileSizeBytes": stored_asset.file_size_bytes,
                 "checksumSha256": stored_asset.checksum_sha256,
+                "sourceKind": stored_asset.source_kind,
                 "contentBase64": base64.b64encode(document_bytes).decode("ascii"),
             }
         )
@@ -95,6 +96,7 @@ async def restore_bundled_assets(
             document_bytes=document_bytes,
             requested_media_type=media_type,
             preferred_asset_id=asset_id,
+            source_kind=str(asset_entry.get("sourceKind", "backup_restore")),
         )
         if existing_asset is None:
             restored_asset_ids.append(stored_asset.asset_id)

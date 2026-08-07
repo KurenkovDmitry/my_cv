@@ -13,5 +13,7 @@ __pycache__/
 .venv/
 .mypy_cache/
 backend/.venv/
-rules/
-
+rules/*
+!rules/custom avatars/
+rules/custom avatars/*
+!rules/custom avatars/*.svg

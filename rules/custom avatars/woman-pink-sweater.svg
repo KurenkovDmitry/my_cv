@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" role="img" aria-labelledby="title">
+  <title id="title">Woman avatar in a pink sweater</title>
+  <circle cx="25" cy="25" r="25" fill="#C0C0C0"/>
+  <path d="M13 43v-8q0-11 12-12 12 1 12 12v8z" fill="#D77FA5"/><path d="M19 26q6 5 12 0" fill="none" stroke="#F0B8CF" stroke-width="2"/><path d="M16 36h18M17 40h16" stroke="#C66891" stroke-width=".7"/>
+  <path d="M14.8 18q0-14 10.2-14T35.2 18l-2 8H16.8z" fill="#55575C"/><circle cx="25" cy="15" r="9" fill="#858585"/><path d="M17 12q2-8 8-7 6-1 8 7-5-4-8-4t-8 4z" fill="#55575C"/>
+  <path d="M19.5 14.5q2.5-2 5 0M25.5 14.5q2.5-2 5 0" fill="none" stroke="#4F4F4F" stroke-width="1" stroke-linecap="round"/><path d="M22 19q3 2 6 0" fill="none" stroke="#4F4F4F" stroke-width=".8"/>
+</svg>
