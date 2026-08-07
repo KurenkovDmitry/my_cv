@@ -105,6 +105,7 @@
 - `AUTH_RATE_LIMIT_KEY_PEPPER`;
 - `BACKUP_STORAGE_PATH=/opt/portfolio/backups`;
 - аналитические retention и throttling limits;
+- `ENABLE_GRAFANA_INTEGRATION=true` и уникальный `GRAFANA_ADMIN_PASSWORD`;
 - `DOMAIN_NAME=kurenkovdmitrii.ru`;
 - `ENABLE_HTTPS=true`;
 - `ADMIN_BASE_PATH=/admin`.

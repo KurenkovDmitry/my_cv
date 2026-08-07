@@ -139,6 +139,7 @@ jobs:
 
           tar -czf "artifacts/deploy/portfolio-deploy-bundle-${RELEASE_SHA}.tar.gz" \
             docker-compose.production.yml \
+            infrastructure/grafana \
             infrastructure/postgres/init \
             scripts/deploy \
             scripts/postgres

@@ -141,17 +141,10 @@ should_run_database_maintenance() {
 
 replace_services() {
   compose_enable_https="$1"
-  dependency_mode="$2"
-  shift 2
+  shift
 
   ENABLE_HTTPS="${compose_enable_https}" docker_compose rm -f -s "$@" || true
-
-  if [ "${dependency_mode}" = "no_deps" ]; then
-    ENABLE_HTTPS="${compose_enable_https}" docker_compose up -d --force-recreate --remove-orphans --no-deps "$@"
-    return
-  fi
-
-  ENABLE_HTTPS="${compose_enable_https}" docker_compose up -d --force-recreate --remove-orphans "$@"
+  ENABLE_HTTPS="${compose_enable_https}" docker_compose up -d --force-recreate --remove-orphans --no-deps "$@"
 }
 
 debug_on_error() {
@@ -165,6 +158,9 @@ debug_on_error() {
 
     echo "--- api logs ---" >&2
     docker_compose logs --tail=80 api >&2 || true
+
+    echo "--- grafana logs ---" >&2
+    docker_compose logs --tail=80 grafana >&2 || true
 
     echo "--- nginx logs ---" >&2
     docker_compose logs --tail=80 nginx >&2 || true
@@ -213,10 +209,11 @@ verify_deployed_release() {
   expected_nginx_image="portfolio-web-nginx:${RELEASE_SHA}"
 
   api_container_id="$(docker_compose ps -q api | head -n 1)"
+  grafana_container_id="$(docker_compose ps -q grafana | head -n 1)"
   nginx_container_id="$(docker_compose ps -q nginx | head -n 1)"
 
-  if [ -z "${api_container_id}" ] || [ -z "${nginx_container_id}" ]; then
-    echo "api or nginx container is missing after deploy." >&2
+  if [ -z "${api_container_id}" ] || [ -z "${grafana_container_id}" ] || [ -z "${nginx_container_id}" ]; then
+    echo "api, grafana or nginx container is missing after deploy." >&2
     return 1
   fi
 
@@ -235,6 +232,7 @@ verify_deployed_release() {
 
   echo "--- deployed container snapshot ---"
   describe_service_container api
+  describe_service_container grafana
   describe_service_container nginx
 }
 
@@ -288,16 +286,19 @@ if [ -z "${TARGET_LETSENCRYPT_EMAIL}" ]; then
   exit 1
 fi
 
+log_step "Validating deployment configuration"
+docker_compose config --quiet
+
 log_step "Loading release images"
 run_root sh -c "gunzip -c '${API_IMAGE_ARCHIVE}' | docker load"
 run_root sh -c "gunzip -c '${NGINX_IMAGE_ARCHIVE}' | docker load"
 run_root docker tag "portfolio-api:${RELEASE_SHA}" portfolio-api:current
 run_root docker tag "portfolio-web-nginx:${RELEASE_SHA}" portfolio-web-nginx:current
 
-dependency_mode="no_deps"
-if should_run_database_maintenance; then
-  dependency_mode="with_deps"
+log_step "Preparing runtime service images"
+docker_compose pull grafana certbot
 
+if should_run_database_maintenance; then
   log_step "Starting stateful services"
   if [ "${RECREATE_STATEFUL_SERVICES}" = "true" ]; then
     docker_compose up -d --force-recreate postgres redis
@@ -327,12 +328,13 @@ if should_run_database_maintenance; then
   docker_compose_run_no_stdin api sh /app/scripts/deploy/run-migrations.sh
 else
   log_step "Skipping database maintenance"
-  echo "Stateful services are left untouched. Deploying only api and nginx against the existing PostgreSQL/Redis instances."
+  echo "Stateful services are left untouched. Deploying api, grafana and nginx against the existing PostgreSQL/Redis instances."
 fi
 
 log_step "Deploying application over HTTP"
-replace_services false "${dependency_mode}" api nginx
+replace_services false api grafana
 wait_for_http "http://127.0.0.1:8000/health/live"
+replace_services false nginx
 wait_for_http "http://127.0.0.1/"
 
 log_step "Issuing or renewing TLS certificate"
@@ -348,7 +350,7 @@ ENABLE_HTTPS=false docker_compose_run_no_stdin certbot certonly \
   -d "${TARGET_DOMAIN_NAME}"
 
 log_step "Deploying application over HTTPS"
-replace_services true "${dependency_mode}" api nginx
+replace_services true nginx
 wait_for_http "https://${TARGET_DOMAIN_NAME}/" --resolve "${TARGET_DOMAIN_NAME}:443:127.0.0.1"
 verify_deployed_release
 
