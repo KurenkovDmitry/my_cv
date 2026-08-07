@@ -218,7 +218,7 @@ describe_service_container() {
   fi
 
   run_root docker inspect \
-    --format "service=${service_name} id={{.Id}} name={{.Name}} image={{.Config.Image}} status={{.State.Status}} started_at={{.State.StartedAt}} health={{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}" \
+    --format "service=${service_name} id={{.Id}} name={{.Name}} image={{.Config.Image}} status={{.State.Status}} started_at={{.State.StartedAt}} health={{with index .State \"Health\"}}{{index . \"Status\"}}{{else}}none{{end}}" \
     "${container_id}"
 }
 
