@@ -33,6 +33,7 @@ import {
   deleteBackupArtifact,
   deleteContentAsset,
   fetchAdminDashboardData,
+  fetchContentAssets,
   getBackupDownloadUrl,
   getImportCandidateFieldReview,
   publishDraftSnapshot,
@@ -204,6 +205,7 @@ export function App() {
   const [runtimeHealth, setRuntimeHealth] = useState<RuntimeHealthSnapshot>(runtimeHealthPreview);
   const [auditLogs, setAuditLogs] = useState<AdminAuditLogEntry[]>(adminAuditLogPreview);
   const [contentAssets, setContentAssets] = useState<ContentAssetSummary[]>([]);
+  const [contentAssetsLoadError, setContentAssetsLoadError] = useState<string | null>(null);
   const [candidateSelections, setCandidateSelections] = useState<Record<string, string[]>>({});
   const [candidateFieldReviews, setCandidateFieldReviews] = useState<Record<string, ImportCandidateFieldReview[]>>({});
   const [candidateFieldDrafts, setCandidateFieldDrafts] = useState<Record<string, Record<string, CandidateFieldDraft>>>({});
@@ -249,7 +251,6 @@ export function App() {
     importCandidateResponse,
     runtimeHealthResponse,
     auditLogResponse,
-    contentAssetItems,
   }: Awaited<ReturnType<typeof fetchAdminDashboardData>>) => {
     if (!hasLocalDraftChangesRef.current) {
       const migratedContent = migrateSeededAssetReferences(portfolioResponse.payload);
@@ -268,7 +269,6 @@ export function App() {
     );
     setRuntimeHealth(runtimeHealthResponse.snapshot);
     setAuditLogs(auditLogResponse.items);
-    setContentAssets(contentAssetItems);
     setDashboardSource("live_api");
     setDashboardLoadError(null);
   };
@@ -276,6 +276,33 @@ export function App() {
   const loadDashboardData = async (signal?: AbortSignal) => {
     const dashboardData = await fetchAdminDashboardData(signal);
     applyDashboardData(dashboardData);
+  };
+
+  /** Загружает файловый реестр независимо от остальных виджетов dashboard. */
+  const loadContentAssetData = async (signal?: AbortSignal) => {
+    try {
+      const assetItems = await fetchContentAssets(signal);
+      if (signal?.aborted) return;
+      setContentAssets(assetItems);
+      setContentAssetsLoadError(null);
+    } catch (error) {
+      if (signal?.aborted) return;
+      setContentAssetsLoadError(
+        error instanceof Error ? error.message : "Не удалось загрузить изображения и файлы.",
+      );
+      if (error instanceof AdminUnauthorizedError) throw error;
+    }
+  };
+
+  /** Один сбой dashboard не должен скрывать доступные изображения в редакторе. */
+  const loadAuthenticatedData = async (signal?: AbortSignal) => {
+    const [dashboardResult, contentAssetsResult] = await Promise.allSettled([
+      loadDashboardData(signal),
+      loadContentAssetData(signal),
+    ]);
+
+    if (dashboardResult.status === "rejected") throw dashboardResult.reason;
+    if (contentAssetsResult.status === "rejected") throw contentAssetsResult.reason;
   };
 
   useEffect(() => {
@@ -289,7 +316,7 @@ export function App() {
         }
 
         setAdminSession(currentAdminSession);
-        await loadDashboardData(abortController.signal);
+        await loadAuthenticatedData(abortController.signal);
         const returnTo = getSafeAdminReturnTo();
         if (returnTo) {
           window.location.replace(returnTo);
@@ -337,7 +364,7 @@ export function App() {
       setAuthError(null);
       const nextAdminSession = await loginToAdminPanel(loginRequest);
       setAdminSession(nextAdminSession);
-      await loadDashboardData();
+      await loadAuthenticatedData();
       const returnTo = getSafeAdminReturnTo();
       if (returnTo) {
         window.location.assign(returnTo);
@@ -359,6 +386,8 @@ export function App() {
       await logoutFromAdminPanel();
     } finally {
       setAdminSession(null);
+      setContentAssets([]);
+      setContentAssetsLoadError(null);
       setLoginRequest((currentRequest) => ({
         ...currentRequest,
         password: "",
@@ -1004,6 +1033,7 @@ export function App() {
         <PortfolioContentEditor
           content={draftContent}
           assets={contentAssets}
+          assetsLoadError={contentAssetsLoadError}
           onChange={handleDraftContentChange}
           onUploadAsset={handleContentAssetUpload}
           onDeleteAsset={handleContentAssetDelete}

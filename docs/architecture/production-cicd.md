@@ -110,6 +110,22 @@
 - `ENABLE_HTTPS=true`;
 - `ADMIN_BASE_PATH=/admin`.
 
+### Лимиты Grafana для маленького сервера
+
+Production Compose использует профиль для одного администратора и одного provisioned dashboard:
+
+- жёсткий лимит памяти `GRAFANA_MEMORY_LIMIT=384m`;
+- мягкий порог памяти `GRAFANA_MEMORY_RESERVATION=256m`;
+- Go heap target `GRAFANA_GO_MEMORY_LIMIT=300MiB`;
+- CPU `GRAFANA_CPU_LIMIT=0.50` и не более `128` процессов;
+- два сжатых Docker-лога по `5m` каждый.
+
+Alerting, query history, Grafana Live, update-checks и файловые логи отключены. Named volume
+`grafana-data` не имеет переносимой Docker-квоты, но при таком профиле содержит только SQLite-
+конфигурацию и пользовательские настройки; dashboards и datasource загружаются из read-only
+provisioning-файлов. При OOM/restart сначала увеличьте `GRAFANA_MEMORY_LIMIT` до `512m` и
+`GRAFANA_GO_MEMORY_LIMIT` до `400MiB`.
+
 ## Проверка сервера "это точно мой"
 
 В контуре две проверки:

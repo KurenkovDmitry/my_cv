@@ -33,7 +33,6 @@ export async function fetchAdminDashboardData(signal?: AbortSignal) {
     importCandidateResponse,
     runtimeHealthResponse,
     auditLogResponse,
-    contentAssetItems,
   ] = await Promise.all([
     requestAdminJson<PublicPortfolioResponse>(
       `${frontendEnvConfig.adminApiBaseUrl}/content/snapshot?kind=draft`,
@@ -70,7 +69,6 @@ export async function fetchAdminDashboardData(signal?: AbortSignal) {
       { method: "GET" },
       signal,
     ),
-    fetchContentAssets(signal),
   ]);
 
   return {
@@ -81,7 +79,6 @@ export async function fetchAdminDashboardData(signal?: AbortSignal) {
     importCandidateResponse,
     runtimeHealthResponse,
     auditLogResponse,
-    contentAssetItems,
   };
 }
 

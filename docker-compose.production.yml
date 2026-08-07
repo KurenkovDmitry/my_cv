@@ -59,12 +59,17 @@ services:
   grafana:
     image: grafana/grafana:13.0.2
     restart: unless-stopped
+    mem_limit: ${GRAFANA_MEMORY_LIMIT:-384m}
+    mem_reservation: ${GRAFANA_MEMORY_RESERVATION:-256m}
+    cpus: ${GRAFANA_CPU_LIMIT:-0.50}
+    pids_limit: ${GRAFANA_PIDS_LIMIT:-128}
     env_file:
       - ${APP_ENV_FILE:-./.env}
     environment:
+      GOMEMLIMIT: ${GRAFANA_GO_MEMORY_LIMIT:-300MiB}
       GF_SERVER_DOMAIN: ${DOMAIN_NAME}
-      GF_SERVER_PROTOCOL: https
-      GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s/grafana/"
+      GF_SERVER_PROTOCOL: http
+      GF_SERVER_ROOT_URL: "https://${DOMAIN_NAME}/grafana/"
       GF_SERVER_SERVE_FROM_SUB_PATH: "true"
       GF_AUTH_PROXY_ENABLED: "true"
       GF_AUTH_PROXY_HEADER_NAME: X-WEBAUTH-USER
@@ -79,6 +84,23 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD is required}
       GF_SECURITY_COOKIE_SECURE: "true"
       GF_SECURITY_COOKIE_SAMESITE: lax
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      GF_UNIFIED_ALERTING_ENABLED: "false"
+      GF_QUERY_HISTORY_ENABLED: "false"
+      GF_QUERY_CONCURRENT_QUERY_LIMIT: "2"
+      GF_LIVE_MAX_CONNECTIONS: "0"
+      GF_METRICS_ENABLED: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+      GF_PLUGINS_PREINSTALL_AUTO_UPDATE: "false"
+      GF_ANNOTATIONS_DASHBOARD_MAX_AGE: 30d
+      GF_ANNOTATIONS_DASHBOARD_MAX_ANNOTATIONS_TO_KEEP: "1000"
+      GF_ANNOTATIONS_API_MAX_AGE: 30d
+      GF_ANNOTATIONS_API_MAX_ANNOTATIONS_TO_KEEP: "1000"
+      GF_LOG_MODE: console
+      GF_LOG_LEVEL: warn
+      GF_PATHS_TEMP_DATA_LIFETIME: 1h
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_DB_NAME: ${POSTGRES_DB_NAME}
@@ -93,6 +115,11 @@ services:
         condition: service_healthy
     expose:
       - "3000"
+    logging:
+      driver: local
+      options:
+        max-size: ${GRAFANA_LOG_MAX_SIZE:-5m}
+        max-file: ${GRAFANA_LOG_MAX_FILES:-2}
 
   nginx:
     image: portfolio-web-nginx:${IMAGE_TAG:-current}

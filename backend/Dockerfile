@@ -20,6 +20,7 @@ COPY backend/pyproject.toml /app/backend/pyproject.toml
 COPY backend/README.md /app/backend/README.md
 COPY backend/app /app/backend/app
 COPY backend/migrations /app/backend/migrations
+COPY content /app/content
 COPY scripts /app/scripts
 COPY ["rules/custom avatars", "/app/backend/app/custom_avatars"]
 

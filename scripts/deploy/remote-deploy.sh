@@ -190,6 +190,24 @@ wait_for_http() {
   return 1
 }
 
+wait_for_internal_http() {
+  source_service="$1"
+  target_url="$2"
+  attempt=1
+
+  while [ "${attempt}" -le 30 ]; do
+    if docker_compose_exec_no_stdin "${source_service}" \
+      curl --fail --silent --show-error "${target_url}" >/dev/null 2>&1; then
+      return 0
+    fi
+    attempt=$((attempt + 1))
+    sleep 3
+  done
+
+  echo "Timed out while waiting for ${target_url} from ${source_service}." >&2
+  return 1
+}
+
 describe_service_container() {
   service_name="$1"
   container_id="$(docker_compose ps -q "${service_name}" | head -n 1)"
@@ -334,6 +352,11 @@ fi
 log_step "Deploying application over HTTP"
 replace_services false api grafana
 wait_for_http "http://127.0.0.1:8000/health/live"
+wait_for_http "http://127.0.0.1:8000/api/public/portfolio"
+wait_for_http "http://127.0.0.1:8000/api/public/portfolio/social-meta"
+wait_for_http "http://127.0.0.1:8000/api/public/portfolio/social-preview"
+wait_for_http "http://127.0.0.1:8000/api/public/portfolio/favicon"
+wait_for_internal_http api "http://grafana:3000/api/health"
 replace_services false nginx
 wait_for_http "http://127.0.0.1/"
 

@@ -12,6 +12,7 @@ type JsonPath = Array<string | number>;
 interface PortfolioContentEditorProps {
   content: PortfolioContent;
   assets: ContentAssetSummary[];
+  assetsLoadError?: string | null;
   onChange: (nextContent: PortfolioContent) => void;
   onUploadAsset: (file: File) => Promise<ContentAssetSummary>;
   onDeleteAsset: (assetId: string) => Promise<void>;
@@ -166,6 +167,7 @@ const LONG_TEXT_FIELDS = new Set([
 export function PortfolioContentEditor({
   content,
   assets,
+  assetsLoadError,
   onChange,
   onUploadAsset,
   onDeleteAsset,
@@ -259,6 +261,12 @@ export function PortfolioContentEditor({
         </button>
       </div>
 
+      {assetsLoadError ? (
+        <p className="content-editor__error" role="alert">
+          Изображения и файлы сейчас недоступны: {assetsLoadError}
+        </p>
+      ) : null}
+
       {isJsonEditorVisible ? (
         <div className="content-editor__json-panel">
           <textarea
@@ -316,7 +324,7 @@ export function PortfolioContentEditor({
       <details className="content-editor__asset-registry">
         <summary>Файловый реестр · {assets.length}</summary>
         <div className="content-editor__asset-list">
-          {assets.length === 0 ? <p>Загруженных через админку файлов пока нет.</p> : null}
+          {assets.length === 0 && !assetsLoadError ? <p>Доступных изображений и файлов пока нет.</p> : null}
           {assets.map((assetItem) => (
             <article key={assetItem.assetId} className="content-editor__asset-row">
               <div className="content-editor__asset-info">
@@ -539,7 +547,9 @@ function AssetPicker({ fieldLabel, assetId, assets, onChange, onUploadAsset, kin
     }),
     [assets, kind],
   );
-  const avatarAssets = availableAssets.filter((assetItem) => assetItem.sourceKind === "custom_avatar");
+  const defaultImageAssets = availableAssets.filter(
+    (assetItem) => assetItem.sourceKind === "custom_avatar" && assetItem.mediaType.startsWith("image/"),
+  );
   const regularAssets = availableAssets.filter((assetItem) => assetItem.sourceKind !== "custom_avatar");
   const selectedAsset = availableAssets.find((assetItem) => assetItem.assetId === assetId);
 
@@ -574,9 +584,9 @@ function AssetPicker({ fieldLabel, assetId, assets, onChange, onUploadAsset, kin
         <span>{fieldLabel}</span>
         <select value={assetId} onChange={(event) => onChange(event.target.value)}>
           <option value="">Не прикреплён</option>
-          {avatarAssets.length > 0 ? (
-            <optgroup label="Custom avatars">
-              {avatarAssets.map((assetItem) => (
+          {defaultImageAssets.length > 0 ? (
+            <optgroup label="Изображения по умолчанию · Custom avatars">
+              {defaultImageAssets.map((assetItem) => (
                 <option key={assetItem.assetId} value={assetItem.assetId}>{assetItem.fileName}</option>
               ))}
             </optgroup>
@@ -602,11 +612,13 @@ function AssetPicker({ fieldLabel, assetId, assets, onChange, onUploadAsset, kin
           onChange={(event) => void handleUpload(event)}
         />
       </label>
-      {kind === "image" && avatarAssets.length > 0 ? (
+      {defaultImageAssets.length > 0 ? (
         <details className="asset-picker__avatar-library">
-          <summary>Выбрать визуально из {avatarAssets.length} аватаров</summary>
+          <summary>
+            Изображения по умолчанию · Custom avatars · {defaultImageAssets.length} вариантов
+          </summary>
           <div className="asset-picker__avatar-grid">
-            {avatarAssets.map((assetItem) => (
+            {defaultImageAssets.map((assetItem) => (
               <button
                 key={assetItem.assetId}
                 type="button"
